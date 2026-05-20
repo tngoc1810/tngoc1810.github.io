@@ -1045,3 +1045,167 @@ body {
     opacity: 0.32;
   }
 }
+/* =========================================================
+   FINAL SCROLL-STABLE BACKGROUND PATCH
+   Goal: stop white flash when scrolling fast.
+   This removes fixed animated layers and uses body-level CSS
+   background animation instead.
+   ========================================================= */
+
+/* Base background must always be painted */
+html,
+body {
+  background: #020816 !important;
+  background-color: #020816 !important;
+  min-height: 100%;
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+  overflow-x: hidden;
+}
+
+/* Disable old fixed background layers completely */
+#site-bg,
+.bg-orb,
+.bg-radar,
+.bg-sweep,
+.bg-stars {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Replace fixed background with stable non-fixed animated layers */
+body::before {
+  content: "";
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(124,240,255,.18), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(45,140,255,.16), transparent 30%),
+    radial-gradient(circle at 50% 48%, rgba(86,199,255,.10), transparent 38%),
+    linear-gradient(rgba(86,199,255,.040) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(86,199,255,.040) 1px, transparent 1px),
+    linear-gradient(180deg, #020816 0%, #06172d 48%, #020816 100%);
+  background-size:
+    900px 900px,
+    900px 900px,
+    1100px 1100px,
+    52px 52px,
+    52px 52px,
+    auto;
+  animation: safeBackgroundDrift 36s linear infinite;
+}
+
+/* Soft transparent cyber orb, non-fixed */
+body::after {
+  content: "";
+  position: absolute !important;
+  left: 50%;
+  top: 260px;
+  width: 760px;
+  height: 760px;
+  transform: translateX(-50%);
+  z-index: 0 !important;
+  pointer-events: none !important;
+  border-radius: 50%;
+  opacity: .34;
+  background:
+    radial-gradient(circle, rgba(124,240,255,.18), rgba(86,199,255,.10) 24%, rgba(45,140,255,.055) 48%, transparent 70%);
+  filter: blur(18px);
+  animation: safeOrbFloat 12s ease-in-out infinite alternate;
+}
+
+/* Make sure actual website content is above background */
+.topbar,
+.page,
+.wrap,
+.hero,
+.article-layout,
+.article-card,
+.glass,
+.card,
+.footer-nav {
+  position: relative;
+  z-index: 2 !important;
+}
+
+.topbar {
+  z-index: 100 !important;
+}
+
+/* Reduce expensive repaints from glass/blur layers */
+.glass,
+.card,
+.article-card,
+.topbar {
+  backface-visibility: hidden;
+}
+
+/* Keep title descenders visible */
+.hero h1,
+.page-title {
+  line-height: 1.08 !important;
+  padding-bottom: 10px !important;
+  overflow: visible !important;
+}
+
+.hero-copy {
+  overflow: visible !important;
+}
+
+/* Stable background animations */
+@keyframes safeBackgroundDrift {
+  from {
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 0,
+      0 0,
+      0 0;
+  }
+
+  to {
+    background-position:
+      160px 120px,
+      -140px 160px,
+      80px -120px,
+      52px 52px,
+      52px 52px,
+      0 0;
+  }
+}
+
+@keyframes safeOrbFloat {
+  from {
+    transform: translateX(-50%) translateY(0) scale(1);
+    opacity: .28;
+  }
+
+  to {
+    transform: translateX(-50%) translateY(18px) scale(1.04);
+    opacity: .40;
+  }
+}
+
+/* Mobile stability */
+@media (max-width: 760px) {
+  body::after {
+    width: 520px;
+    height: 520px;
+    top: 220px;
+    filter: blur(14px);
+    opacity: .26;
+  }
+
+  body::before {
+    animation-duration: 48s;
+  }
+}
