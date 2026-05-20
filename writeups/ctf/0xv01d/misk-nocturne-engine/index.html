@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Misk Nocturne Engine — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+
+  <style>
+    .code-toggle {
+      margin: 18px 0;
+      border: 1px solid rgba(90, 190, 255, .22);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(8, 20, 44, .88), rgba(5, 14, 30, .82));
+      overflow: hidden;
+    }
+
+    .code-toggle summary {
+      cursor: pointer;
+      padding: 16px 18px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #9fe8ff;
+      list-style: none;
+      border-bottom: 1px solid rgba(90, 190, 255, .14);
+    }
+
+    .code-toggle summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .code-toggle summary::before {
+      content: "▶";
+      display: inline-block;
+      margin-right: 10px;
+      color: #56c7ff;
+      transition: .18s ease;
+    }
+
+    .code-toggle[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    .code-toggle pre {
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      max-height: 720px;
+      overflow: auto;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid rgba(90, 190, 255, .18);
+    }
+
+    .mini-table th,
+    .mini-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(90, 190, 255, .12);
+      color: var(--muted);
+      vertical-align: top;
+    }
+
+    .mini-table th {
+      color: #9fe8ff;
+      text-align: left;
+      background: rgba(86, 199, 255, .07);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .mini-table tr:last-child td {
+      border-bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
+
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a class="active" href="/writeups/">Writeups</a>
+        <a href="/projects/">Projects</a>
+        <a href="/achievements/">Achievements</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap article-layout">
+      <aside class="toc">
+        <div class="toc-title">Contents</div>
+        <a href="#overview">Overview</a>
+        <a href="#lab-overview">Lab Overview</a>
+        <a href="#tools">Tools Used</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#findings">Key Findings</a>
+        <a href="#ioc">Artifacts</a>
+        <a href="#analysis">Step-by-step Analysis</a>
+        <a class="sub" href="#strings">Fake Flag</a>
+        <a class="sub" href="#state-machine">State Machine</a>
+        <a class="sub" href="#solver">Solver Script</a>
+        <a href="#flag">Final Flag</a>
+        <a href="#lessons">Lessons Learned</a>
+      </aside>
+
+      <article class="article-card glass">
+        <div class="eyebrow">0xV01D CTF • Reverse Engineering</div>
+
+        <h1 class="page-title">Misk Nocturne Engine</h1>
+
+        <p class="lead">
+          Reverse engineering a Windows PE64 checker that hides the real validation logic
+          behind a fake flag, target bytes, eight transition tables and a state machine
+          that remembers previous transitions.
+        </p>
+
+        <div class="info-card">
+          <div class="item">
+            <div class="label">Challenge</div>
+            <div class="value">Misk Nocturne Engine</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Platform</div>
+            <div class="value">0xV01D CTF</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Category</div>
+            <div class="value accent">Reverse Engineering</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Difficulty</div>
+            <div class="value">500 pts</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Date</div>
+            <div class="value">20/05/2026</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Author</div>
+            <div class="value">Nguyen Thai Ngoc</div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Analyst Note</strong>
+          The binary contains a visible flag-like string, but the nearby operator note
+          says the visible state names are bait. I treated the string as suspicious and
+          reversed the actual checker instead of submitting it immediately.
+        </div>
+
+        <h2 id="overview">Executive Summary</h2>
+
+        <p>
+          In this challenge, the binary exposes a fake flag through <code>strings</code>:
+          <code>0xV01D{eight_states_are_not_enough}</code>. However, the real checker
+          uses a finite-state-style validation routine with eight state tables, a memory
+          variable, a 42-byte target array and five transitions per input character.
+        </p>
+
+        <p>
+          By extracting the target bytes and state tables from the PE file, then
+          re-implementing the validation logic in Python, the correct flag can be
+          recovered through printable ASCII brute force.
+        </p>
+
+        <h2 id="lab-overview">Lab Overview</h2>
+
+        <p>
+          Challenge description:
+        </p>
+
+        <pre><code>Misk Nocturne Engine
+500
+
+The machine has only eight states, but it remembers every wrong transition.</code></pre>
+
+        <p>
+          The phrase <code>only eight states</code> strongly hints at an automaton or
+          state machine. The phrase <code>remembers every wrong transition</code> suggests
+          that the logic is not stateless and likely carries some memory between
+          characters.
+        </p>
+
+        <h2 id="tools">Tools Used</h2>
+
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>unzip</code></td>
+              <td>Extract the challenge archive.</td>
+            </tr>
+            <tr>
+              <td><code>file</code></td>
+              <td>Identify the binary type.</td>
+            </tr>
+            <tr>
+              <td><code>strings</code></td>
+              <td>Find visible ASCII strings and possible bait.</td>
+            </tr>
+            <tr>
+              <td><code>objdump</code></td>
+              <td>Disassemble the PE binary.</td>
+            </tr>
+            <tr>
+              <td><code>Python 3</code></td>
+              <td>Extract data and emulate the checker.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="timeline">Investigation Timeline</h2>
+
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Activity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Extract the challenge archive.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Identify the binary as Windows PE64.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Run <code>strings</code> and discover a fake flag plus bait note.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Disassemble the binary and locate the checker logic.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Identify target array and state table pointer array.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Translate the checker logic into pseudocode.</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Write a Python solver to emulate transitions and brute force input.</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Recover the valid flag.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="findings">Key Findings</h2>
+
+        <h3 id="strings">1. Visible flag is bait</h3>
+
+        <p>
+          Running <code>strings</code> reveals a flag-like value:
+        </p>
+
+        <pre><code>0xV01D{eight_states_are_not_enough}</code></pre>
+
+        <p>
+          But the binary also contains this warning:
+        </p>
+
+        <pre><code>operator note: the visible state names are bait</code></pre>
+
+        <p>
+          This confirms that the visible string should not be trusted directly.
+        </p>
+
+        <h3>2. Input length must be 42 bytes</h3>
+
+        <p>
+          The checker compares the input length against <code>0x2a</code>:
+        </p>
+
+        <pre><code>cmp rax, 0x2a
+jne fail</code></pre>
+
+        <p>
+          Since <code>0x2a = 42</code>, the valid flag must be exactly 42 characters long.
+        </p>
+
+        <h3>3. Target array and state tables are in <code>.rdata</code></h3>
+
+        <pre><code>target array:              0x140005080
+state table pointer array: 0x1400050c0</code></pre>
+
+        <p>
+          The state table pointer array contains eight table pointers:
+        </p>
+
+        <pre><code>0x140005800
+0x140005700
+0x140005600
+0x140005500
+0x140005400
+0x140005300
+0x140005200
+0x140005100</code></pre>
+
+        <h2 id="ioc">Important Artifacts</h2>
+
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Value</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>File</td>
+              <td><code>3kfpga.zip</code></td>
+              <td>Original challenge archive.</td>
+            </tr>
+            <tr>
+              <td>File</td>
+              <td><code>misk_automaton.exe</code></td>
+              <td>Windows PE64 binary to reverse.</td>
+            </tr>
+            <tr>
+              <td>String</td>
+              <td><code>0xV01D{eight_states_are_not_enough}</code></td>
+              <td>Fake flag / bait.</td>
+            </tr>
+            <tr>
+              <td>Address</td>
+              <td><code>0x140005080</code></td>
+              <td>Target byte array.</td>
+            </tr>
+            <tr>
+              <td>Address</td>
+              <td><code>0x1400050c0</code></td>
+              <td>State table pointer array.</td>
+            </tr>
+            <tr>
+              <td>Length</td>
+              <td><code>42</code></td>
+              <td>Required input length.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="analysis">Step-by-step Analysis</h2>
+
+        <h3>Step 1 — Extract the challenge</h3>
+
+        <pre><code>unzip 3kfpga.zip</code></pre>
+
+        <p>
+          The extracted binary is:
+        </p>
+
+        <pre><code>misk_automaton.exe</code></pre>
+
+        <h3>Step 2 — Identify the binary</h3>
+
+        <pre><code>file misk_automaton.exe</code></pre>
+
+        <p>Output:</p>
+
+        <pre><code>misk_automaton.exe: PE32+ executable for MS Windows 5.02 (console), x86-64</code></pre>
+
+        <h3>Step 3 — Search for visible strings</h3>
+
+        <pre><code>strings -a misk_automaton.exe</code></pre>
+
+        <p>Important strings:</p>
+
+        <pre><code>idle
+stalled
+awake
+operator note: the visible state names are bait
+0xV01D{eight_states_are_not_enough}</code></pre>
+
+        <h3 id="state-machine">Step 4 — Reconstruct checker logic</h3>
+
+        <p>
+          The validation logic can be represented as:
+        </p>
+
+        <pre><code>if (strlen(input) != 42) {
+    fail();
+}
+
+state = 3;
+memory = 0x41;
+
+for (i = 0; i < 42; i++) {
+    x = ((i * 9 + memory) & 0xff) ^ input[i];
+
+    for (j = 0; j < 5; j++) {
+        table_id = (state + j) & 7;
+        x = table[table_id][x];
+
+        memory = (19 * state + x + j + memory) & 0xff;
+        state = (5 * state + x + i + j) & 7;
+    }
+
+    out = x ^ memory;
+
+    if (out != target[i]) {
+        fail();
+    }
+}
+
+success();</code></pre>
+
+        <div class="callout">
+          <strong>Key Insight</strong>
+          The state is limited to eight values using <code>&amp; 7</code>, while the
+          memory byte is carried forward across transitions. That matches the challenge
+          hint: the machine has eight states, but remembers transitions.
+        </div>
+
+        <h2 id="solver">Solver Script</h2>
+
+        <p>
+          The solver is long, so it is hidden by default. Click the block below to expand
+          and read the full script.
+        </p>
+
+        <details class="code-toggle">
+          <summary>View Solver Script</summary>
+          <pre><code>import struct
+
+BIN = "misk_automaton.exe"
+BASE = 0x140000000
+
+data = open(BIN, "rb").read()
+
+# Parse PE header
+pe = struct.unpack_from("&lt;I", data, 0x3c)[0]
+num_sections = struct.unpack_from("&lt;H", data, pe + 6)[0]
+opt_size = struct.unpack_from("&lt;H", data, pe + 20)[0]
+sec_off = pe + 24 + opt_size
+
+sections = []
+
+for i in range(num_sections):
+    off = sec_off + i * 40
+    name = data[off:off + 8].rstrip(b"\x00").decode(errors="ignore")
+    vsize, vaddr, rawsize, rawptr = struct.unpack_from("&lt;IIII", data, off + 8)
+    sections.append((name, vaddr, vsize, rawptr, rawsize))
+
+def va_to_off(va):
+    rva = va - BASE
+
+    for name, vaddr, vsize, rawptr, rawsize in sections:
+        size = max(vsize, rawsize)
+
+        if vaddr &lt;= rva &lt; vaddr + size:
+            return rawptr + (rva - vaddr)
+
+    raise ValueError(f"Cannot convert VA: {hex(va)}")
+
+TARGET_VA = 0x140005080
+PTRS_VA = 0x1400050c0
+
+target = data[va_to_off(TARGET_VA):va_to_off(TARGET_VA) + 42]
+
+ptrs = []
+
+for i in range(8):
+    ptr = struct.unpack_from("&lt;Q", data, va_to_off(PTRS_VA) + i * 8)[0]
+    ptrs.append(ptr)
+
+tables = []
+
+for ptr in ptrs:
+    table = data[va_to_off(ptr):va_to_off(ptr) + 256]
+    tables.append(table)
+
+def check_one_char(i, ch, state, memory):
+    x = ((i * 9 + memory) &amp; 0xff) ^ ch
+    x &amp;= 0xff
+
+    for j in range(5):
+        table_id = (state + j) &amp; 7
+        x = tables[table_id][x]
+
+        memory = (19 * state + x + j + memory) &amp; 0xff
+        state = (5 * state + x + i + j) &amp; 7
+
+    out = x ^ memory
+    return out &amp; 0xff, state, memory
+
+allowed = bytes(range(32, 127))
+
+candidates = [(b"", 3, 0x41)]
+
+for i, expected in enumerate(target):
+    new_candidates = []
+
+    for prefix, state, memory in candidates:
+        for ch in allowed:
+            out, new_state, new_memory = check_one_char(i, ch, state, memory)
+
+            if out == expected:
+                new_candidates.append((prefix + bytes([ch]), new_state, new_memory))
+
+    candidates = new_candidates
+
+    print(f"index={i}, candidates={len(candidates)}")
+
+print("\nFinal candidates:")
+
+for flag, state, memory in candidates:
+    print(flag.decode(errors="replace"), "state =", state, "memory =", memory)</code></pre>
+        </details>
+
+        <h3>Solver Output</h3>
+
+        <pre><code>Final candidates:
+0xV01D{the_automaton_reads_between_states; state = 0 memory = 221
+0xV01D{the_automaton_reads_between_states} state = 0 memory = 221</code></pre>
+
+        <p>
+          The first candidate ends with <code>;</code>, which does not match the expected
+          flag format. The second candidate is the valid flag.
+        </p>
+
+        <h2 id="flag">Final Flag</h2>
+
+        <pre><code>0xV01D{the_automaton_reads_between_states}</code></pre>
+
+        <h2 id="lessons">Lessons Learned</h2>
+
+        <ul>
+          <li>Do not trust visible strings immediately in reverse engineering challenges.</li>
+          <li>Fake flags are common in CTF binaries and must be verified against program logic.</li>
+          <li>Hints often describe the actual algorithm, not just the story.</li>
+          <li>When lookup tables are involved, emulation is usually better than manual table analysis.</li>
+          <li>Small state spaces make brute forcing practical when the checker can be reproduced accurately.</li>
+        </ul>
+
+        <div class="footer-nav">
+          <a href="/writeups/">← Back to Writeups</a>
+          <a href="/writeups/ctf/0xv01d-ctf-writeups/">0xV01D Hub →</a>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
