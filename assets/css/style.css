@@ -761,3 +761,78 @@ pre code{
     padding-bottom:8px;
   }
 }
+/* === FIX: prevent white flash on fast scroll / page transition === */
+html,
+body {
+  background-color: #020816 !important;
+  min-height: 100%;
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Put animated background inside the page stacking context instead of negative z-index */
+body::before,
+#site-bg,
+.bg-orb,
+.bg-radar,
+.bg-sweep {
+  z-index: 0 !important;
+}
+
+/* Keep all real content above animated background */
+.topbar,
+.page,
+.wrap,
+.hero,
+.article-layout,
+.article-card,
+.glass,
+.card,
+.footer-nav {
+  position: relative;
+  z-index: 2;
+}
+
+/* Header should stay above everything */
+.topbar {
+  z-index: 50 !important;
+}
+
+/* Prevent heavy repaint artifacts from blur/glass layers */
+.glass,
+.card,
+.article-card,
+.topbar {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Slightly reduce expensive repaint during scroll */
+.bg-orb {
+  will-change: transform;
+}
+
+.bg-radar,
+.bg-sweep {
+  will-change: transform;
+}
+
+/* Mobile / low power devices: reduce the heaviest fixed background effects */
+@media (max-width: 760px) {
+  #site-bg {
+    opacity: 0.55 !important;
+  }
+
+  .bg-orb {
+    filter: blur(16px) !important;
+    opacity: 0.7 !important;
+  }
+
+  .bg-radar,
+  .bg-sweep {
+    opacity: 0.14 !important;
+  }
+}
