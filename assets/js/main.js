@@ -1,27 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
-  setupStableBackground();
+  cleanupHeavyBackground();
   setupFilters();
 });
 
-function setupStableBackground() {
-  // Remove old canvas if it exists, because canvas repaint can cause white flash on fast scrolling.
-  const oldCanvas = document.getElementById("site-bg");
-  if (oldCanvas) oldCanvas.remove();
-
-  const layers = [
-    ["div", "bg-orb"],
-    ["div", "bg-radar"],
-    ["div", "bg-sweep"],
-    ["div", "bg-stars"]
+function cleanupHeavyBackground() {
+  // Remove old injected background layers that can cause white flash on fast scroll.
+  const oldLayers = [
+    "#site-bg",
+    ".bg-orb",
+    ".bg-radar",
+    ".bg-sweep",
+    ".bg-stars"
   ];
 
-  for (const [tag, className] of layers) {
-    if (!document.querySelector("." + className)) {
-      const el = document.createElement(tag);
-      el.className = className;
-      document.body.prepend(el);
-    }
-  }
+  oldLayers.forEach(selector => {
+    document.querySelectorAll(selector).forEach(el => el.remove());
+  });
 }
 
 function setupFilters() {
