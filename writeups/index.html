@@ -30,17 +30,19 @@
     <div class="wrap">
       <section class="hero">
         <div class="hero-copy glass">
-          <div class="eyebrow">Featured Writeups</div>
+          <div class="eyebrow">Writeup Library</div>
 
           <h1>Labs, CTFs and investigations.</h1>
 
           <p class="lead">
-            A structured collection of my SOC investigations, CTF writeups,
-            reverse engineering notes, malware analysis practice and technical learning logs.
+            A focused collection of my published cybersecurity writeups:
+            SOC investigations, CTF challenges, reverse engineering notes,
+            and future blue team labs from platforms such as BTLO, CyberDefenders,
+            TryHackMe, HackTheBox and LetsDefend.
           </p>
 
           <div class="cta-row">
-            <a class="btn primary" href="/writeups/">View Writeups</a>
+            <a class="btn primary" href="/writeups/">View Library</a>
             <a class="btn" href="/achievements/">Achievements</a>
             <a class="btn" href="/contact/">Contact</a>
           </div>
@@ -77,32 +79,40 @@
           <span class="filter-label">Filter:</span>
 
           <button class="filter-chip active" data-filter="all">
-            All <span class="count">8</span>
+            All <span class="count">4</span>
           </button>
 
-          <button class="filter-chip" data-filter="soc">
-            SOC <span class="count">2</span>
+          <button class="filter-chip" data-filter="btlo">
+            BTLO <span class="count">1</span>
           </button>
 
-          <button class="filter-chip" data-filter="reverse">
-            Reverse <span class="count">2</span>
+          <button class="filter-chip" data-filter="0xv01d">
+            0xV01D <span class="count">2</span>
           </button>
 
-          <button class="filter-chip" data-filter="pwn">
-            Pwn <span class="count">1</span>
+          <button class="filter-chip" data-filter="tjctf">
+            TJCTF <span class="count">1</span>
           </button>
 
-          <button class="filter-chip" data-filter="malware">
-            Malware <span class="count">1</span>
+          <button class="filter-chip" data-filter="cyberdefenders">
+            CyberDefenders <span class="count">0</span>
           </button>
 
-          <button class="filter-chip" data-filter="ctf">
-            CTF <span class="count">3</span>
+          <button class="filter-chip" data-filter="tryhackme">
+            TryHackMe <span class="count">0</span>
+          </button>
+
+          <button class="filter-chip" data-filter="hackthebox">
+            HackTheBox <span class="count">0</span>
+          </button>
+
+          <button class="filter-chip" data-filter="letsdefend">
+            LetsDefend <span class="count">0</span>
           </button>
         </div>
 
         <div class="search-box">
-          <input data-search placeholder="Search writeups, tags, topics...">
+          <input data-search placeholder="Search writeups, platforms, tags...">
         </div>
       </div>
 
@@ -111,16 +121,16 @@
           class="card"
           href="/writeups/soc/compromised-wordpress-log-analysis/"
           data-card
-          data-category="soc blue-team log-analysis wordpress"
+          data-category="btlo soc blue-team log-analysis wordpress"
           data-text="btlo compromised wordpress log analysis soc apache wordpress simple file list contact form 7 web shell fr34k cve"
         >
           <div class="card-top">
-            <span class="badge">SOC</span>
-            <span class="badge secondary">BTLO</span>
+            <span class="badge">BTLO</span>
+            <span class="badge secondary">SOC</span>
             <span class="card-date">2026</span>
           </div>
 
-          <h3>BTLO: Compromised WordPress</h3>
+          <h3>Compromised WordPress</h3>
 
           <p>
             Apache access log investigation of a compromised WordPress site,
@@ -138,12 +148,12 @@
           class="card"
           href="/writeups/ctf/0xv01d/misk-automaton/"
           data-card
-          data-category="reverse ctf 0xv01d"
+          data-category="0xv01d reverse ctf"
           data-text="misk automaton reverse engineering 0xv01d ctf pe32 state machine automaton fake flag solver transition tables"
         >
           <div class="card-top">
-            <span class="badge">Reverse</span>
-            <span class="badge secondary">0xV01D</span>
+            <span class="badge">0xV01D</span>
+            <span class="badge secondary">Reverse</span>
             <span class="card-date">2026</span>
           </div>
 
@@ -163,105 +173,28 @@
 
         <a
           class="card"
-          href="/writeups/soc/soc-analyst-writeups/"
+          href="/writeups/ctf/0xv01d-ctf-writeups/"
           data-card
-          data-category="soc"
-          data-text="soc analyst blue team siem logs alert triage"
+          data-category="0xv01d ctf pwn reverse web forensics osint"
+          data-text="0xv01d ctf pwn reverse web forensics osint team rank 44 challenge hub"
         >
           <div class="card-top">
-            <span class="badge">SOC</span>
-            <span class="badge secondary">Learning</span>
-            <span class="card-date">Now</span>
-          </div>
-
-          <h3>SOC Analyst Writeups</h3>
-
-          <p>
-            Blue team labs, log analysis, alert triage and investigation notes.
-          </p>
-
-          <div class="tags">
-            <span class="tag">SIEM</span>
-            <span class="tag">Logs</span>
-            <span class="tag">Blue Team</span>
-          </div>
-        </a>
-
-        <a
-          class="card"
-          href="/writeups/reverse/reverse-engineering-notes/"
-          data-card
-          data-category="reverse ctf"
-          data-text="reverse engineering ghidra elf solver binary analysis"
-        >
-          <div class="card-top">
-            <span class="badge">Reverse</span>
-            <span class="badge secondary">CTF</span>
+            <span class="badge">0xV01D</span>
+            <span class="badge secondary">Hub</span>
             <span class="card-date">2026</span>
           </div>
 
-          <h3>Reverse Engineering Notes</h3>
+          <h3>0xV01D CTF Writeups</h3>
 
           <p>
-            Binary checkers, string obfuscation, algorithm reconstruction and solvers.
+            Multi-category CTF hub for pwn, reverse, web, forensics and OSINT
+            challenges from 0xV01D CTF.
           </p>
 
           <div class="tags">
-            <span class="tag">Ghidra</span>
-            <span class="tag">ELF</span>
-            <span class="tag">Solver</span>
-          </div>
-        </a>
-
-        <a
-          class="card"
-          href="/writeups/pwn/binary-exploitation-writeups/"
-          data-card
-          data-category="pwn ctf"
-          data-text="pwn binary exploitation heap format string libc exploit"
-        >
-          <div class="card-top">
-            <span class="badge">Pwn</span>
-            <span class="badge secondary">CTF</span>
-            <span class="card-date">2026</span>
-          </div>
-
-          <h3>Binary Exploitation Writeups</h3>
-
-          <p>
-            Heap, format string, libc leaks and exploit reasoning.
-          </p>
-
-          <div class="tags">
-            <span class="tag">Heap</span>
-            <span class="tag">Format String</span>
-            <span class="tag">libc</span>
-          </div>
-        </a>
-
-        <a
-          class="card"
-          href="/writeups/malware/malware-analysis-notes/"
-          data-card
-          data-category="malware"
-          data-text="malware analysis triage ioc behavior static dynamic"
-        >
-          <div class="card-top">
-            <span class="badge">Malware</span>
-            <span class="badge secondary">Learning</span>
-            <span class="card-date">Soon</span>
-          </div>
-
-          <h3>Malware Analysis Notes</h3>
-
-          <p>
-            Static analysis, behavior notes and IOC-oriented triage writeups.
-          </p>
-
-          <div class="tags">
-            <span class="tag">Triage</span>
-            <span class="tag">IOC</span>
-            <span class="tag">Behavior</span>
+            <span class="tag">CTF</span>
+            <span class="tag">Team Rank 44</span>
+            <span class="tag">Writeup Hub</span>
           </div>
         </a>
 
@@ -269,11 +202,11 @@
           class="card"
           href="/writeups/ctf/tjctf-team-writeups/"
           data-card
-          data-category="ctf team"
-          data-text="tjctf team novarun ctf certificate rank 106"
+          data-category="tjctf ctf team"
+          data-text="tjctf team novarun ctf certificate rank 106 team writeups"
         >
           <div class="card-top">
-            <span class="badge">CTF</span>
+            <span class="badge">TJCTF</span>
             <span class="badge secondary">Team</span>
             <span class="card-date">2026</span>
           </div>
@@ -281,43 +214,20 @@
           <h3>TJCTF Team Writeups</h3>
 
           <p>
-            Team activity, certificate and challenge writeup hub.
+            Team activity, certificate and selected writeup hub for TJCTF
+            participation with NovaRun.
           </p>
 
           <div class="tags">
             <span class="tag">NovaRun</span>
             <span class="tag">Rank 106</span>
-          </div>
-        </a>
-
-        <a
-          class="card"
-          href="/writeups/ctf/0xv01d-ctf-writeups/"
-          data-card
-          data-category="ctf pwn reverse web forensics osint"
-          data-text="0xv01d ctf pwn reverse web forensics osint team rank 44"
-        >
-          <div class="card-top">
-            <span class="badge">CTF</span>
-            <span class="badge secondary">Team</span>
-            <span class="card-date">2026</span>
-          </div>
-
-          <h3>0xV01D CTF Writeups</h3>
-
-          <p>
-            Multi-category CTF notes from pwn, reverse, web, forensics and OSINT.
-          </p>
-
-          <div class="tags">
-            <span class="tag">0xV01D</span>
-            <span class="tag">Rank 44</span>
+            <span class="tag">Team</span>
           </div>
         </a>
       </section>
 
       <div class="empty-state" data-empty>
-        No writeups matched your filter.
+        No writeups matched your filter or search keyword. New labs will be added here after they are completed.
       </div>
     </div>
   </main>
