@@ -71,8 +71,6 @@
           <div class="item"><div class="label">Date</div><div class="value">20/05/2026</div></div>
           <div class="item"><div class="label">Author</div><div class="value">Nguyen Thai Ngoc</div></div>
         </section>
-
-        <figure class="evidence"><img src="/assets/writeups/ctf/0xv01d/misk-automaton/01_challenge_info.png" alt="Challenge information"><figcaption>Evidence 01 — Challenge information and category context.</figcaption></figure>
         <div class="callout warn"><strong>Analyst Note</strong>The binary contains a visible flag-like string, but the challenge name and the note inside <code>strings</code> strongly suggest it is bait. I avoided submitting it and continued reversing the checker.</div>
 
         <h2 id="overview">Overview</h2>
@@ -88,7 +86,6 @@
         <p>First, I checked the binary type. This confirms that the artifact is a Windows 64-bit PE executable and that the binary is stripped to an external PDB, so the reverse process cannot rely on friendly symbol names.</p>
         <div class="code-title">Command</div><pre><code>file misk_automaton.exe</code></pre>
         <div class="code-title">Output</div><pre><code>misk_automaton.exe: PE32+ executable for MS Windows 5.02 (console), x86-64 (stripped to external PDB), 11 sections</code></pre>
-        <figure class="evidence"><img src="/assets/writeups/ctf/0xv01d/misk-automaton/02_file_type.png" alt="file command output"><figcaption>Evidence 02 — The binary is a PE32+ Windows x86-64 executable.</figcaption></figure>
         <p>Because this is Windows x64, the calling convention matters when reading assembly: <code>rcx</code> is the first argument, <code>rdx</code> is the second argument, <code>r8</code> is the third argument, and <code>r9</code> is the fourth argument.</p>
 
         <h3 id="strings">Fake Flag in Strings</h3>
@@ -96,7 +93,6 @@
         <div class="code-title">Command</div><pre><code>strings -a misk_automaton.exe | grep -E '0xV01D|bait|operator|Correct|Wrong|usage'</code></pre>
         <div class="code-title">Output</div><pre><code>operator note: the visible state names are bait
 0xV01D{eight_states_are_not_enough}</code></pre>
-        <figure class="evidence"><img src="/assets/writeups/ctf/0xv01d/misk-automaton/03_strings_fake_flag.png" alt="strings output showing fake flag"><figcaption>Evidence 03 — A visible flag-like string appears, but the binary explicitly warns that visible names are bait.</figcaption></figure>
         <p>The string <code>0xV01D{eight_states_are_not_enough}</code> looks like a flag, but the nearby phrase <code>operator note: the visible state names are bait</code> makes it highly suspicious.</p>
 
         <h2 id="rdata">.rdata Analysis</h2>
@@ -109,7 +105,6 @@ Idx Name          Size      VMA               LMA               File off
   0 .text         00002378  0000000140001000  0000000140001000  00000400
   1 .data         00000120  0000000140004000  0000000140004000  00002800
   2 .rdata        000017d0  0000000140005000  0000000140005000  00002a00</code></pre>
-        <figure class="evidence"><img src="/assets/writeups/ctf/0xv01d/misk-automaton/04_sections_rdata.png" alt="objdump section table"><figcaption>Evidence 04 — The <code>.rdata</code> section starts at VMA <code>0x140005000</code> and file offset <code>0x2a00</code>.</figcaption></figure>
         <div class="code-title">Dumping .rdata</div><pre><code>objdump -s -j .rdata misk_automaton.exe | head -n 35</code></pre>
         <pre><code>140005060 69646c65 00737461 6c6c6564 00617761  idle.stalled.awa
 140005070 6b650000 00000000 00000000 00000000  ke..............
@@ -136,7 +131,6 @@ grep -n "140003220" -A90 -B5 disasm.txt</code></pre>
 14000324e: e8 2d fe ff ff        call   0x140003080
 140003253: 48 83 f8 2a           cmp    rax,0x2a
 140003257: 0f 85 ba 00 00 00     jne    0x140003317</code></pre>
-        <figure class="evidence"><img src="/assets/writeups/ctf/0xv01d/misk-automaton/05_disasm_checker.png" alt="disassembly checker"><figcaption>Evidence 05 — The checker function validates <code>argc == 2</code> and <code>strlen(argv[1]) == 42</code>.</figcaption></figure>
         <p>The program must be executed as <code>misk_automaton.exe &lt;flag&gt;</code>, and the input must be exactly 42 characters.</p>
 
         <h3 id="fake-branch">Fake Flag Branch</h3>
@@ -261,7 +255,6 @@ print("[+] flag:", flag.decode())</code></pre>
     0x140005100
 [+] extracted 8 tables
 [+] flag: 0xV01D{the_automaton_reads_between_states}</code></pre>
-        <figure class="evidence"><img src="/assets/writeups/ctf/0xv01d/misk-automaton/06_solve_flag.png" alt="solver output flag"><figcaption>Evidence 06 — The solver extracts the target, reads eight tables and recovers the real flag.</figcaption></figure>
 
         <h2 id="flag">Flag</h2>
         <p>The recovered flag is 42 characters long, matching the binary condition <code>strlen(input) == 0x2a</code>.</p>
