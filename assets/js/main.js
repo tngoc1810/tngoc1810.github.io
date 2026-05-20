@@ -293,3 +293,50 @@ function setupFilters() {
 
   applyFilter();
 }
+/* =========================================================
+   TOC ACTIVE SECTION HIGHLIGHT
+   Highlights current heading while scrolling writeup pages.
+   Paste at the END of assets/js/main.js
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTocActiveHighlight();
+});
+
+function initTocActiveHighlight() {
+  const tocLinks = Array.from(document.querySelectorAll(".toc a[href^='#']"));
+  if (!tocLinks.length) return;
+
+  const sections = tocLinks
+    .map(link => {
+      const id = link.getAttribute("href").slice(1);
+      const target = document.getElementById(id);
+      return target ? { link, target } : null;
+    })
+    .filter(Boolean);
+
+  if (!sections.length) return;
+
+  function setActiveToc() {
+    const offset = 145;
+    let current = sections[0];
+
+    for (const item of sections) {
+      const rect = item.target.getBoundingClientRect();
+
+      if (rect.top <= offset) {
+        current = item;
+      } else {
+        break;
+      }
+    }
+
+    tocLinks.forEach(link => link.classList.remove("active"));
+    current.link.classList.add("active");
+  }
+
+  setActiveToc();
+
+  window.addEventListener("scroll", setActiveToc, { passive: true });
+  window.addEventListener("resize", setActiveToc);
+}
