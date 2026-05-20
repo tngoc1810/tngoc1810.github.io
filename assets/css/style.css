@@ -783,3 +783,219 @@ footer {
     margin-left: 0 !important;
   }
 }
+/* =========================================================
+   PREMIUM WRITEUP TOC V2
+   Inspired by compact security blog sidebar style,
+   but customized for ThaiNgoc blue/cyan portfolio.
+   ========================================================= */
+
+@media (min-width: 1101px) {
+  .article-layout {
+    display: block !important;
+    position: relative !important;
+  }
+
+  .article-layout .toc {
+    position: fixed !important;
+    top: 104px !important;
+    left: max(34px, calc((100vw - 1340px) / 2)) !important;
+
+    width: 315px !important;
+    height: calc(100vh - 128px) !important;
+    max-height: calc(100vh - 128px) !important;
+
+    padding: 22px 18px 22px 20px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    border: 1px solid rgba(110, 210, 255, .16) !important;
+    border-radius: 18px !important;
+
+    background:
+      linear-gradient(180deg, rgba(5, 16, 35, .88), rgba(3, 10, 24, .76)) !important;
+
+    box-shadow:
+      0 18px 50px rgba(0, 0, 0, .28),
+      inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+
+    z-index: 80 !important;
+  }
+
+  .article-layout .article-card {
+    width: calc(100% - 375px) !important;
+    margin-left: 375px !important;
+  }
+
+  .toc-title {
+    margin: 0 0 16px 0 !important;
+    padding: 0 0 14px 0 !important;
+
+    color: rgba(150, 180, 215, .82) !important;
+    font-family: "JetBrains Mono", monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: .22em !important;
+    text-transform: uppercase !important;
+
+    border-bottom: 1px solid rgba(110, 210, 255, .12) !important;
+  }
+
+  .toc a {
+    position: relative !important;
+    display: block !important;
+
+    margin: 3px 0 !important;
+    padding: 9px 12px 9px 15px !important;
+
+    border: 1px solid transparent !important;
+    border-radius: 10px !important;
+
+    color: rgba(175, 210, 240, .88) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+
+    background: transparent !important;
+
+    transition:
+      background .18s ease,
+      color .18s ease,
+      border-color .18s ease,
+      transform .18s ease,
+      box-shadow .18s ease !important;
+  }
+
+  .toc a.sub {
+    margin-left: 12px !important;
+    padding: 7px 10px 7px 16px !important;
+
+    color: rgba(130, 160, 195, .82) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+  }
+
+  .toc a::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 50% !important;
+
+    width: 4px !important;
+    height: 4px !important;
+
+    border-radius: 999px !important;
+    background: rgba(86, 199, 255, .42) !important;
+
+    transform: translateY(-50%) !important;
+    box-shadow: 0 0 10px rgba(86, 199, 255, .16) !important;
+  }
+
+  .toc a.sub::before {
+    width: 3px !important;
+    height: 3px !important;
+    background: rgba(130, 170, 210, .42) !important;
+  }
+
+  .toc a:hover {
+    color: #e9fbff !important;
+    background: rgba(86, 199, 255, .075) !important;
+    border-color: rgba(86, 199, 255, .16) !important;
+    transform: translateX(4px) !important;
+  }
+
+  .toc a:hover::before {
+    background: #73e7ff !important;
+    box-shadow: 0 0 14px rgba(115, 231, 255, .42) !important;
+  }
+
+  /* Active section style, JS below will add .active */
+  .toc a.active {
+    color: #f3fcff !important;
+    background:
+      linear-gradient(90deg, rgba(86, 199, 255, .16), rgba(86, 199, 255, .055)) !important;
+    border-color: rgba(86, 199, 255, .24) !important;
+    box-shadow:
+      inset 3px 0 0 rgba(86, 199, 255, .78),
+      0 0 22px rgba(86, 199, 255, .055) !important;
+  }
+
+  .toc a.active::before {
+    background: #8ef0ff !important;
+    box-shadow: 0 0 16px rgba(142, 240, 255, .58) !important;
+  }
+
+  /* Clean scrollbar */
+  .toc::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .toc::-webkit-scrollbar-track {
+    background: rgba(4, 12, 24, .34);
+    border-radius: 999px;
+  }
+
+  .toc::-webkit-scrollbar-thumb {
+    background:
+      linear-gradient(180deg, rgba(86, 199, 255, .52), rgba(45, 140, 255, .34));
+    border-radius: 999px;
+  }
+
+  .toc::-webkit-scrollbar-thumb:hover {
+    background:
+      linear-gradient(180deg, rgba(120, 225, 255, .72), rgba(45, 140, 255, .48));
+  }
+}
+
+/* Mobile/tablet: TOC becomes a normal clean card */
+@media (max-width: 1100px) {
+  .article-layout {
+    display: block !important;
+  }
+
+  .article-layout .toc {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+
+    margin: 0 0 24px 0 !important;
+    padding: 20px !important;
+
+    border: 1px solid rgba(110, 210, 255, .16) !important;
+    border-radius: 18px !important;
+
+    background:
+      linear-gradient(180deg, rgba(5, 16, 35, .86), rgba(3, 10, 24, .72)) !important;
+  }
+
+  .article-layout .article-card {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .toc a {
+    display: inline-flex !important;
+    margin: 4px !important;
+    padding: 8px 12px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(110, 210, 255, .14) !important;
+
+    color: rgba(175, 210, 240, .9) !important;
+    background: rgba(86, 199, 255, .045) !important;
+
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+
+  .toc a.sub {
+    margin-left: 4px !important;
+    font-size: 12px !important;
+    opacity: .82 !important;
+  }
+
+  .toc a::before {
+    display: none !important;
+  }
+}
