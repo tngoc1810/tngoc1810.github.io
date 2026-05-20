@@ -1290,3 +1290,146 @@ body:has(.article-layout) .toc {
     animation: none !important;
   }
 }
+/* =========================================================
+   FIX WRITEUP CONTENTS FOLLOW SCROLL
+   Lightweight fixed TOC for desktop writeup pages
+   Paste at the VERY END of assets/css/style.css
+   ========================================================= */
+
+@media (min-width: 1101px) {
+  .article-layout {
+    display: block !important;
+    position: relative !important;
+    max-width: 1220px !important;
+    margin: 0 auto !important;
+  }
+
+  .article-layout .toc {
+    position: fixed !important;
+    top: 96px !important;
+    left: max(28px, calc((100vw - 1220px) / 2)) !important;
+
+    width: 260px !important;
+    height: calc(100vh - 116px) !important;
+    max-height: calc(100vh - 116px) !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    padding: 18px 14px 18px 0 !important;
+    margin: 0 !important;
+
+    border-right: 1px solid rgba(125, 200, 255, .16) !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+    box-shadow: none !important;
+
+    z-index: 90 !important;
+  }
+
+  .article-layout .article-card {
+    width: calc(100% - 320px) !important;
+    margin-left: 320px !important;
+  }
+
+  .toc-title {
+    margin: 0 0 14px 0 !important;
+    padding-bottom: 12px !important;
+
+    color: rgba(140, 170, 205, .82) !important;
+    font-family: "JetBrains Mono", monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: .18em !important;
+    text-transform: uppercase !important;
+
+    border-bottom: 1px solid rgba(125, 200, 255, .12) !important;
+  }
+
+  .toc a {
+    display: block !important;
+
+    margin: 2px 0 !important;
+    padding: 7px 9px !important;
+
+    border-radius: 8px !important;
+    border: 0 !important;
+
+    color: rgba(175, 210, 240, .82) !important;
+    background: transparent !important;
+
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.38 !important;
+
+    transition:
+      background .15s ease,
+      color .15s ease,
+      transform .15s ease !important;
+  }
+
+  .toc a.sub {
+    padding-left: 20px !important;
+    color: rgba(130, 160, 195, .78) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
+
+  .toc a::before {
+    display: none !important;
+  }
+
+  .toc a:hover {
+    color: #e9fbff !important;
+    background: rgba(86, 199, 255, .075) !important;
+    transform: translateX(3px) !important;
+  }
+
+  .toc a.active {
+    color: #7cf0ff !important;
+    background: rgba(86, 199, 255, .09) !important;
+    font-weight: 900 !important;
+  }
+
+  .toc::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .toc::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .toc::-webkit-scrollbar-thumb {
+    background: rgba(86, 199, 255, .32);
+    border-radius: 999px;
+  }
+}
+
+/* Mobile / tablet: contents stays normal at top */
+@media (max-width: 1100px) {
+  .article-layout {
+    display: block !important;
+    max-width: none !important;
+  }
+
+  .article-layout .toc {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+
+    margin: 0 0 24px 0 !important;
+    padding: 18px !important;
+
+    border: 1px solid rgba(125, 200, 255, .16) !important;
+    border-radius: 18px !important;
+
+    background: rgba(5, 16, 35, .76) !important;
+  }
+
+  .article-layout .article-card {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
