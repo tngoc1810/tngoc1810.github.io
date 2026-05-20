@@ -366,3 +366,259 @@ footer {
 
 .quote {
   border-left: 3px solid var
+/* =========================================================
+   SMOOTH WRITEUP MODE — INSPIRED, NOT COPIED
+   Goal: make scrolling smooth like compact security blogs.
+   Keeps ThaiNgoc blue/cyan style, but reduces heavy rendering.
+   Paste at the VERY END of assets/css/style.css
+   ========================================================= */
+
+/* 1. Make animated background subtle, not dominant */
+#network-bg {
+  opacity: .24 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 2. Keep content cleanly above background */
+.topbar,
+.page,
+.wrap,
+.hero,
+.article-layout,
+.article-card,
+.glass,
+.card,
+.footer-nav,
+.profile-card,
+.hero-copy,
+.toc,
+section,
+main,
+footer {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+/* 3. Remove expensive blur effects */
+.glass,
+.article-card,
+.profile-card,
+.card,
+.topbar,
+.toc {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  will-change: auto !important;
+  transform-style: flat !important;
+  backface-visibility: visible !important;
+}
+
+/* 4. Make panels more solid, easier to render */
+.glass,
+.article-card,
+.profile-card {
+  background:
+    linear-gradient(180deg, rgba(8, 20, 44, .96), rgba(5, 14, 30, .94)) !important;
+  border: 1px solid rgba(90, 190, 255, .18) !important;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, .20),
+    inset 0 1px 0 rgba(255, 255, 255, .025) !important;
+}
+
+.card {
+  background:
+    linear-gradient(180deg, rgba(8, 20, 44, .94), rgba(5, 14, 30, .91)) !important;
+  border: 1px solid rgba(90, 190, 255, .15) !important;
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, .18),
+    inset 0 1px 0 rgba(255, 255, 255, .02) !important;
+}
+
+/* 5. Lighter hover = smoother */
+.card:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(120, 225, 255, .28) !important;
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, .22),
+    0 0 12px rgba(60, 190, 255, .035) !important;
+}
+
+/* =========================================================
+   REBUILD ARTICLE LAYOUT LIKE A CLEAN BLOG
+   No fixed TOC. Sticky TOC inside layout = smoother.
+   ========================================================= */
+
+@media (min-width: 1101px) {
+  .article-layout {
+    display: grid !important;
+    grid-template-columns: 260px minmax(0, 880px) !important;
+    gap: 42px !important;
+    align-items: start !important;
+
+    width: min(1220px, calc(100% - 36px)) !important;
+    margin: 0 auto !important;
+  }
+
+  .article-layout .toc {
+    position: sticky !important;
+    top: 96px !important;
+
+    width: auto !important;
+    height: calc(100vh - 116px) !important;
+    max-height: calc(100vh - 116px) !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    margin: 0 !important;
+    padding: 18px 14px 18px 16px !important;
+
+    border: 1px solid rgba(110, 210, 255, .13) !important;
+    border-radius: 14px !important;
+
+    background:
+      linear-gradient(180deg, rgba(5, 16, 35, .92), rgba(3, 10, 24, .86)) !important;
+
+    box-shadow:
+      0 8px 22px rgba(0, 0, 0, .18),
+      inset 0 1px 0 rgba(255, 255, 255, .025) !important;
+
+    z-index: 20 !important;
+  }
+
+  .article-layout .article-card {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .toc-title {
+    margin: 0 0 12px 0 !important;
+    padding: 0 0 10px 0 !important;
+
+    color: rgba(145, 176, 214, .78) !important;
+    font-family: "JetBrains Mono", monospace !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: .18em !important;
+    text-transform: uppercase !important;
+
+    border-bottom: 1px solid rgba(110, 210, 255, .10) !important;
+  }
+
+  .toc a {
+    position: relative !important;
+    display: block !important;
+
+    margin: 2px 0 !important;
+    padding: 7px 9px 7px 13px !important;
+
+    border-radius: 7px !important;
+    border: 1px solid transparent !important;
+
+    color: rgba(175, 210, 240, .82) !important;
+    background: transparent !important;
+
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    line-height: 1.35 !important;
+
+    transition:
+      background .14s ease,
+      color .14s ease,
+      border-color .14s ease !important;
+  }
+
+  .toc a.sub {
+    margin-left: 10px !important;
+    padding: 6px 8px 6px 13px !important;
+
+    color: rgba(130, 160, 195, .78) !important;
+    font-size: 12px !important;
+    font-weight: 550 !important;
+  }
+
+  .toc a::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 50% !important;
+
+    width: 3px !important;
+    height: 3px !important;
+
+    border-radius: 999px !important;
+    background: rgba(86, 199, 255, .42) !important;
+
+    transform: translateY(-50%) !important;
+  }
+
+  .toc a:hover {
+    color: #e9fbff !important;
+    background: rgba(86, 199, 255, .07) !important;
+    border-color: rgba(86, 199, 255, .12) !important;
+    transform: none !important;
+  }
+
+  .toc a.active {
+    color: #f3fcff !important;
+    background: rgba(86, 199, 255, .10) !important;
+    border-color: rgba(86, 199, 255, .18) !important;
+    box-shadow: inset 2px 0 0 rgba(86, 199, 255, .70) !important;
+  }
+
+  .toc::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .toc::-webkit-scrollbar-track {
+    background: rgba(4, 12, 24, .30);
+    border-radius: 999px;
+  }
+
+  .toc::-webkit-scrollbar-thumb {
+    background: rgba(86, 199, 255, .34);
+    border-radius: 999px;
+  }
+}
+
+/* 6. Code blocks should stay simple */
+pre {
+  box-shadow: none !important;
+}
+
+code {
+  box-shadow: none !important;
+}
+
+/* 7. Disable CSS popping on long writeups */
+.article-card pre,
+.article-card table,
+.article-card figure,
+.article-card .callout,
+.article-card .info-card,
+.article-card .grid,
+.article-card img,
+.article-layout,
+.article-card,
+.toc {
+  content-visibility: visible !important;
+  contain: none !important;
+  contain-intrinsic-size: auto !important;
+}
+
+/* 8. Browser-native scroll is smoother than forced smooth on heavy pages */
+html {
+  scroll-behavior: auto !important;
+}
+
+/* 9. Mobile: remove animated canvas for best smoothness */
+@media (max-width: 760px) {
+  #network-bg {
+    display: none !important;
+  }
+
+  .card:hover {
+    transform: none !important;
+  }
+}
