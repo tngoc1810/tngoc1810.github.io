@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Thai Ngoc Lab — Vietnamese CTF Writeups</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg0: #05070b;
+      --bg1: #0a0f18;
+      --bg2: #101827;
+      --border: #1f2a3d;
+      --text0: #f8fafc;
+      --text1: #e2e8f0;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --accent: #38bdf8;
+      --purple: #8b5cf6;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --orange: #f97316;
+      --gradient: linear-gradient(135deg, #38bdf8, #8b5cf6);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Inter, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.14), transparent 28%),
+        radial-gradient(circle at top right, rgba(139,92,246,0.14), transparent 28%),
+        var(--bg0);
+      color: var(--text1);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .header {
+      height: 64px;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,7,11,0.85);
+      backdrop-filter: blur(18px);
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 800;
+      color: var(--text0);
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 0 30px rgba(56,189,248,0.25);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 18px;
+      background: var(--green);
+      margin-left: 4px;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .nav {
+      margin-left: 40px;
+      display: flex;
+      gap: 22px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text2);
+    }
+
+    .nav a:hover {
+      color: var(--accent);
+    }
+
+    .github {
+      margin-left: auto;
+      color: var(--text2);
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--bg1);
+    }
+
+    .github:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .hero {
+      min-height: 460px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 48px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal {
+      font-family: "JetBrains Mono", monospace;
+      color: var(--accent);
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 56px;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      color: var(--text0);
+      margin-bottom: 18px;
+    }
+
+    h1 span {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text2);
+      max-width: 650px;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge {
+      border: 1px solid var(--border);
+      background: rgba(16,24,39,0.8);
+      color: var(--text1);
+      padding: 7px 13px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .badge:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .stats {
+      background: rgba(16,24,39,0.85);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stats::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient);
+    }
+
+    .stats-label {
+      color: var(--text3);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .stat-value {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 28px;
+      color: var(--text0);
+      font-weight: 800;
+    }
+
+    .stat-value.highlight {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-name {
+      color: var(--text3);
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .section {
+      padding: 34px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      color: var(--text3);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      font-weight: 900;
+      margin-bottom: 18px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(10,15,24,0.9);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+    }
+
+    .card h3 {
+      color: var(--text0);
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .card p {
+      color: var(--text2);
+      font-size: 14px;
+    }
+
+    .quote {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-left: 2px solid var(--accent);
+      background: rgba(56,189,248,0.08);
+      color: var(--text2);
+      font-style: italic;
+      border-radius: 0 10px 10px 0;
+      font-size: 14px;
+    }
+
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: var(--bg2);
+      color: var(--text2);
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+
+    .tag.hot {
+      color: var(--accent);
+      border-color: rgba(56,189,248,0.4);
+      background: rgba(56,189,248,0.08);
+    }
+
+    .writeups {
+      padding: 34px 0;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .filter {
+      border: 1px solid var(--border);
+      background: var(--bg1);
+      color: var(--text2);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .filter:hover,
+    .filter.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .post {
+      display: block;
+      background: rgba(10,15,24,0.9);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 16px;
+      transition: 0.22s;
+    }
+
+    .post:hover {
+      transform: translateY(-4px);
+      border-color: #334155;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+    }
+
+    .post-top {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .type,
+    .level {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      padding: 4px 9px;
+      border-radius: 7px;
+    }
+
+    .type.pwn {
+      background: rgba(139,92,246,0.14);
+      color: var(--purple);
+    }
+
+    .type.rev {
+      background: rgba(249,115,22,0.14);
+      color: var(--orange);
+    }
+
+    .type.web {
+      background: rgba(56,189,248,0.14);
+      color: var(--accent);
+    }
+
+    .type.forensics {
+      background: rgba(34,197,94,0.14);
+      color: var(--green);
+    }
+
+    .level.medium {
+      background: rgba(234,179,8,0.14);
+      color: var(--yellow);
+    }
+
+    .level.hard {
+      background: rgba(249,115,22,0.14);
+      color: var(--orange);
+    }
+
+    .date {
+      margin-left: auto;
+      color: var(--text3);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+    }
+
+    .post h3 {
+      color: var(--text0);
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .post:hover h3 {
+      color: var(--accent);
+    }
+
+    .post p {
+      color: var(--text2);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .learned {
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      color: var(--text2);
+      font-size: 13px;
+    }
+
+    footer {
+      padding: 32px;
+      text-align: center;
+      color: var(--text3);
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    @media (max-width: 850px) {
+      .nav {
+        display: none;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 60px 0;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <a href="#" class="brand">
+      <span class="logo">T</span>
+      ThaiNgoc<span class="cursor"></span>
+    </a>
+
+    <nav class="nav">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#writeups">Writeups</a>
+      <a href="#notes">Notes</a>
+    </nav>
+
+    <a class="github" href="https://github.com/tngoc1810" target="_blank">GitHub</a>
+  </header>
+
+  <main class="container" id="home">
+    <section class="hero">
+      <div>
+        <div class="terminal">tngoc@security:~$ ./journey</div>
+
+        <h1>
+          Vietnamese CTF Writeups<br>
+          <span>From Confusion to Root</span>
+        </h1>
+
+        <p class="subtitle">
+          Mình ghi lại hành trình học An toàn thông tin qua CTF: pwn, reverse,
+          web, forensics, crypto và OSINT. Không chỉ lấy flag, mà phải hiểu bug,
+          hiểu tư duy khai thác và rút ra kỹ năng dùng lại được.
+        </p>
+
+        <div class="badges">
+          <span class="badge">Pwn</span>
+          <span class="badge">Reverse</span>
+          <span class="badge">Web Security</span>
+          <span class="badge">Forensics</span>
+          <span class="badge">Crypto</span>
+          <span class="badge">OSINT</span>
+          <span class="badge">Linux</span>
+          <span class="badge">C++</span>
+        </div>
+      </div>
+
+      <aside class="stats">
+        <div class="stats-label">Current Stats</div>
+
+        <div class="stat-grid">
+          <div>
+            <div class="stat-value highlight">50+</div>
+            <div class="stat-name">CTF Solves</div>
+          </div>
+
+          <div>
+            <div class="stat-value">2</div>
+            <div class="stat-name">Tin Awards</div>
+          </div>
+
+          <div>
+            <div class="stat-value highlight">ATTT</div>
+            <div class="stat-name">Major</div>
+          </div>
+
+          <div>
+            <div class="stat-value">VN</div>
+            <div class="stat-name">Writeups</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section" id="about">
+      <div class="section-title">About / Tags / Focus</div>
+
+      <div class="info-grid">
+        <div class="card">
+          <h3>Thai Ngoc</h3>
+          <p>
+            Information Security student from Vietnam. Mình thích CTF,
+            lập trình C++, Linux, binary exploitation và reverse engineering.
+          </p>
+
+          <div class="quote">
+            “Flag chỉ là kết quả. Tư duy mới là thứ mình giữ lại.”
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Popular Tags</h3>
+          <div class="tag-cloud">
+            <span class="tag hot">heap</span>
+            <span class="tag hot">format string</span>
+            <span class="tag hot">reverse</span>
+            <span class="tag">ret2libc</span>
+            <span class="tag">ELF</span>
+            <span class="tag">Ghidra</span>
+            <span class="tag">SQLite WAL</span>
+            <span class="tag">PCAP</span>
+            <span class="tag">XOR</span>
+            <span class="tag">RSA</span>
+            <span class="tag">OSINT</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Current Focus</h3>
+          <p>Binary Exploitation</p>
+          <p>Reverse Engineering</p>
+          <p>Web Vulnerability</p>
+          <p>Forensics Analysis</p>
+          <p>Linux & C++</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="writeups" id="writeups">
+      <div class="section-title">Latest Writeups</div>
+
+      <div class="filters">
+        <button class="filter active" onclick="filterPosts('all', this)">All</button>
+        <button class="filter" onclick="filterPosts('pwn', this)">Pwn</button>
+        <button class="filter" onclick="filterPosts('rev', this)">Reverse</button>
+        <button class="filter" onclick="filterPosts('web', this)">Web</button>
+        <button class="filter" onclick="filterPosts('forensics', this)">Forensics</button>
+      </div>
+
+      <a href="#" class="post" data-category="pwn">
+        <div class="post-top">
+          <span class="type pwn">Pwn</span>
+          <span class="level hard">Hard</span>
+          <span class="date">2026</span>
+        </div>
+
+        <h3>Average Heap — Heap Exploitation Walkthrough</h3>
+
+        <p>
+          Phân tích heap allocator, leak libc, tính safe-linking key,
+          đọc environ để tìm stack và điều hướng control flow.
+        </p>
+
+        <div class="tag-cloud">
+          <span class="tag">heap</span>
+          <span class="tag">libc leak</span>
+          <span class="tag">safe-linking</span>
+          <span class="tag">stack leak</span>
+        </div>
+
+        <div class="learned">
+          Learned: cách biến leak nhỏ thành primitive mạnh hơn.
+        </div>
+      </a>
+
+      <a href="#" class="post" data-category="pwn">
+        <div class="post-top">
+          <span class="type pwn">Pwn</span>
+          <span class="level medium">Medium</span>
+          <span class="date">2026</span>
+        </div>
+
+        <h3>Olive Handlebook — Format String Notes</h3>
+
+        <p>
+          Ghi chú quá trình tìm format string bug, leak địa chỉ,
+          tính libc base và dựng payload ghi đè mục tiêu.
+        </p>
+
+        <div class="tag-cloud">
+          <span class="tag">format string</span>
+          <span class="tag">libc</span>
+          <span class="tag">write primitive</span>
+        </div>
+
+        <div class="learned">
+          Learned: đọc stack layout trước khi viết payload.
+        </div>
+      </a>
+
+      <a href="#" class="post" data-category="rev">
+        <div class="post-top">
+          <span class="type rev">Reverse</span>
+          <span class="level medium">Medium</span>
+          <span class="date">2026</span>
+        </div>
+
+        <h3>Sable Midnight Turn — Adjacent Byte Mixer</h3>
+
+        <p>
+          Phân tích checker, khôi phục công thức biến đổi byte liền kề
+          và viết script đảo ngược để tìm input hợp lệ.
+        </p>
+
+        <div class="tag-cloud">
+          <span class="tag">ELF</span>
+          <span class="tag">Ghidra</span>
+          <span class="tag">XOR</span>
+          <span class="tag">solver</span>
+        </div>
+
+        <div class="learned">
+          Learned: biến reverse thành bài toán phương trình.
+        </div>
+      </a>
+
+      <a href="#" class="post" data-category="web">
+        <div class="post-top">
+          <span class="type web">Web</span>
+          <span class="level medium">Medium</span>
+          <span class="date">2026</span>
+        </div>
+
+        <h3>Neon Mirage — Support Preview Console</h3>
+
+        <p>
+          Ghi chú quá trình kiểm tra filter, preview input, bypass sanitize
+          và tìm dữ liệu bị che giấu trong ứng dụng web.
+        </p>
+
+        <div class="tag-cloud">
+          <span class="tag">web</span>
+          <span class="tag">filter bypass</span>
+          <span class="tag">preview</span>
+        </div>
+
+        <div class="learned">
+          Learned: khi input bị echo lại, phải tìm context render thật sự.
+        </div>
+      </a>
+
+      <a href="#" class="post" data-category="forensics">
+        <div class="post-top">
+          <span class="type forensics">Forensics</span>
+          <span class="level hard">Hard</span>
+          <span class="date">2026</span>
+        </div>
+
+        <h3>Mina Gallery — SQLite WAL & Thumbnail Trail</h3>
+
+        <p>
+          Phân tích snapshot mobile gallery, tìm dữ liệu còn sót trong WAL,
+          thumbnail cache và các manh mối bị xóa chưa sạch.
+        </p>
+
+        <div class="tag-cloud">
+          <span class="tag">SQLite WAL</span>
+          <span class="tag">thumbnail</span>
+          <span class="tag">mobile forensics</span>
+        </div>
+
+        <div class="learned">
+          Learned: file database sạch chưa chắc session đã sạch.
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Thai Ngoc Lab — Vietnamese CTF Writeups & Cybersecurity Notes
+  </footer>
+
+  <script>
+    function filterPosts(category, button) {
+      document.querySelectorAll(".filter").forEach(function(btn) {
+        btn.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+      document.querySelectorAll(".post").forEach(function(post) {
+        if (category === "all" || post.dataset.category === category) {
+          post.style.display = "block";
+        } else {
+          post.style.display = "none";
+        }
+      });
+    }
+  </script>
+</body>
+</html>
