@@ -477,3 +477,76 @@ footer {
     scroll-behavior: auto;
   }
 }
+/* =========================================================
+   FIX WRITEUP TABLE OF CONTENTS STICKY SIDEBAR
+   Make left Contents stay visible while scrolling article pages
+   ========================================================= */
+
+.article-layout {
+  align-items: start !important;
+}
+
+/* Desktop sticky table of contents */
+.toc {
+  position: sticky !important;
+  top: 105px !important;
+  align-self: start !important;
+  max-height: calc(100vh - 125px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 24px !important;
+  z-index: 20 !important;
+}
+
+/* Make TOC scrollbar clean and subtle */
+.toc::-webkit-scrollbar {
+  width: 6px;
+}
+
+.toc::-webkit-scrollbar-track {
+  background: rgba(4, 12, 24, 0.35);
+  border-radius: 999px;
+}
+
+.toc::-webkit-scrollbar-thumb {
+  background: rgba(90, 190, 255, 0.35);
+  border-radius: 999px;
+}
+
+/* Keep TOC links clickable above animated background */
+.toc,
+.toc a,
+.toc-title {
+  position: relative;
+  z-index: 25 !important;
+}
+
+/* Improve TOC active/hover feeling */
+.toc a {
+  border-radius: 10px;
+  transition: 0.18s ease;
+}
+
+.toc a:hover {
+  color: #d8f6ff !important;
+  transform: translateX(4px);
+}
+
+/* Prevent sticky from breaking because of content visibility patches */
+.article-layout,
+.toc,
+.article-card {
+  content-visibility: visible !important;
+  contain: none !important;
+}
+
+/* On mobile/tablet, TOC should not be sticky */
+@media (max-width: 1100px) {
+  .toc {
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+  }
+}
