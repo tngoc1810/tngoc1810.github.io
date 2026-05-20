@@ -1058,22 +1058,34 @@ pre code {
   }
 }
 /* =========================================================
-   LIGHT PREMIUM TRANSPARENT CYBER BACKGROUND
-   More beautiful background without heavy blur/canvas overload
-   Paste at the END of assets/css/style.css
+   VISIBLE TRANSPARENT CYBER BACKGROUND — THAINGOC V2
+   Stronger animated background, still lightweight.
+   Paste at the VERY END of assets/css/style.css
    ========================================================= */
 
-/* Make animated canvas a bit more visible, but still light */
+/* Make sure old rules cannot hide these layers */
+body {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(124, 240, 255, .18), transparent 30%),
+    radial-gradient(circle at 85% 12%, rgba(45, 140, 255, .18), transparent 32%),
+    radial-gradient(circle at 50% 85%, rgba(45, 212, 191, .10), transparent 38%),
+    linear-gradient(180deg, #020816 0%, #06172d 52%, #020816 100%) !important;
+}
+
+/* Canvas background from JS */
 #network-bg {
+  display: block !important;
+  visibility: visible !important;
+  opacity: .58 !important;
+  z-index: 0 !important;
+}
+
+/* On writeup pages keep canvas lighter */
+body:has(.article-layout) #network-bg {
   opacity: .42 !important;
 }
 
-/* On long writeup pages, keep it lighter */
-body:has(.article-layout) #network-bg {
-  opacity: .30 !important;
-}
-
-/* Add a lightweight transparent cyber layer behind content */
+/* Animated cyber grid + aurora */
 body::before {
   content: "" !important;
   display: block !important;
@@ -1086,49 +1098,83 @@ body::before {
   pointer-events: none !important;
 
   background:
-    radial-gradient(circle at 18% 12%, rgba(124, 240, 255, .16), transparent 28%),
-    radial-gradient(circle at 82% 18%, rgba(45, 140, 255, .16), transparent 30%),
-    radial-gradient(circle at 50% 78%, rgba(45, 212, 191, .10), transparent 36%),
+    radial-gradient(circle at 18% 15%, rgba(124, 240, 255, .24), transparent 27%),
+    radial-gradient(circle at 82% 20%, rgba(45, 140, 255, .24), transparent 31%),
+    radial-gradient(circle at 50% 78%, rgba(45, 212, 191, .15), transparent 36%),
 
-    linear-gradient(rgba(86, 199, 255, .030) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(86, 199, 255, .030) 1px, transparent 1px);
+    linear-gradient(rgba(86, 199, 255, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(86, 199, 255, .055) 1px, transparent 1px),
 
-  background-size:
-    900px 900px,
-    900px 900px,
-    1000px 1000px,
-    54px 54px,
-    54px 54px;
-
-  animation: cyberLayerDrift 42s linear infinite;
-}
-
-/* Subtle scan/aurora layer */
-body::after {
-  content: "" !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: .55 !important;
-
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 2 !important;
-  pointer-events: none !important;
-
-  background:
     linear-gradient(
       115deg,
       transparent 0%,
-      transparent 38%,
-      rgba(124, 240, 255, .045) 44%,
+      transparent 36%,
+      rgba(124, 240, 255, .07) 44%,
       transparent 52%,
       transparent 100%
     );
 
-  animation: cyberSweep 12s ease-in-out infinite alternate;
+  background-size:
+    850px 850px,
+    900px 900px,
+    1000px 1000px,
+    54px 54px,
+    54px 54px,
+    900px 900px;
+
+  animation: tnCyberDrift 38s linear infinite;
 }
 
-/* Keep content above background layers */
+/* Radar / hologram orb layer */
+body::after {
+  content: "" !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: .72 !important;
+
+  position: fixed !important;
+  left: 50% !important;
+  top: 48% !important;
+  width: min(760px, 88vw) !important;
+  height: min(760px, 88vw) !important;
+  transform: translate(-50%, -50%) !important;
+
+  z-index: 2 !important;
+  pointer-events: none !important;
+  border-radius: 50% !important;
+
+  background:
+    radial-gradient(circle,
+      transparent 0 22%,
+      rgba(124, 240, 255, .15) 22.3%,
+      transparent 23%,
+      transparent 38%,
+      rgba(86, 199, 255, .11) 38.3%,
+      transparent 39%,
+      transparent 54%,
+      rgba(45, 140, 255, .09) 54.3%,
+      transparent 55%,
+      transparent 100%
+    ),
+    conic-gradient(
+      from 220deg,
+      transparent 0deg,
+      rgba(124, 240, 255, .22) 24deg,
+      rgba(86, 199, 255, .10) 44deg,
+      transparent 72deg,
+      transparent 360deg
+    ),
+    radial-gradient(circle,
+      rgba(124, 240, 255, .12) 0%,
+      rgba(86, 199, 255, .075) 30%,
+      rgba(45, 140, 255, .035) 55%,
+      transparent 72%
+    );
+
+  animation: tnCyberRadar 22s linear infinite;
+}
+
+/* Content must stay above animated layers */
 .topbar,
 .page,
 .wrap,
@@ -1148,76 +1194,92 @@ footer {
   z-index: 5 !important;
 }
 
-/* Make cards more transparent but not blurry */
+/* Make panels more transparent so background is visible */
 .glass,
 .article-card,
 .profile-card {
   background:
-    linear-gradient(180deg, rgba(8, 20, 44, .88), rgba(5, 14, 30, .80)) !important;
-  border-color: rgba(110, 210, 255, .18) !important;
+    linear-gradient(180deg, rgba(8, 20, 44, .82), rgba(5, 14, 30, .74)) !important;
+  border-color: rgba(124, 240, 255, .20) !important;
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, .24),
+    inset 0 1px 0 rgba(255, 255, 255, .03) !important;
 }
 
 .card {
   background:
-    linear-gradient(180deg, rgba(8, 20, 44, .78), rgba(5, 14, 30, .72)) !important;
-  border-color: rgba(110, 210, 255, .15) !important;
+    linear-gradient(180deg, rgba(8, 20, 44, .70), rgba(5, 14, 30, .64)) !important;
+  border-color: rgba(124, 240, 255, .18) !important;
 }
 
 .topbar {
-  background: rgba(2, 8, 22, .90) !important;
+  background: rgba(2, 8, 22, .86) !important;
 }
 
-/* Slightly nicer glow, still light */
+/* Writeup pages: slightly more solid for readability */
+body:has(.article-layout) .article-card,
+body:has(.article-layout) .toc {
+  background:
+    linear-gradient(180deg, rgba(8, 20, 44, .90), rgba(5, 14, 30, .84)) !important;
+}
+
+/* Hover still light */
 .card:hover {
-  border-color: rgba(124, 240, 255, .30) !important;
+  border-color: rgba(124, 240, 255, .34) !important;
   box-shadow:
-    0 10px 26px rgba(0, 0, 0, .22),
-    0 0 18px rgba(86, 199, 255, .045) !important;
+    0 12px 30px rgba(0, 0, 0, .25),
+    0 0 22px rgba(86, 199, 255, .06) !important;
 }
 
 /* Animations */
-@keyframes cyberLayerDrift {
+@keyframes tnCyberDrift {
   from {
     background-position:
       0 0,
       0 0,
       0 0,
       0 0,
-      0 0;
+      0 0,
+      -260px 0;
   }
 
   to {
     background-position:
-      120px 80px,
-      -100px 120px,
-      80px -100px,
+      130px 90px,
+      -110px 130px,
+      90px -120px,
       54px 54px,
-      54px 54px;
+      54px 54px,
+      260px 0;
   }
 }
 
-@keyframes cyberSweep {
+@keyframes tnCyberRadar {
   from {
-    transform: translateX(-8%);
-    opacity: .34;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
   }
 
   to {
-    transform: translateX(8%);
-    opacity: .58;
+    transform: translate(-50%, -50%) rotate(360deg) scale(1.025);
   }
 }
 
-/* Mobile: keep it light */
+/* Mobile: visible but not too heavy */
 @media (max-width: 760px) {
+  #network-bg {
+    display: none !important;
+  }
+
   body::before {
-    opacity: .70 !important;
+    opacity: .75 !important;
     animation-duration: 70s !important;
   }
 
   body::after {
-    opacity: .22 !important;
-    animation-duration: 20s !important;
+    opacity: .42 !important;
+    width: 560px !important;
+    height: 560px !important;
+    animation-duration: 34s !important;
   }
 }
 
