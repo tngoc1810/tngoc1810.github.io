@@ -1,10 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
-  initCyberBackground();
+  initLightCyberBackground();
   setupFilters();
+  initTocActiveHighlight();
 });
 
-function initCyberBackground() {
-  // Xóa các background cũ nếu còn tồn tại
+function initLightCyberBackground() {
   [
     "#site-bg",
     "#network-bg",
@@ -30,37 +30,34 @@ function initCyberBackground() {
   let dpr = 1;
   let particles = [];
   let lastFrame = 0;
-
-  const FPS = 28;
-  const FRAME_INTERVAL = 1000 / FPS;
-
-  let isScrolling = false;
+  let scrolling = false;
   let scrollTimer = null;
 
-  function markScrolling() {
-    isScrolling = true;
-    clearTimeout(scrollTimer);
+  const FPS = 22;
+  const FRAME_TIME = 1000 / FPS;
 
+  function markScrolling() {
+    scrolling = true;
+    clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
-      isScrolling = false;
-    }, 120);
+      scrolling = false;
+    }, 160);
   }
 
   window.addEventListener("scroll", markScrolling, { passive: true });
   window.addEventListener("wheel", markScrolling, { passive: true });
   window.addEventListener("touchmove", markScrolling, { passive: true });
 
-  function particleCount() {
-    if (w < 640) return 22;
-    if (w < 1000) return 30;
-    if (w < 1400) return 38;
-    return 46;
+  function getCount() {
+    if (window.innerWidth < 700) return 14;
+    if (window.innerWidth < 1100) return 20;
+    return 26;
   }
 
   function resize() {
     w = window.innerWidth;
     h = window.innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 1.4);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.25);
 
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
@@ -69,84 +66,63 @@ function initCyberBackground() {
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    particles = Array.from({ length: particleCount() }, () => ({
+    particles = Array.from({ length: getCount() }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.24,
-      vy: (Math.random() - 0.5) * 0.24,
-      r: Math.random() * 1.9 + 1.1,
-      alpha: Math.random() * 0.38 + 0.28
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: (Math.random() - 0.5) * 0.18,
+      r: Math.random() * 1.6 + 1,
+      a: Math.random() * 0.28 + 0.22
     }));
   }
 
-  window.addEventListener("resize", resize);
+  window.addEventListener("resize", resize, { passive: true });
   resize();
 
-  function drawAurora(time) {
-    const t = time * 0.00022;
+  function drawGlow(time) {
+    const t = time * 0.00018;
+    const cx = w * 0.55 + Math.sin(t) * 18;
+    const cy = h * 0.42 + Math.cos(t) * 12;
 
-    const cx = w * 0.55 + Math.sin(t) * 22;
-    const cy = h * 0.42 + Math.cos(t * 0.8) * 16;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.48);
+    g.addColorStop(0, "rgba(90, 220, 255, 0.12)");
+    g.addColorStop(0.35, "rgba(45, 140, 255, 0.07)");
+    g.addColorStop(1, "rgba(0, 0, 0, 0)");
 
-    // glow trung tâm
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.48);
-    glow.addColorStop(0, "rgba(80, 220, 255, 0.16)");
-    glow.addColorStop(0.32, "rgba(40, 145, 255, 0.09)");
-    glow.addColorStop(0.72, "rgba(0, 40, 90, 0.04)");
-    glow.addColorStop(1, "rgba(0, 0, 0, 0)");
-
-    ctx.fillStyle = glow;
+    ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(cx, cy, Math.min(w, h) * 0.48, 0, Math.PI * 2);
     ctx.fill();
 
-    // vòng hologram
+    if (scrolling) return;
+
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(time * 0.00007);
+    ctx.rotate(time * 0.00005);
 
-    const ringOpacity = isScrolling ? 0.045 : 0.075;
-    const rings = [120, 195, 275, 360];
-
-    for (const r of rings) {
+    [130, 220, 320].forEach(r => {
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(95, 220, 255, ${ringOpacity})`;
+      ctx.strokeStyle = "rgba(100, 225, 255, 0.055)";
       ctx.lineWidth = 1;
       ctx.stroke();
-    }
+    });
 
-    // đường chéo radar
-    const spokes = isScrolling ? 8 : 12;
-    for (let i = 0; i < spokes; i++) {
-      const a = (Math.PI * 2 * i) / spokes;
+    for (let i = 0; i < 8; i++) {
+      const a = (Math.PI * 2 * i) / 8;
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.lineTo(Math.cos(a) * 370, Math.sin(a) * 370);
-      ctx.strokeStyle = `rgba(95, 220, 255, ${isScrolling ? 0.025 : 0.045})`;
+      ctx.lineTo(Math.cos(a) * 320, Math.sin(a) * 320);
+      ctx.strokeStyle = "rgba(100, 225, 255, 0.03)";
       ctx.lineWidth = 1;
       ctx.stroke();
-    }
-
-    // scan sweep
-    if (!isScrolling) {
-      const sweep = ctx.createRadialGradient(0, 0, 0, 0, 0, 370);
-      sweep.addColorStop(0, "rgba(120, 245, 255, 0.13)");
-      sweep.addColorStop(1, "rgba(120, 245, 255, 0)");
-
-      ctx.fillStyle = sweep;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, 370, -0.16, 0.16);
-      ctx.closePath();
-      ctx.fill();
     }
 
     ctx.restore();
   }
 
   function updateParticles() {
-    const speed = isScrolling ? 0.45 : 1;
+    const speed = scrolling ? 0.35 : 1;
 
     for (const p of particles) {
       p.x += p.vx * speed;
@@ -160,88 +136,58 @@ function initCyberBackground() {
   }
 
   function drawParticles() {
-    const maxDistance = isScrolling ? 90 : 135;
-    const maxDistanceSq = maxDistance * maxDistance;
+    const maxDist = scrolling ? 70 : 115;
+    const maxDistSq = maxDist * maxDist;
 
-    // lines
-    for (let i = 0; i < particles.length; i++) {
-      const a = particles[i];
+    if (!scrolling) {
+      for (let i = 0; i < particles.length; i++) {
+        const a = particles[i];
 
-      for (let j = i + 1; j < particles.length; j++) {
-        if (isScrolling && (i + j) % 2 === 0) continue;
+        for (let j = i + 1; j < particles.length; j++) {
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const distSq = dx * dx + dy * dy;
 
-        const b = particles[j];
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        const distSq = dx * dx + dy * dy;
+          if (distSq < maxDistSq) {
+            const opacity = (1 - Math.sqrt(distSq) / maxDist) * 0.16;
 
-        if (distSq < maxDistanceSq) {
-          const dist = Math.sqrt(distSq);
-          const opacity = (1 - dist / maxDistance) * (isScrolling ? 0.10 : 0.20);
-
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(60, 220, 255, ${opacity})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(80, 220, 255, ${opacity})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
         }
       }
     }
 
-    // nodes
     for (const p of particles) {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(135, 240, 255, ${p.alpha})`;
+      ctx.fillStyle = `rgba(130, 240, 255, ${p.a})`;
       ctx.fill();
-
-      if (!isScrolling) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r + 4, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(80, 210, 255, ${p.alpha * 0.08})`;
-        ctx.fill();
-      }
     }
-  }
-
-  function drawStars(time) {
-    const t = time * 0.00012;
-
-    ctx.save();
-    ctx.globalAlpha = isScrolling ? 0.22 : 0.34;
-
-    for (let i = 0; i < 28; i++) {
-      const x = ((i * 193 + Math.sin(t + i) * 14) % w + w) % w;
-      const y = ((i * 97 + Math.cos(t + i) * 10) % h + h) % h;
-      const size = i % 5 === 0 ? 2 : 1;
-
-      ctx.fillStyle = "rgba(120, 235, 255, 0.55)";
-      ctx.fillRect(x, y, size, size);
-    }
-
-    ctx.restore();
   }
 
   function render(time) {
     ctx.clearRect(0, 0, w, h);
-
-    drawAurora(time);
-    drawStars(time);
+    drawGlow(time);
     updateParticles();
     drawParticles();
   }
 
-  function animate(time) {
-    if (!lastFrame || time - lastFrame >= FRAME_INTERVAL) {
+  function loop(time) {
+    if (!lastFrame || time - lastFrame >= FRAME_TIME) {
       lastFrame = time;
       render(time);
     }
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(loop);
   }
 
-  requestAnimationFrame(animate);
+  requestAnimationFrame(loop);
 }
 
 function setupFilters() {
@@ -293,15 +239,6 @@ function setupFilters() {
 
   applyFilter();
 }
-/* =========================================================
-   TOC ACTIVE SECTION HIGHLIGHT
-   Highlights current heading while scrolling writeup pages.
-   Paste at the END of assets/js/main.js
-   ========================================================= */
-
-document.addEventListener("DOMContentLoaded", () => {
-  initTocActiveHighlight();
-});
 
 function initTocActiveHighlight() {
   const tocLinks = Array.from(document.querySelectorAll(".toc a[href^='#']"));
@@ -323,12 +260,8 @@ function initTocActiveHighlight() {
 
     for (const item of sections) {
       const rect = item.target.getBoundingClientRect();
-
-      if (rect.top <= offset) {
-        current = item;
-      } else {
-        break;
-      }
+      if (rect.top <= offset) current = item;
+      else break;
     }
 
     tocLinks.forEach(link => link.classList.remove("active"));
@@ -336,7 +269,6 @@ function initTocActiveHighlight() {
   }
 
   setActiveToc();
-
   window.addEventListener("scroll", setActiveToc, { passive: true });
   window.addEventListener("resize", setActiveToc);
 }
