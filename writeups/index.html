@@ -1,53 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Writeups — Nguyen Thai Ngoc</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-</head>
-<body>
-<canvas id="fx-canvas"></canvas>
-<div class="aurora"></div>
-
-<header class="site-header">
-  <div class="wrap">
-    <nav class="nav">
-      <a class="brand" href="/"><span class="brand-mark">TN</span><span>ThaiNgoc :~$</span></a>
-      <div class="nav-links"><a class="" href="/">Home</a>
-<a class="active" href="/writeups/">Writeups</a>
-<a class="" href="/projects/">Projects</a>
-<a class="" href="/achievements/">Achievements</a>
-<a class="" href="/contact/">Contact</a></div>
-      <button class="icon-btn mobile-toggle">☰</button>
-    </nav>
-    <div class="mobile-panel"><a href="/">Home</a>
-<a href="/writeups/">Writeups</a>
-<a href="/projects/">Projects</a>
-<a href="/achievements/">Achievements</a>
-<a href="/contact/">Contact</a></div>
-  </div>
-</header>
-
-<main>
-<section class="hero"><div class="wrap hero-grid"><div><div class="kicker"><span class="pulse"></span>Writeups Index</div><h1>Labs, CTFs<br><span class="grad">and investigations.</span></h1><p class="lead">Filter by category or search by keyword. Each card opens a dedicated hub or writeup page.</p></div><div class="holo-card">
-<div class="holo-orb">
-  <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
-  <div class="mesh-line m1"></div><div class="mesh-line m2"></div><div class="mesh-line m3"></div><div class="mesh-line m4"></div><div class="mesh-line m5"></div><div class="mesh-line m6"></div><div class="mesh-line m7"></div><div class="mesh-line m8"></div><div class="mesh-line m9"></div><div class="mesh-line m10"></div>
-  <div class="node n1"></div><div class="node n2"></div><div class="node n3"></div><div class="node n4"></div><div class="node n5"></div><div class="node n6"></div><div class="node n7"></div><div class="node n8"></div>
-</div>
-</div></div></section>
-<section class="section"><div class="wrap">
-<div class="filter-bar"><span class="filter-label">Filter:</span><button class="filter-btn active" data-filter="all">All</button><button class="filter-btn" data-filter="soc">SOC</button><button class="filter-btn" data-filter="reverse">Reverse</button><button class="filter-btn" data-filter="pwn">Pwn</button><button class="filter-btn" data-filter="malware">Malware</button><button class="filter-btn" data-filter="ctf">CTF</button><div class="search-wrap"><input id="searchInput" class="search-input" placeholder="Search writeups, tags, topics..."></div></div>
-<div class="grid-3">
-  <a data-card data-category="soc" data-text="soc analyst writeups blue team" class="card" href="/writeups/soc/soc-analyst-writeups/"><div class="writeup-top"><span class="cat soc">SOC</span><span class="diff">Learning</span><span class="date">Now</span></div><h3>SOC Analyst Writeups</h3><p>Blue team labs and investigation notes.</p><div class="tags"><span class="tag blue">SIEM</span><span class="tag">Logs</span></div></a>
-  <a data-card data-category="reverse ctf" data-text="reverse ghidra" class="card" href="/writeups/reverse/reverse-engineering-notes/"><div class="writeup-top"><span class="cat reverse">Reverse</span><span class="diff">CTF</span><span class="date">2026</span></div><h3>Reverse Engineering Notes</h3><p>Binary analysis and solver writing.</p><div class="tags"><span class="tag blue">Ghidra</span></div></a>
-  <a data-card data-category="pwn ctf" data-text="pwn heap libc" class="card" href="/writeups/pwn/binary-exploitation-writeups/"><div class="writeup-top"><span class="cat pwn">Pwn</span><span class="diff">CTF</span><span class="date">2026</span></div><h3>Binary Exploitation Writeups</h3><p>Heap, format strings and exploit reasoning.</p><div class="tags"><span class="tag red">Heap</span></div></a>
-  <a data-card data-category="malware reverse" data-text="malware triage" class="card" href="/writeups/malware/malware-analysis-notes/"><div class="writeup-top"><span class="cat malware">Malware</span><span class="diff">Learning</span><span class="date">Soon</span></div><h3>Malware Analysis Notes</h3><p>Triage, IOCs and behavior observations.</p><div class="tags"><span class="tag amber">IOC</span></div></a>
-  <a data-card data-category="ctf" data-text="tjctf novarun" class="card" href="/writeups/ctf/tjctf-team-writeups/"><div class="writeup-top"><span class="cat ctf">CTF</span><span class="diff">Team</span><span class="date">2026</span></div><h3>TJCTF Team Writeups</h3><p>NovaRun team practice and TJCTF notes.</p><div class="tags"><span class="tag blue">Rank 106</span></div></a>
-  <a data-card data-category="ctf pwn reverse" data-text="0xv01d novarun" class="card" href="/writeups/ctf/0xv01d-ctf-writeups/"><div class="writeup-top"><span class="cat ctf">CTF</span><span class="diff">Team</span><span class="date">2026</span></div><h3>0xV01D CTF Writeups</h3><p>Multi-category CTF notes and writeups.</p><div class="tags"><span class="tag blue">Rank 44</span></div></a>
-</div></div></section></main>
-<footer class="footer"><div class="wrap footer-inner"><span>© 2026 Nguyen Thai Ngoc · SOC / Threat Hunting / CTF Portfolio</span><a href="/">Back home ↑</a></div></footer><script src="/assets/js/main.js"></script></body></html>
+<!DOCTYPE html><html lang="en"><head><title>Writeups — Nguyen Thai Ngoc</title><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/css/style.css"></head><body><header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a class="" href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a class="" href="/projects/">Projects</a><a class="" href="/achievements/">Achievements</a><a class="" href="/contact/">Contact</a></nav><button class="theme-toggle" aria-label="Theme">☾</button></div></header><main class="page"><div class="wrap">
+<section class="hero">
+  <div class="hero-copy"><div class="eyebrow">Featured Writeups</div><h1>Labs, CTFs and investigations.</h1><p class="lead">A structured collection of learning notes, CTF writeups, SOC investigations, reverse engineering notes, and malware analysis practice.</p></div>
+  <div class="hero-card"><div class="profile-mini"><img src="/assets/media/avatar.png" alt="Nguyen Thai Ngoc"><div><h3>Thai Ngoc</h3><p>Information Security Student • Vietnam</p></div></div><div class="profile-links"><a class="icon-pill" href="https://github.com/tngoc1810" target="_blank">G</a><a class="icon-pill" href="https://www.linkedin.com/in/ngoc-thai-8343023b4/?skipRedirect=true" target="_blank">in</a></div><p class="desc">I focus on SOC Analyst learning, CTF problem solving, reverse engineering, pwn, malware analysis, and practical investigation workflows.</p><div class="quote">“If you do not protect your data in peace, you will pay for it in the storm.”</div></div>
+</section>
+<div class="filters-bar"><div class="filter-left"><span class="filter-label">Filter:</span><button class="filter-chip active" data-filter="all">All <span class="count">30</span></button><button class="filter-chip" data-filter="soc">SOC <span class="count">4</span></button><button class="filter-chip" data-filter="reverse">Reverse <span class="count">5</span></button><button class="filter-chip" data-filter="pwn">Pwn <span class="count">3</span></button><button class="filter-chip" data-filter="malware">Malware <span class="count">2</span></button><button class="filter-chip" data-filter="ctf">CTF <span class="count">8</span></button></div><div class="search-box"><input type="text" placeholder="Search writeups, tags, topics..." data-search></div></div>
+<section class="grid">
+<a class="card" href="/writeups/soc/soc-analyst-writeups/" data-card data-category="soc blue-team" data-text="soc analyst blue team siem logs alert triage investigation"><div class="card-top"><span class="badge">SOC</span><span class="badge secondary">Learning</span><span class="card-date">Now</span></div><h3>SOC Analyst Writeups</h3><p>A collection of blue team labs, alert triage notes, log analysis and SOC learning writeups.</p><div class="tags"><span class="tag">Blue Team</span><span class="tag">SIEM</span><span class="tag">Logs</span></div></a>
+<a class="card" href="/writeups/reverse/reverse-engineering-notes/" data-card data-category="reverse ctf" data-text="reverse engineering ghidra strings deobfuscation elf solver notes"><div class="card-top"><span class="badge">Reverse</span><span class="badge secondary">CTF</span><span class="card-date">2026</span></div><h3>Reverse Engineering Notes</h3><p>Binary checkers, string obfuscation, algorithm reconstruction and solver writing notes.</p><div class="tags"><span class="tag">Ghidra</span><span class="tag">ELF</span><span class="tag">Solver</span></div></a>
+<a class="card" href="/writeups/pwn/binary-exploitation-writeups/" data-card data-category="pwn ctf" data-text="pwn heap format string libc uaf binary exploitation writeups"><div class="card-top"><span class="badge">Pwn</span><span class="badge secondary">CTF</span><span class="card-date">2026</span></div><h3>Binary Exploitation Writeups</h3><p>Format strings, heap exploitation, leaks, libc base calculation and exploit reasoning.</p><div class="tags"><span class="tag">Heap</span><span class="tag">Format String</span><span class="tag">libc</span></div></a>
+<a class="card" href="/writeups/malware/malware-analysis-notes/" data-card data-category="malware learning" data-text="malware triage static analysis dynamic analysis ioc network behavior"><div class="card-top"><span class="badge">Malware</span><span class="badge secondary">Learning</span><span class="card-date">Soon</span></div><h3>Malware Analysis Notes</h3><p>Basic triage reports, behavior notes, suspicious artifacts and IOC-oriented malware writeups.</p><div class="tags"><span class="tag">Static</span><span class="tag">Dynamic</span><span class="tag">IOC</span></div></a>
+<a class="card" href="/writeups/ctf/tjctf-team-writeups/" data-card data-category="ctf crypto reverse pwn team" data-text="tjctf team writeups novarun ctf crypto reverse pwn"><div class="card-top"><span class="badge">CTF</span><span class="badge secondary">Team</span><span class="card-date">2026</span></div><h3>TJCTF Team Writeups</h3><p>Selected team writeups and challenge notes from NovaRun’s TJCTF participation.</p><div class="tags"><span class="tag">NovaRun</span><span class="tag">Crypto</span><span class="tag">Team</span></div></a>
+<a class="card" href="/writeups/ctf/0xv01d-ctf-writeups/" data-card data-category="ctf pwn reverse web forensics osint team" data-text="0xv01d ctf writeups pwn reverse web forensics osint team notes"><div class="card-top"><span class="badge">CTF</span><span class="badge secondary">Team</span><span class="card-date">2026</span></div><h3>0xV01D CTF Writeups</h3><p>Multi-category CTF notes from pwn, reverse, web, forensics and OSINT challenges.</p><div class="tags"><span class="tag">Pwn</span><span class="tag">Reverse</span><span class="tag">OSINT</span></div></a>
+</section><div class="empty-state" data-empty>No writeups matched your current filter or search keyword.</div><div class="footer-nav"><a href="/">← Back to Home</a><a href="/achievements/">Achievements →</a></div>
+</div></main><script src="/assets/js/main.js"></script></body></html>
