@@ -35,8 +35,8 @@
           <h1>Labs, CTFs and investigations.</h1>
 
           <p class="lead">
-            A structured collection of my learning notes, CTF writeups,
-            SOC investigations, reverse engineering notes, and malware analysis practice.
+            A structured collection of my SOC investigations, CTF writeups,
+            reverse engineering notes, malware analysis practice and technical learning logs.
           </p>
 
           <div class="cta-row">
@@ -48,7 +48,7 @@
 
         <aside class="profile-card glass">
           <div class="profile-mini">
-            <img class="avatar" src="/assets/media/avatar.png" alt="avatar">
+            <img class="avatar" src="/assets/media/avatar.png" alt="Nguyen Thai Ngoc avatar">
 
             <div>
               <h2>Thai Ngoc</h2>
@@ -63,7 +63,7 @@
 
           <p class="small">
             SOC Analyst & Threat Hunter in training. I document labs, CTFs,
-            malware notes and defensive investigations.
+            reverse engineering, pwn, malware notes and defensive investigations.
           </p>
 
           <div class="quote">
@@ -77,7 +77,7 @@
           <span class="filter-label">Filter:</span>
 
           <button class="filter-chip active" data-filter="all">
-            All <span class="count">7</span>
+            All <span class="count">8</span>
           </button>
 
           <button class="filter-chip" data-filter="soc">
@@ -85,7 +85,7 @@
           </button>
 
           <button class="filter-chip" data-filter="reverse">
-            Reverse <span class="count">1</span>
+            Reverse <span class="count">2</span>
           </button>
 
           <button class="filter-chip" data-filter="pwn">
@@ -97,7 +97,7 @@
           </button>
 
           <button class="filter-chip" data-filter="ctf">
-            CTF <span class="count">2</span>
+            CTF <span class="count">3</span>
           </button>
         </div>
 
@@ -108,64 +108,11 @@
 
       <section class="grid">
         <a
-  class="card"
-  href="/writeups/ctf/0xv01d/misk-automaton/"
-  data-card
-  data-category="reverse ctf 0xv01d"
-  data-text="misk automaton reverse engineering pe64 windows automaton state machine fake flag transition tables solver 0xv01d"
->
-  <div class="card-top">
-    <span class="badge">Reverse</span>
-    <span class="badge secondary">0xV01D</span>
-    <span class="card-date">2026</span>
-  </div>
-
-  <h3>Misk Automaton</h3>
-
-  <p>
-    Reverse engineering a PE64 automaton checker with fake flag bait,
-    target bytes, transition tables and a Python solver.
-  </p>
-
-  <div class="tags">
-    <span class="tag">PE64</span>
-    <span class="tag">Automaton</span>
-    <span class="tag">Solver</span>
-  </div>
-</a>
-
-        <a
-  class="card"
-  href="/writeups/soc/compromised-wordpress-log-analysis/"
-  data-card
-  data-category="soc blue-team log-analysis wordpress"
-  data-text="btlo compromised wordpress log analysis soc apache wordpress simple file list contact form 7 web shell fr34k cve-2020-8380 cve-2020-35489"
->
-  <div class="card-top">
-    <span class="badge">SOC</span>
-    <span class="badge secondary">BTLO</span>
-    <span class="card-date">2026</span>
-  </div>
-
-  <h3>BTLO: Compromised WordPress</h3>
-
-  <p>
-    Apache access log investigation of a compromised WordPress site,
-    vulnerable plugins, web shell activity, attacker IPs and exploitation timeline.
-  </p>
-
-  <div class="tags">
-    <span class="tag">Log Analysis</span>
-    <span class="tag">WordPress</span>
-    <span class="tag">Web Shell</span>
-  </div>
-</a>
-        <a
           class="card"
           href="/writeups/soc/compromised-wordpress-log-analysis/"
           data-card
           data-category="soc blue-team log-analysis wordpress"
-          data-text="btlo compromised wordpress log analysis soc apache wordpress simple file list contact form 7 web shell fr34k"
+          data-text="btlo compromised wordpress log analysis soc apache wordpress simple file list contact form 7 web shell fr34k cve"
         >
           <div class="card-top">
             <span class="badge">SOC</span>
@@ -177,7 +124,7 @@
 
           <p>
             Apache access log investigation of a compromised WordPress site,
-            vulnerable plugins, web shell activity and attacker tooling.
+            vulnerable plugins, web shell activity and attacker timeline.
           </p>
 
           <div class="tags">
@@ -189,10 +136,37 @@
 
         <a
           class="card"
+          href="/writeups/ctf/0xv01d/misk-automaton/"
+          data-card
+          data-category="reverse ctf 0xv01d"
+          data-text="misk automaton reverse engineering 0xv01d ctf pe32 state machine automaton fake flag solver transition tables"
+        >
+          <div class="card-top">
+            <span class="badge">Reverse</span>
+            <span class="badge secondary">0xV01D</span>
+            <span class="card-date">2026</span>
+          </div>
+
+          <h3>Misk Automaton</h3>
+
+          <p>
+            Windows PE reverse challenge with fake flag bait, argc trap,
+            automaton checker, target bytes and transition tables.
+          </p>
+
+          <div class="tags">
+            <span class="tag">PE32+</span>
+            <span class="tag">Automaton</span>
+            <span class="tag">Solver</span>
+          </div>
+        </a>
+
+        <a
+          class="card"
           href="/writeups/soc/soc-analyst-writeups/"
           data-card
           data-category="soc"
-          data-text="soc analyst blue team siem logs"
+          data-text="soc analyst blue team siem logs alert triage"
         >
           <div class="card-top">
             <span class="badge">SOC</span>
@@ -218,7 +192,7 @@
           href="/writeups/reverse/reverse-engineering-notes/"
           data-card
           data-category="reverse ctf"
-          data-text="reverse ghidra elf solver"
+          data-text="reverse engineering ghidra elf solver binary analysis"
         >
           <div class="card-top">
             <span class="badge">Reverse</span>
@@ -244,7 +218,7 @@
           href="/writeups/pwn/binary-exploitation-writeups/"
           data-card
           data-category="pwn ctf"
-          data-text="pwn heap format string libc"
+          data-text="pwn binary exploitation heap format string libc exploit"
         >
           <div class="card-top">
             <span class="badge">Pwn</span>
@@ -270,7 +244,7 @@
           href="/writeups/malware/malware-analysis-notes/"
           data-card
           data-category="malware"
-          data-text="malware triage ioc behavior"
+          data-text="malware analysis triage ioc behavior static dynamic"
         >
           <div class="card-top">
             <span class="badge">Malware</span>
@@ -295,8 +269,8 @@
           class="card"
           href="/writeups/ctf/tjctf-team-writeups/"
           data-card
-          data-category="ctf reverse pwn"
-          data-text="tjctf team novarun"
+          data-category="ctf team"
+          data-text="tjctf team novarun ctf certificate rank 106"
         >
           <div class="card-top">
             <span class="badge">CTF</span>
@@ -320,8 +294,8 @@
           class="card"
           href="/writeups/ctf/0xv01d-ctf-writeups/"
           data-card
-          data-category="ctf pwn reverse"
-          data-text="0xv01d ctf pwn reverse forensics"
+          data-category="ctf pwn reverse web forensics osint"
+          data-text="0xv01d ctf pwn reverse web forensics osint team rank 44"
         >
           <div class="card-top">
             <span class="badge">CTF</span>
