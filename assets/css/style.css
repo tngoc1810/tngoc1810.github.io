@@ -1057,3 +1057,174 @@ pre code {
     scroll-behavior: auto;
   }
 }
+/* =========================================================
+   LIGHT PREMIUM TRANSPARENT CYBER BACKGROUND
+   More beautiful background without heavy blur/canvas overload
+   Paste at the END of assets/css/style.css
+   ========================================================= */
+
+/* Make animated canvas a bit more visible, but still light */
+#network-bg {
+  opacity: .42 !important;
+}
+
+/* On long writeup pages, keep it lighter */
+body:has(.article-layout) #network-bg {
+  opacity: .30 !important;
+}
+
+/* Add a lightweight transparent cyber layer behind content */
+body::before {
+  content: "" !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+
+  background:
+    radial-gradient(circle at 18% 12%, rgba(124, 240, 255, .16), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(45, 140, 255, .16), transparent 30%),
+    radial-gradient(circle at 50% 78%, rgba(45, 212, 191, .10), transparent 36%),
+
+    linear-gradient(rgba(86, 199, 255, .030) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(86, 199, 255, .030) 1px, transparent 1px);
+
+  background-size:
+    900px 900px,
+    900px 900px,
+    1000px 1000px,
+    54px 54px,
+    54px 54px;
+
+  animation: cyberLayerDrift 42s linear infinite;
+}
+
+/* Subtle scan/aurora layer */
+body::after {
+  content: "" !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: .55 !important;
+
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 38%,
+      rgba(124, 240, 255, .045) 44%,
+      transparent 52%,
+      transparent 100%
+    );
+
+  animation: cyberSweep 12s ease-in-out infinite alternate;
+}
+
+/* Keep content above background layers */
+.topbar,
+.page,
+.wrap,
+.hero,
+.article-layout,
+.article-card,
+.glass,
+.card,
+.footer-nav,
+.profile-card,
+.hero-copy,
+.toc,
+section,
+main,
+footer {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+/* Make cards more transparent but not blurry */
+.glass,
+.article-card,
+.profile-card {
+  background:
+    linear-gradient(180deg, rgba(8, 20, 44, .88), rgba(5, 14, 30, .80)) !important;
+  border-color: rgba(110, 210, 255, .18) !important;
+}
+
+.card {
+  background:
+    linear-gradient(180deg, rgba(8, 20, 44, .78), rgba(5, 14, 30, .72)) !important;
+  border-color: rgba(110, 210, 255, .15) !important;
+}
+
+.topbar {
+  background: rgba(2, 8, 22, .90) !important;
+}
+
+/* Slightly nicer glow, still light */
+.card:hover {
+  border-color: rgba(124, 240, 255, .30) !important;
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, .22),
+    0 0 18px rgba(86, 199, 255, .045) !important;
+}
+
+/* Animations */
+@keyframes cyberLayerDrift {
+  from {
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 0,
+      0 0;
+  }
+
+  to {
+    background-position:
+      120px 80px,
+      -100px 120px,
+      80px -100px,
+      54px 54px,
+      54px 54px;
+  }
+}
+
+@keyframes cyberSweep {
+  from {
+    transform: translateX(-8%);
+    opacity: .34;
+  }
+
+  to {
+    transform: translateX(8%);
+    opacity: .58;
+  }
+}
+
+/* Mobile: keep it light */
+@media (max-width: 760px) {
+  body::before {
+    opacity: .70 !important;
+    animation-duration: 70s !important;
+  }
+
+  body::after {
+    opacity: .22 !important;
+    animation-duration: 20s !important;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none !important;
+  }
+}
