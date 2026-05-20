@@ -9,6 +9,160 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+  /* =========================================================
+     WORDPRESS WRITEUP HARD LAYOUT FIX
+     Scoped only to this WordPress writeup page
+     ========================================================= */
+
+  @media (min-width: 1101px) {
+    .wp-wordpress-page .article-layout {
+      display: grid !important;
+      grid-template-columns: 300px minmax(0, 1fr) !important;
+      gap: 34px !important;
+      align-items: start !important;
+
+      width: min(1280px, calc(100% - 48px)) !important;
+      max-width: 1280px !important;
+      margin: 0 auto !important;
+      position: relative !important;
+    }
+
+    .wp-wordpress-page .article-layout .toc {
+      position: sticky !important;
+      top: 96px !important;
+
+      grid-column: 1 !important;
+
+      width: 300px !important;
+      height: calc(100vh - 118px) !important;
+      max-height: calc(100vh - 118px) !important;
+
+      margin: 0 !important;
+      padding: 24px 22px !important;
+
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+
+      border: 1px solid rgba(125, 200, 255, 0.18) !important;
+      border-radius: 34px !important;
+
+      background:
+        linear-gradient(180deg, rgba(8, 24, 52, 0.92), rgba(5, 16, 36, 0.86)) !important;
+
+      box-shadow:
+        0 16px 42px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035) !important;
+
+      z-index: 20 !important;
+    }
+
+    .wp-wordpress-page .article-layout .article-card {
+      grid-column: 2 !important;
+
+      width: 100% !important;
+      max-width: none !important;
+      margin: 0 !important;
+
+      padding: 34px !important;
+      border-radius: 34px !important;
+    }
+
+    .wp-wordpress-page .article-card > * {
+      max-width: 100% !important;
+    }
+
+    .wp-wordpress-page .toc-title {
+      margin: 0 0 16px 0 !important;
+      padding-bottom: 14px !important;
+
+      border-bottom: 1px solid rgba(125, 200, 255, 0.14) !important;
+
+      color: rgba(180, 210, 235, 0.86) !important;
+      font-family: "JetBrains Mono", monospace !important;
+      font-size: 11px !important;
+      font-weight: 900 !important;
+      letter-spacing: 0.22em !important;
+      text-transform: uppercase !important;
+    }
+
+    .wp-wordpress-page .toc a {
+      display: block !important;
+
+      margin: 4px 0 !important;
+      padding: 10px 12px !important;
+
+      border-radius: 15px !important;
+      border: 1px solid transparent !important;
+
+      color: #bfe8ff !important;
+      background: transparent !important;
+
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 1.45 !important;
+
+      transition:
+        background 0.16s ease,
+        color 0.16s ease,
+        border-color 0.16s ease,
+        transform 0.16s ease !important;
+    }
+
+    .wp-wordpress-page .toc a.sub {
+      padding-left: 24px !important;
+      color: rgba(170, 195, 220, 0.82) !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+    }
+
+    .wp-wordpress-page .toc a:hover {
+      background: rgba(86, 199, 255, 0.08) !important;
+      border-color: rgba(86, 199, 255, 0.13) !important;
+      color: #ecfbff !important;
+      transform: translateX(3px) !important;
+    }
+
+    .wp-wordpress-page .toc a.active {
+      background: rgba(86, 199, 255, 0.12) !important;
+      border-color: rgba(86, 199, 255, 0.16) !important;
+      color: #7feaff !important;
+      font-weight: 900 !important;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .wp-wordpress-page .article-layout {
+      display: block !important;
+      width: min(100%, calc(100% - 28px)) !important;
+      max-width: none !important;
+      margin: 0 auto !important;
+    }
+
+    .wp-wordpress-page .article-layout .toc {
+      position: static !important;
+      width: 100% !important;
+      height: auto !important;
+      max-height: none !important;
+
+      margin: 0 0 24px 0 !important;
+      padding: 20px 18px !important;
+
+      border: 1px solid rgba(125, 200, 255, 0.16) !important;
+      border-radius: 28px !important;
+
+      background:
+        linear-gradient(180deg, rgba(8, 24, 52, 0.90), rgba(5, 16, 36, 0.84)) !important;
+    }
+
+    .wp-wordpress-page .article-layout .article-card {
+      width: 100% !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 24px !important;
+    }
+  }
+</style>
 </head>
 
 <body>
@@ -26,7 +180,7 @@
     </div>
   </header>
 
-  <main class="page">
+  <main class="page wp-wordpress-page">
     <div class="wrap article-layout">
       <aside class="toc">
         <div class="toc-title">On this page</div>
