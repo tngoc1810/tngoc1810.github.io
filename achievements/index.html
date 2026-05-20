@@ -3,40 +3,685 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Nguyen Thai Ngoc — SOC Analyst and Threat Hunter in training." />
+
   <title>Achievements — Nguyen Thai Ngoc</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --bg: #05070d;
+      --bg-soft: #08111f;
+      --panel: rgba(11, 18, 32, 0.82);
+      --panel-solid: #0b1220;
+      --panel-2: #101a2e;
+      --line: rgba(148, 163, 184, 0.16);
+      --line-strong: rgba(148, 163, 184, 0.28);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --subtle: #94a3b8;
+      --dim: #64748b;
+      --blue: #38bdf8;
+      --violet: #8b5cf6;
+      --purple: #c084fc;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --gradient: linear-gradient(135deg, #38bdf8 0%, #60a5fa 45%, #8b5cf6 100%);
+      --shadow: 0 24px 80px rgba(0, 0, 0, .38);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(56, 189, 248, .18), transparent 30%),
+        radial-gradient(circle at 90% 8%, rgba(139, 92, 246, .17), transparent 30%),
+        linear-gradient(180deg, var(--bg), var(--bg-soft) 48%, var(--bg));
+      color: var(--text);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, .05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, .05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.75), transparent 82%);
+      z-index: -1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(22px) saturate(1.2);
+      background: rgba(5, 7, 13, .82);
+    }
+
+    .nav {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: max-content;
+      font-family: "Space Grotesk", Inter, sans-serif;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: var(--gradient);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.14) inset, 0 18px 44px rgba(56, 189, 248, .22);
+    }
+
+    .brand small {
+      display: block;
+      font-family: "JetBrains Mono", monospace;
+      color: var(--subtle);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0;
+      margin-top: -3px;
+    }
+
+    .nav-links {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-links a {
+      color: var(--subtle);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 12px;
+      border-radius: 999px;
+      transition: .2s ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text);
+      background: rgba(148, 163, 184, .10);
+    }
+
+    .hero {
+      padding: 72px 0 38px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--blue);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 12px;
+      border: 1px solid rgba(56, 189, 248, .22);
+      background: rgba(56, 189, 248, .08);
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 7px rgba(34, 197, 94, .12);
+    }
+
+    h1 {
+      font-family: "Space Grotesk", Inter, sans-serif;
+      font-size: clamp(44px, 6vw, 74px);
+      line-height: .98;
+      letter-spacing: -.06em;
+      color: var(--text);
+      margin-bottom: 18px;
+    }
+
+    .gradient-text {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 760px;
+    }
+
+    .section {
+      padding: 42px 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .section-kicker {
+      color: var(--blue);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.05;
+      letter-spacing: -.045em;
+    }
+
+    .section-desc {
+      color: var(--subtle);
+      max-width: 680px;
+      margin-top: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 22px;
+      padding: 22px;
+      transition: .22s ease;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--line-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      letter-spacing: -.02em;
+    }
+
+    .card p {
+      color: var(--subtle);
+      font-size: 14px;
+    }
+
+    .certificate-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(56, 189, 248, .26);
+      background:
+        linear-gradient(135deg, rgba(56, 189, 248, .12), rgba(139, 92, 246, .12)),
+        rgba(15, 23, 42, .78);
+    }
+
+    .certificate-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 3px;
+      background: var(--gradient);
+    }
+
+    .cert-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cert-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      background: rgba(56, 189, 248, .12);
+      color: var(--blue);
+      border: 1px solid rgba(56, 189, 248, .24);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .cert-rank {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 42px;
+      line-height: 1;
+      font-weight: 900;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+
+    .cert-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cert-meta span {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(148, 163, 184, .08);
+      border: 1px solid rgba(148, 163, 184, .16);
+      color: var(--subtle);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .cert-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border-radius: 14px;
+      padding: 11px 15px;
+      font-weight: 800;
+      font-size: 14px;
+      border: 1px solid var(--line);
+      transition: .2s ease;
+      white-space: nowrap;
+    }
+
+    .btn.primary {
+      background: var(--gradient);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 18px 48px rgba(56, 189, 248, .22);
+    }
+
+    .btn.secondary {
+      background: rgba(148, 163, 184, .08);
+      color: var(--text);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+    }
+
+    .rank-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .rank-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(148, 163, 184, .06);
+    }
+
+    .rank-item span {
+      color: var(--subtle);
+      font-size: 13px;
+      display: block;
+    }
+
+    .rank-number {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--blue);
+    }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 17px;
+      top: 12px;
+      bottom: 12px;
+      width: 1px;
+      background: var(--line-strong);
+    }
+
+    .timeline-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 12px;
+    }
+
+    .timeline-dot {
+      width: 35px;
+      height: 35px;
+      border-radius: 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      z-index: 2;
+    }
+
+    .timeline-content {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: rgba(148, 163, 184, .06);
+    }
+
+    .timeline-content strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .timeline-content span {
+      color: var(--subtle);
+      font-size: 13px;
+    }
+
+    .footer {
+      padding: 34px 0 46px;
+      color: var(--dim);
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+      margin-top: 40px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer a {
+      color: var(--subtle);
+    }
+
+    @media (max-width: 900px) {
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .cert-top {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .wrap {
+        width: min(100% - 28px, 1180px);
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .cert-rank {
+        font-size: 34px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<header class="topbar">
-  <div class="wrap">
-    <nav class="nav">
-      <a class="brand" href="/">ThaiNgoc :~$</a>
-      <div class="navlinks">
-        <a href="/" >Home</a>
-        <a href="/writeups/" >Writeups</a>
-        <a href="/projects/" >Projects</a>
-        <a href="/achievements/" class="active">Achievements</a>
-        <a href="/contact/" >Contact</a>
-      </div>
-      <button class="theme-btn" data-theme-toggle aria-label="Toggle theme">☾</button>
-      <button class="menu-btn" data-menu-btn aria-label="Menu">☰</button>
-    </nav>
-    <div class="mobile" data-mobile>
-      <a href="/">Home</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a>
+  <header class="site-header">
+    <div class="wrap">
+      <nav class="nav">
+        <a class="brand" href="/">
+          <span class="brand-mark">TN</span>
+          <span>Nguyen Thai Ngoc<small>@tngoc1810</small></span>
+        </a>
+
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/writeups/">Writeups</a>
+          <a href="/projects/">Projects</a>
+          <a class="active" href="/achievements/">Achievements</a>
+          <a href="/contact/">Contact</a>
+        </div>
+      </nav>
     </div>
-  </div>
-</header>
-<main><section class="hero"><div class="wrap"><div class="badge blue">Achievements</div><h1>Progress, contests<br><span class="grad">and certificates.</span></h1><p class="lead">This section is prepared for certificates and verified achievements as the portfolio grows.</p></div></section><section><div class="wrap"><div class="grid-3"><div class="card"><div class="icon">🏁</div><h3>TJCTF</h3><p>Team NovaRun rank: <strong>106</strong>.</p><div class="tags"><span class="tag green">Team</span><span class="tag">NovaRun</span></div></div><div class="card"><div class="icon">🏁</div><h3>0xV01D CTF</h3><p>Team NovaRun rank: <strong>44</strong>.</p><div class="tags"><span class="tag green">Team</span><span class="tag">NovaRun</span></div></div><div class="card"><div class="icon">🎓</div><h3>In Progress</h3><p>Cyberjutsu Blue Team, Blue Team Junior Analyst Pathway, TryHackMe SOC Level 1 learning path.</p><div class="tags"><span class="tag blue">Blue Team</span><span class="tag">Learning</span></div></div></div></div></section></main>
-<footer class="footer">
-  <div class="wrap footer-inner">
-    <span>© 2026 Nguyen Thai Ngoc. Built for SOC, Threat Hunting and CTF learning.</span>
-    <span><a href="/">Home ↑</a></span>
-  </div>
-</footer>
-<script src="/assets/js/main.js"></script>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow"><span class="pulse"></span> Achievements & Certificates</div>
+        <h1>Progress, contests<br><span class="gradient-text">and certificates.</span></h1>
+        <p class="lead">
+          This page tracks my cybersecurity learning progress, CTF activity,
+          certificates, and verified milestones as I build my SOC Analyst portfolio.
+        </p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Featured Certificate</div>
+            <h2 class="section-title">TJCTF 2026 Certificate</h2>
+            <p class="section-desc">
+              Certificate of participation for team-based CTF activity with NovaRun.
+            </p>
+          </div>
+        </div>
+
+        <div class="card certificate-card">
+          <div class="cert-top">
+            <div>
+              <span class="cert-badge"><i class="bi bi-award"></i> Certificate</span>
+              <h3>TJCTF 2026 — Certificate of Participation</h3>
+            </div>
+            <div class="cert-rank">106th</div>
+          </div>
+
+          <p>
+            Certificate of participation for <strong>Nguyen Thai Ngoc</strong>,
+            member of team <strong>NovaRun</strong>, for placing
+            <strong>106th</strong> at <strong>TJCTF 2026</strong>.
+          </p>
+
+          <div class="cert-meta">
+            <span>Event: TJCTF 2026</span>
+            <span>Team: NovaRun</span>
+            <span>Placement: 106th</span>
+            <span>Type: Participation Certificate</span>
+          </div>
+
+          <div class="cert-actions">
+            <a class="btn primary" href="/tjctf-2026-certificate.pdf" target="_blank">
+              <i class="bi bi-file-earmark-pdf"></i>
+              View Certificate
+            </a>
+            <a class="btn secondary" href="/writeups/ctf/tjctf-team-writeups/">
+              <i class="bi bi-journal-code"></i>
+              View TJCTF Writeups
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">CTF Activity</div>
+            <h2 class="section-title">Team rankings and contest practice.</h2>
+            <p class="section-desc">
+              These rankings are team placements from CTF participation with NovaRun.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>CTF Rankings</h3>
+            <p>
+              Team-based CTF practice helps me train technical reasoning,
+              writeup documentation, and teamwork under time pressure.
+            </p>
+
+            <div class="rank-list">
+              <div class="rank-item">
+                <div>
+                  <strong>TJCTF 2026</strong>
+                  <span>Team NovaRun · Certificate of Participation</span>
+                </div>
+                <div class="rank-number">106</div>
+              </div>
+
+              <div class="rank-item">
+                <div>
+                  <strong>0xV01D CTF</strong>
+                  <span>Team NovaRun</span>
+                </div>
+                <div class="rank-number">44</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Learning Timeline</h3>
+
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-code-slash"></i></div>
+                <div class="timeline-content">
+                  <strong>Programming Foundation</strong>
+                  <span>C++ / Python, algorithmic thinking and provincial Informatics experience.</span>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-shield"></i></div>
+                <div class="timeline-content">
+                  <strong>Information Security at KMA</strong>
+                  <span>Second-year Information Security student at the Academy of Cryptography Techniques.</span>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-display"></i></div>
+                <div class="timeline-content">
+                  <strong>SOC & Blue Team Path</strong>
+                  <span>Cyberjutsu Blue Team, Blue Team Junior Analyst Pathway and TryHackMe SOC Level 1 practice.</span>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="timeline-dot"><i class="bi bi-award"></i></div>
+                <div class="timeline-content">
+                  <strong>Certificates Coming Soon</strong>
+                  <span>This section will be updated after more certificates are completed.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>© 2026 Nguyen Thai Ngoc. Built for SOC, Threat Hunting and CTF learning.</span>
+      <span><a href="/">Back to home ↑</a></span>
+    </div>
+  </footer>
 </body>
 </html>
