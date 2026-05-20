@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reverse Engineering Notes — Nguyen Thai Ngoc</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+<header class="topbar"><div class="wrap"><nav class="nav"><a class="brand" href="/">ThaiNgoc :~$</a><div class="navlinks"><a href="/">Home</a><a href="/writeups/" class="active">Writeups</a><a href="/projects/">Projects</a><a href="/contact/">Contact</a></div><button class="theme-btn" data-theme-toggle>☾</button><button class="menu-btn" data-menu-btn>☰</button></nav><div class="mobile" data-mobile><a href="/">Home</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/contact/">Contact</a></div></div></header>
+<main class="article-layout">
+  <aside class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#overview">Overview</a>
+    <a href="#context">Context</a>
+    <a href="#analysis">Analysis</a>
+    <a class="sub" href="#workflow">Workflow</a>
+    <a href="#notes">Technical Notes</a>
+    <a href="#lessons">Lessons Learned</a>
+  </aside>
+  <article class="article">
+    <div class="badge">Reverse Writeup</div>
+    <h1>Reverse Engineering Notes</h1>
+    <div class="meta"><span>Nguyen Thai Ngoc</span><span>2026</span><span>Reverse / CTF</span></div>
+    <section class="infogrid">
+      <div><div class="label">Topic</div><div class="value">Reverse Engineering</div></div>
+      <div><div class="label">Category</div><div class="value" style="color:var(--violet)">Reverse / CTF</div></div>
+      <div><div class="label">Status</div><div class="value">Growing</div></div>
+      <div><div class="label">Repository / Source</div><div class="flag">Ghidra / ELF / Solver</div></div>
+    </section>
+    <p id="overview">Notes about binary checkers, string obfuscation, algorithm reconstruction and solver writing.</p>
+    <div class="callout"><strong>Key Insight</strong>The goal is not only to recover the flag, but to understand how the binary validates input.</div>
+    <h2 id="context">Context</h2>
+    <p>Reverse engineering practice usually starts from strings, functions, control flow and data transformations.</p>
+    <h2 id="analysis">Analysis</h2>
+    <p>I focus on turning assembly or decompiled code into a clean algorithm, then writing a solver.</p>
+    <h3 id="workflow">Workflow</h3>
+    <pre><code>1. strings/file/checksec\n2. Open in Ghidra\n3. Find main/check function\n4. Rename variables\n5. Reconstruct algorithm\n6. Write solver</code></pre>
+    <h2 id="notes">Technical Notes</h2>
+    <ul><li>ELF analysis</li><li>Ghidra decompiler</li><li>XOR and byte transformations</li></ul>
+    <h2 id="lessons">Lessons Learned</h2>
+    <div class="success"><strong>What I learned:</strong><ul><li>Renaming variables makes hard code readable.</li><li>Most checkers become simple algorithms.</li><li>Solvers are proof of understanding.</li></ul></div>
+    <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Portfolio ↑</a></div>
+  </article>
+</main>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>

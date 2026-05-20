@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOC Analyst Writeups — Nguyen Thai Ngoc</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+<header class="topbar"><div class="wrap"><nav class="nav"><a class="brand" href="/">ThaiNgoc :~$</a><div class="navlinks"><a href="/">Home</a><a href="/writeups/" class="active">Writeups</a><a href="/projects/">Projects</a><a href="/contact/">Contact</a></div><button class="theme-btn" data-theme-toggle>☾</button><button class="menu-btn" data-menu-btn>☰</button></nav><div class="mobile" data-mobile><a href="/">Home</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/contact/">Contact</a></div></div></header>
+<main class="article-layout">
+  <aside class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#overview">Overview</a>
+    <a href="#context">Context</a>
+    <a href="#analysis">Analysis</a>
+    <a class="sub" href="#workflow">Workflow</a>
+    <a href="#notes">Technical Notes</a>
+    <a href="#lessons">Lessons Learned</a>
+  </aside>
+  <article class="article">
+    <div class="badge">SOC Writeup</div>
+    <h1>SOC Analyst Writeups</h1>
+    <div class="meta"><span>Nguyen Thai Ngoc</span><span>2026</span><span>SOC / Blue Team</span></div>
+    <section class="infogrid">
+      <div><div class="label">Topic</div><div class="value">SOC Analyst Labs</div></div>
+      <div><div class="label">Category</div><div class="value" style="color:var(--violet)">SOC / Blue Team</div></div>
+      <div><div class="label">Status</div><div class="value">Active</div></div>
+      <div><div class="label">Repository / Source</div><div class="flag">SOC-Analyst-Writeups</div></div>
+    </section>
+    <p id="overview">A collection of blue team labs, investigation notes, log analysis practice and SOC learning writeups.</p>
+    <div class="callout"><strong>Key Insight</strong>A good SOC writeup should show evidence, timeline, investigation reasoning and final conclusion.</div>
+    <h2 id="context">Context</h2>
+    <p>This page will collect lab reports from blue team training paths such as Cyberjutsu Blue Team and Blue Team Junior Analyst Pathway.</p>
+    <h2 id="analysis">Analysis</h2>
+    <p>For each lab, I document alert context, evidence collected, timeline, indicators, root cause and response recommendation.</p>
+    <h3 id="workflow">Workflow</h3>
+    <pre><code>1. Collect alert context\n2. Identify affected host/user\n3. Review logs and network evidence\n4. Build timeline\n5. Extract indicators\n6. Recommend response</code></pre>
+    <h2 id="notes">Technical Notes</h2>
+    <ul><li>Windows Event Logs</li><li>SIEM queries</li><li>Network traffic analysis</li></ul>
+    <h2 id="lessons">Lessons Learned</h2>
+    <div class="success"><strong>What I learned:</strong><ul><li>Clear documentation matters in SOC work.</li><li>Evidence must support every conclusion.</li><li>Timeline building is a core skill.</li></ul></div>
+    <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Portfolio ↑</a></div>
+  </article>
+</main>
+<script src="/assets/js/main.js"></script>
+</body>
+</html>
