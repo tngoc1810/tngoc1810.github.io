@@ -1,36 +1,35 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Achievements — Nguyen Thai Ngoc</title>
+  <title>TJCTF Team Writeups — Nguyen Thai Ngoc</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <style>
     :root {
-      --bg: #05070d;
-      --bg-soft: #08111f;
-      --panel: rgba(11, 18, 32, 0.82);
-      --panel-solid: #0b1220;
-      --panel-2: #101a2e;
-      --line: rgba(148, 163, 184, 0.16);
-      --line-strong: rgba(148, 163, 184, 0.28);
-      --text: #f8fafc;
-      --muted: #cbd5e1;
-      --subtle: #94a3b8;
-      --dim: #64748b;
-      --blue: #38bdf8;
-      --violet: #8b5cf6;
-      --purple: #c084fc;
-      --green: #22c55e;
-      --amber: #f59e0b;
-      --gradient: linear-gradient(135deg, #38bdf8 0%, #60a5fa 45%, #8b5cf6 100%);
-      --shadow: 0 24px 80px rgba(0, 0, 0, .38);
+      --bg: #03060f;
+      --bg-soft: #071120;
+      --panel: rgba(8, 16, 32, 0.82);
+      --panel-2: rgba(12, 24, 46, 0.92);
+      --panel-3: rgba(10, 20, 38, 0.72);
+      --line: rgba(120, 170, 255, 0.14);
+      --line-strong: rgba(120, 170, 255, 0.28);
+      --text: #f5f9ff;
+      --muted: #c7d4e8;
+      --subtle: #8da3c3;
+      --dim: #587196;
+      --blue: #4fb7ff;
+      --blue-2: #60a5fa;
+      --cyan: #22d3ee;
+      --navy: #0f1f3a;
+      --violet-soft: #8aa4ff;
+      --gradient: linear-gradient(135deg, #38bdf8 0%, #60a5fa 45%, #3b82f6 100%);
+      --shadow: 0 25px 80px rgba(0, 0, 0, .45);
     }
 
     * {
@@ -44,15 +43,15 @@
     }
 
     body {
-      min-height: 100vh;
       font-family: Inter, system-ui, sans-serif;
-      background:
-        radial-gradient(circle at 10% 0%, rgba(56, 189, 248, .18), transparent 30%),
-        radial-gradient(circle at 90% 8%, rgba(139, 92, 246, .17), transparent 30%),
-        linear-gradient(180deg, var(--bg), var(--bg-soft) 48%, var(--bg));
       color: var(--text);
-      line-height: 1.65;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(34, 211, 238, .12), transparent 24%),
+        radial-gradient(circle at 90% 10%, rgba(96, 165, 250, .16), transparent 28%),
+        linear-gradient(180deg, #03060f 0%, #07101d 46%, #040814 100%);
+      line-height: 1.72;
       overflow-x: hidden;
+      min-height: 100vh;
     }
 
     body::before {
@@ -61,11 +60,34 @@
       inset: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(rgba(148, 163, 184, .05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148, 163, 184, .05) 1px, transparent 1px);
+        linear-gradient(rgba(79, 183, 255, .045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79, 183, 255, .045) 1px, transparent 1px);
       background-size: 48px 48px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,.75), transparent 82%);
-      z-index: -1;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.9), transparent 88%);
+      z-index: -3;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 60% 18%, rgba(79, 183, 255, .08), transparent 22%),
+        radial-gradient(circle at 72% 22%, rgba(34, 211, 238, .06), transparent 24%);
+      animation: backgroundPulse 8s ease-in-out infinite alternate;
+      z-index: -2;
+    }
+
+    @keyframes backgroundPulse {
+      0% {
+        transform: scale(1) translateY(0);
+        opacity: .7;
+      }
+      100% {
+        transform: scale(1.06) translateY(-8px);
+        opacity: 1;
+      }
     }
 
     a {
@@ -73,615 +95,776 @@
       text-decoration: none;
     }
 
-    .wrap {
-      width: min(1180px, calc(100% - 40px));
-      margin: 0 auto;
-    }
-
-    .site-header {
+    .topbar {
       position: sticky;
       top: 0;
-      z-index: 50;
-      border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(22px) saturate(1.2);
-      background: rgba(5, 7, 13, .82);
-    }
-
-    .nav {
-      height: 72px;
+      z-index: 100;
+      height: 74px;
       display: flex;
       align-items: center;
-      gap: 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(3, 6, 15, .80);
+      backdrop-filter: blur(18px) saturate(1.2);
+    }
+
+    .topbar-inner {
+      width: min(1280px, calc(100% - 44px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: max-content;
-      font-family: "Space Grotesk", Inter, sans-serif;
-      font-weight: 800;
-      letter-spacing: -.03em;
-    }
-
-    .brand-mark {
-      width: 40px;
-      height: 40px;
-      border-radius: 14px;
-      background: var(--gradient);
-      display: grid;
-      place-items: center;
-      color: #fff;
-      box-shadow: 0 0 0 1px rgba(255,255,255,.14) inset, 0 18px 44px rgba(56, 189, 248, .22);
-    }
-
-    .brand small {
-      display: block;
       font-family: "JetBrains Mono", monospace;
-      color: var(--subtle);
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0;
-      margin-top: -3px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--blue);
+      letter-spacing: -.02em;
     }
 
-    .nav-links {
+    .nav {
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
     }
 
-    .nav-links a {
+    .nav a {
+      color: var(--subtle);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 11px 14px;
+      border-radius: 999px;
+      transition: .22s ease;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      color: var(--text);
+      background: rgba(79, 183, 255, .10);
+      box-shadow: inset 0 0 0 1px rgba(79, 183, 255, .12);
+    }
+
+    .theme-pill {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .layout {
+      width: min(1280px, calc(100% - 44px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 42px;
+      padding: 56px 0 90px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 98px;
+      align-self: start;
+      padding-right: 28px;
+      border-right: 1px solid var(--line);
+    }
+
+    .sidebar-title {
+      color: var(--dim);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      letter-spacing: .20em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 22px;
+    }
+
+    .toc {
+      display: grid;
+      gap: 8px;
+    }
+
+    .toc a {
+      color: #8bc7ff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 4px 0;
+      transition: .18s ease;
+    }
+
+    .toc a:hover {
+      color: #d4efff;
+      transform: translateX(4px);
+    }
+
+    .toc a.sub {
+      padding-left: 18px;
       color: var(--subtle);
       font-size: 13px;
-      font-weight: 700;
-      padding: 9px 12px;
-      border-radius: 999px;
-      transition: .2s ease;
     }
 
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--text);
-      background: rgba(148, 163, 184, .10);
+    .content {
+      position: relative;
     }
 
     .hero {
-      padding: 72px 0 38px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background:
+        linear-gradient(135deg, rgba(11, 24, 50, .85), rgba(5, 10, 20, .72)),
+        rgba(10, 18, 34, .78);
+      padding: 42px 42px 34px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      isolation: isolate;
     }
 
-    .eyebrow {
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 560px;
+      height: 560px;
+      right: -60px;
+      top: -160px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(79, 183, 255, .22), rgba(79, 183, 255, .06) 42%, transparent 62%);
+      filter: blur(8px);
+      animation: orbFloat 10s ease-in-out infinite alternate;
+      z-index: -1;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(79,183,255,.06) 1px, transparent 1px),
+        linear-gradient(rgba(79,183,255,.06) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(circle at 72% 26%, rgba(0,0,0,.9), transparent 72%);
+      opacity: .45;
+      z-index: -1;
+    }
+
+    @keyframes orbFloat {
+      0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+      100% {
+        transform: translate(-24px, 18px) scale(1.06) rotate(10deg);
+      }
+    }
+
+    .hero-art {
+      position: absolute;
+      right: 70px;
+      top: 36px;
+      width: 430px;
+      height: 430px;
+      pointer-events: none;
+      opacity: .72;
+      z-index: -1;
+      animation: heroArtFloat 9s ease-in-out infinite alternate;
+    }
+
+    @keyframes heroArtFloat {
+      0% {
+        transform: translateY(0px) scale(1);
+      }
+      100% {
+        transform: translateY(10px) scale(1.03);
+      }
+    }
+
+    .ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(96, 165, 250, .14);
+    }
+
+    .ring.r1 {
+      transform: scale(.88);
+      animation: slowRotate 24s linear infinite;
+    }
+
+    .ring.r2 {
+      transform: scale(.68);
+      animation: slowRotateReverse 18s linear infinite;
+    }
+
+    .ring.r3 {
+      transform: scale(.48);
+      animation: slowRotate 14s linear infinite;
+    }
+
+    .mesh-line {
+      position: absolute;
+      inset: 50%;
+      width: 1px;
+      height: 42%;
+      transform-origin: top center;
+      background: linear-gradient(to bottom, rgba(96, 165, 250, .45), transparent);
+      opacity: .75;
+    }
+
+    .mesh-line.l1 { transform: rotate(10deg); }
+    .mesh-line.l2 { transform: rotate(42deg); }
+    .mesh-line.l3 { transform: rotate(76deg); }
+    .mesh-line.l4 { transform: rotate(114deg); }
+    .mesh-line.l5 { transform: rotate(148deg); }
+    .mesh-line.l6 { transform: rotate(182deg); }
+    .mesh-line.l7 { transform: rotate(220deg); }
+    .mesh-line.l8 { transform: rotate(254deg); }
+    .mesh-line.l9 { transform: rotate(292deg); }
+    .mesh-line.l10 { transform: rotate(326deg); }
+
+    .node {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #8bd8ff;
+      box-shadow: 0 0 18px rgba(79, 183, 255, .7);
+      animation: nodePulse 3.5s ease-in-out infinite;
+    }
+
+    .n1 { top: 40px; left: 210px; }
+    .n2 { top: 92px; left: 314px; animation-delay: .4s; }
+    .n3 { top: 170px; left: 360px; animation-delay: .8s; }
+    .n4 { top: 272px; left: 305px; animation-delay: 1.2s; }
+    .n5 { top: 332px; left: 198px; animation-delay: 1.6s; }
+    .n6 { top: 286px; left: 94px; animation-delay: 2s; }
+    .n7 { top: 180px; left: 54px; animation-delay: 2.4s; }
+    .n8 { top: 92px; left: 102px; animation-delay: 2.8s; }
+
+    @keyframes nodePulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: .65;
+      }
+      50% {
+        transform: scale(1.4);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slowRotate {
+      from { transform: scale(.88) rotate(0deg); }
+      to { transform: scale(.88) rotate(360deg); }
+    }
+
+    @keyframes slowRotateReverse {
+      from { transform: scale(.68) rotate(360deg); }
+      to { transform: scale(.68) rotate(0deg); }
+    }
+
+    .badge {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      color: var(--blue);
-      font-family: "JetBrains Mono", monospace;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 7px 12px;
-      border: 1px solid rgba(56, 189, 248, .22);
-      background: rgba(56, 189, 248, .08);
+      gap: 8px;
       border-radius: 999px;
-      margin-bottom: 18px;
-    }
-
-    .pulse {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 0 7px rgba(34, 197, 94, .12);
+      padding: 8px 15px;
+      background: rgba(79, 183, 255, .14);
+      border: 1px solid rgba(79, 183, 255, .22);
+      color: #b8e8ff;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 22px;
     }
 
     h1 {
-      font-family: "Space Grotesk", Inter, sans-serif;
-      font-size: clamp(44px, 6vw, 74px);
-      line-height: .98;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(48px, 6vw, 88px);
+      line-height: .95;
       letter-spacing: -.06em;
-      color: var(--text);
-      margin-bottom: 18px;
-    }
-
-    .gradient-text {
-      background: var(--gradient);
+      background: linear-gradient(135deg, #dff5ff 0%, #7dd3fc 36%, #60a5fa 72%, #38bdf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      margin-bottom: 18px;
+      max-width: 920px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--subtle);
+      font-size: 15px;
+      margin-bottom: 30px;
+    }
+
+    .meta span::after {
+      content: "·";
+      margin-left: 10px;
+      color: var(--dim);
+    }
+
+    .meta span:last-child::after {
+      display: none;
+    }
+
+    .info-card {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      border: 1px solid var(--line);
+      background: rgba(9, 20, 40, .84);
+      border-radius: 22px;
+      padding: 26px;
+      margin-bottom: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    }
+
+    .info-block .label {
+      color: var(--dim);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .info-block .value {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .info-block .accent {
+      color: #7dd3fc;
     }
 
     .lead {
       color: var(--muted);
       font-size: 18px;
-      max-width: 760px;
+      margin: 6px 0 24px;
+      max-width: 980px;
+    }
+
+    .callout {
+      border: 1px solid rgba(96, 165, 250, .26);
+      border-left: 4px solid #60a5fa;
+      background: rgba(96, 165, 250, .08);
+      border-radius: 18px;
+      padding: 20px 22px;
+      margin-bottom: 28px;
+    }
+
+    .callout strong {
+      display: block;
+      color: #bfe7ff;
+      margin-bottom: 8px;
+      font-size: 17px;
     }
 
     .section {
-      padding: 42px 0;
+      margin-top: 36px;
     }
 
-    .section-head {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 24px;
-      margin-bottom: 22px;
-    }
-
-    .section-kicker {
-      color: var(--blue);
-      font-family: "JetBrains Mono", monospace;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .section-title {
+    .section h2 {
       font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(28px, 4vw, 42px);
-      line-height: 1.05;
-      letter-spacing: -.045em;
+      font-size: 36px;
+      line-height: 1.08;
+      letter-spacing: -.04em;
+      margin-bottom: 14px;
     }
 
-    .section-desc {
-      color: var(--subtle);
-      max-width: 680px;
-      margin-top: 10px;
+    .section p {
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 16px;
     }
 
-    .grid-2 {
+    .mini-grid {
       display: grid;
-      grid-template-columns: 1.1fr .9fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
+      margin-top: 18px;
     }
 
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      position: relative;
+    .mini-card {
+      display: block;
       border: 1px solid var(--line);
-      background: var(--panel);
-      border-radius: 22px;
-      padding: 22px;
+      background: rgba(9, 18, 36, .78);
+      border-radius: 20px;
+      padding: 20px;
       transition: .22s ease;
-      overflow: hidden;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: var(--line-strong);
-      box-shadow: var(--shadow);
-    }
-
-    .card h3 {
-      font-size: 20px;
-      margin-bottom: 8px;
-      letter-spacing: -.02em;
-    }
-
-    .card p {
-      color: var(--subtle);
-      font-size: 14px;
-    }
-
-    .certificate-card {
       position: relative;
       overflow: hidden;
-      border: 1px solid rgba(56, 189, 248, .26);
-      background:
-        linear-gradient(135deg, rgba(56, 189, 248, .12), rgba(139, 92, 246, .12)),
-        rgba(15, 23, 42, .78);
     }
 
-    .certificate-card::before {
+    .mini-card::before {
       content: "";
       position: absolute;
-      inset: 0 0 auto 0;
-      height: 3px;
-      background: var(--gradient);
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: linear-gradient(180deg, #22d3ee, #60a5fa);
+      opacity: .9;
     }
 
-    .cert-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 18px;
-      align-items: flex-start;
-      margin-bottom: 14px;
-      position: relative;
-      z-index: 1;
+    .mini-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--line-strong);
+      box-shadow: 0 18px 50px rgba(0,0,0,.22);
     }
 
-    .cert-badge {
+    .mini-tag {
       display: inline-flex;
-      align-items: center;
       border-radius: 999px;
-      padding: 5px 10px;
-      margin-bottom: 10px;
-      background: rgba(56, 189, 248, .12);
-      color: var(--blue);
-      border: 1px solid rgba(56, 189, 248, .24);
+      padding: 6px 10px;
+      background: rgba(79, 183, 255, .12);
+      color: #9ce8ff;
+      border: 1px solid rgba(79, 183, 255, .18);
       font-size: 11px;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: .08em;
+      margin-bottom: 12px;
     }
 
-    .cert-rank {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 42px;
-      line-height: 1;
-      font-weight: 900;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      white-space: nowrap;
-    }
-
-    .cert-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 16px 0;
-      position: relative;
-      z-index: 1;
-    }
-
-    .cert-meta span {
-      display: inline-flex;
-      border-radius: 999px;
-      padding: 6px 10px;
-      background: rgba(148, 163, 184, .08);
-      border: 1px solid rgba(148, 163, 184, .16);
-      color: var(--subtle);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .cert-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      border-radius: 14px;
-      padding: 11px 15px;
-      font-weight: 800;
-      font-size: 14px;
-      border: 1px solid var(--line);
-      transition: .2s ease;
-      white-space: nowrap;
-    }
-
-    .btn.primary {
-      background: var(--gradient);
-      color: #fff;
-      border-color: transparent;
-      box-shadow: 0 18px 48px rgba(56, 189, 248, .22);
-    }
-
-    .btn.secondary {
-      background: rgba(148, 163, 184, .08);
+    .mini-card h3 {
+      font-size: 22px;
+      letter-spacing: -.02em;
+      margin-bottom: 8px;
       color: var(--text);
     }
 
-    .btn:hover {
-      transform: translateY(-2px);
-      border-color: var(--line-strong);
-    }
-
-    .rank-list {
-      display: grid;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .rank-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: rgba(148, 163, 184, .06);
-    }
-
-    .rank-item span {
+    .mini-card p {
       color: var(--subtle);
-      font-size: 13px;
-      display: block;
+      font-size: 14px;
+      margin-bottom: 12px;
     }
 
-    .rank-number {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--blue);
-    }
-
-    .timeline {
-      position: relative;
-      display: grid;
-      gap: 14px;
-    }
-
-    .timeline::before {
-      content: "";
-      position: absolute;
-      left: 17px;
-      top: 12px;
-      bottom: 12px;
-      width: 1px;
-      background: var(--line-strong);
-    }
-
-    .timeline-item {
-      position: relative;
-      display: grid;
-      grid-template-columns: 48px 1fr;
-      gap: 12px;
-    }
-
-    .timeline-dot {
-      width: 35px;
-      height: 35px;
-      border-radius: 14px;
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-      display: grid;
-      place-items: center;
-      color: var(--blue);
-      z-index: 2;
-    }
-
-    .timeline-content {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px 16px;
-      background: rgba(148, 163, 184, .06);
-    }
-
-    .timeline-content strong {
-      display: block;
-      margin-bottom: 3px;
-    }
-
-    .timeline-content span {
-      color: var(--subtle);
-      font-size: 13px;
-    }
-
-    .footer {
-      padding: 34px 0 46px;
+    .mini-meta {
       color: var(--dim);
-      font-size: 13px;
-      border-top: 1px solid var(--line);
-      margin-top: 40px;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .footer-inner {
+    ul.clean-list {
+      padding-left: 20px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    ul.clean-list li {
+      margin: 8px 0;
+    }
+
+    code {
+      font-family: "JetBrains Mono", monospace;
+      color: #9ee7ff;
+      background: rgba(79, 183, 255, .10);
+      border: 1px solid rgba(79, 183, 255, .18);
+      border-radius: 8px;
+      padding: 2px 6px;
+      font-size: .92em;
+    }
+
+    .footer-nav {
       display: flex;
       justify-content: space-between;
       gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .footer a {
+      margin-top: 54px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
       color: var(--subtle);
+      font-weight: 700;
     }
 
-    @media (max-width: 900px) {
-      .grid-2,
-      .grid-3 {
+    .footer-nav a:hover {
+      color: #d6f3ff;
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
         grid-template-columns: 1fr;
       }
 
-      .nav-links {
-        display: none;
+      .sidebar {
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        padding-right: 0;
+        padding-bottom: 20px;
       }
 
-      .cert-top {
-        flex-direction: column;
+      .hero-art {
+        width: 320px;
+        height: 320px;
+        right: 10px;
+        top: 70px;
       }
     }
 
-    @media (max-width: 520px) {
-      .wrap {
-        width: min(100% - 28px, 1180px);
+    @media (max-width: 900px) {
+      .nav {
+        gap: 4px;
       }
 
-      .btn {
-        width: 100%;
-        justify-content: center;
+      .nav a {
+        padding: 10px 11px;
+        font-size: 13px;
       }
 
-      .cert-rank {
-        font-size: 34px;
+      .info-card {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 30px 24px 26px;
+      }
+
+      h1 {
+        font-size: clamp(38px, 12vw, 62px);
+      }
+
+      .hero-art {
+        opacity: .35;
+        right: -20px;
+        top: 70px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar-inner,
+      .layout {
+        width: min(100% - 26px, 1280px);
+      }
+
+      .nav {
+        display: none;
+      }
+
+      .theme-pill {
+        margin-left: auto;
+      }
+
+      .meta {
+        font-size: 14px;
+      }
+
+      .lead {
+        font-size: 16px;
       }
     }
   </style>
 </head>
 
 <body>
-  <header class="site-header">
-    <div class="wrap">
-      <nav class="nav">
-        <a class="brand" href="/">
-          <span class="brand-mark">TN</span>
-          <span>Nguyen Thai Ngoc<small>@tngoc1810</small></span>
-        </a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
 
-        <div class="nav-links">
-          <a href="/">Home</a>
-          <a href="/writeups/">Writeups</a>
-          <a href="/projects/">Projects</a>
-          <a class="active" href="/achievements/">Achievements</a>
-          <a href="/contact/">Contact</a>
-        </div>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a class="active" href="/writeups/">Writeups</a>
+        <a href="/projects/">Projects</a>
+        <a href="/contact/">Contact</a>
       </nav>
+
+      <div class="theme-pill">☾</div>
     </div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="wrap">
-        <div class="eyebrow"><span class="pulse"></span> Achievements & Certificates</div>
-        <h1>Progress, contests<br><span class="gradient-text">and certificates.</span></h1>
-        <p class="lead">
-          This page tracks my cybersecurity learning progress, CTF activity,
-          certificates, and verified milestones as I build my SOC Analyst portfolio.
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-title">Contents</div>
+      <nav class="toc">
+        <a href="#overview">Overview</a>
+        <a href="#context">Context</a>
+        <a href="#analysis">Analysis</a>
+        <a class="sub" href="#workflow">Workflow</a>
+        <a href="#technical-notes">Technical Notes</a>
+        <a href="#selected-writeups">Selected Writeups</a>
+        <a href="#lessons">Lessons Learned</a>
+      </nav>
+    </aside>
+
+    <section class="content">
+      <div class="hero">
+        <div class="hero-art">
+          <div class="ring r1"></div>
+          <div class="ring r2"></div>
+          <div class="ring r3"></div>
+
+          <div class="mesh-line l1"></div>
+          <div class="mesh-line l2"></div>
+          <div class="mesh-line l3"></div>
+          <div class="mesh-line l4"></div>
+          <div class="mesh-line l5"></div>
+          <div class="mesh-line l6"></div>
+          <div class="mesh-line l7"></div>
+          <div class="mesh-line l8"></div>
+          <div class="mesh-line l9"></div>
+          <div class="mesh-line l10"></div>
+
+          <div class="node n1"></div>
+          <div class="node n2"></div>
+          <div class="node n3"></div>
+          <div class="node n4"></div>
+          <div class="node n5"></div>
+          <div class="node n6"></div>
+          <div class="node n7"></div>
+          <div class="node n8"></div>
+        </div>
+
+        <div class="badge">CTF Writeup</div>
+
+        <h1>TJCTF Team Writeups</h1>
+
+        <div class="meta">
+          <span>Nguyen Thai Ngoc</span>
+          <span>2026</span>
+          <span>CTF / Team</span>
+        </div>
+
+        <div class="info-card" id="context">
+          <div class="info-block">
+            <div class="label">Topic</div>
+            <div class="value">TJCTF 2026</div>
+          </div>
+
+          <div class="info-block">
+            <div class="label">Category</div>
+            <div class="value accent">CTF / Team</div>
+          </div>
+
+          <div class="info-block">
+            <div class="label">Status</div>
+            <div class="value">Team Rank 106</div>
+          </div>
+
+          <div class="info-block">
+            <div class="label">Repository / Source</div>
+            <div class="value accent">NovaRun</div>
+          </div>
+
+          <div class="info-block">
+            <div class="label">Focus</div>
+            <div class="value">Writeups + Learning Notes</div>
+          </div>
+
+          <div class="info-block">
+            <div class="label">Certificate</div>
+            <div class="value"><a href="/tjctf-2026-certificate.pdf" target="_blank">View PDF</a></div>
+          </div>
+        </div>
+
+        <p class="lead" id="overview">
+          Selected CTF writeups from NovaRun team practice and TJCTF participation.
+          This page is where I organize team-related notes, challenge links, and lessons learned
+          from competition problem solving.
+        </p>
+
+        <div class="callout">
+          <strong>Key Insight</strong>
+          A useful CTF writeup should show the thinking path, not just commands or the final script.
+        </div>
+      </div>
+
+      <div class="section" id="analysis">
+        <h2>Analysis</h2>
+        <p>
+          This section can be used as the introduction page for TJCTF team activity.
+          Later, when you finish a challenge, you can link each real writeup here.
+        </p>
+        <p id="workflow">
+          My usual workflow is: identify the category, inspect the artifact or service,
+          note down failed ideas, then document the actual solution path in a clean and reusable format.
         </p>
       </div>
-    </section>
 
-    <section class="section">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Featured Certificate</div>
-            <h2 class="section-title">TJCTF 2026 Certificate</h2>
-            <p class="section-desc">
-              Certificate of participation for team-based CTF activity with NovaRun.
-            </p>
-          </div>
-        </div>
+      <div class="section" id="technical-notes">
+        <h2>Technical Notes</h2>
+        <p>
+          You can use this page as a category hub. For example:
+        </p>
+        <ul class="clean-list">
+          <li><strong>Pwn:</strong> heap, format string, libc leak, safe-linking, UAF.</li>
+          <li><strong>Reverse:</strong> string deobfuscation, control-flow recovery, key checking logic.</li>
+          <li><strong>Web:</strong> input handling, access control, SSRF, template injection.</li>
+          <li><strong>Forensics / OSINT:</strong> evidence chain, timeline reconstruction, IOC collection.</li>
+        </ul>
+        <p>
+          Later, each completed writeup will live in its own path, for example
+          <code>/writeups/ctf/tjctf/bit-leak/</code> or similar.
+        </p>
+      </div>
 
-        <div class="card certificate-card">
-          <div class="cert-top">
-            <div>
-              <span class="cert-badge"><i class="bi bi-award"></i> Certificate</span>
-              <h3>TJCTF 2026 — Certificate of Participation</h3>
-            </div>
-            <div class="cert-rank">106th</div>
-          </div>
+      <div class="section" id="selected-writeups">
+        <h2>Selected Writeups</h2>
+        <p>
+          These cards should point to your real writeups once you finish them.
+          For now, you can keep them as placeholders or replace them with actual links.
+        </p>
 
-          <p>
-            Certificate of participation for <strong>Nguyen Thai Ngoc</strong>,
-            member of team <strong>NovaRun</strong>, for placing
-            <strong>106th</strong> at <strong>TJCTF 2026</strong>.
-          </p>
+        <div class="mini-grid">
+          <a class="mini-card" href="/writeups/">
+            <span class="mini-tag">Crypto</span>
+            <h3>Bit Leak</h3>
+            <p>RSA parity oracle style challenge writeup and mathematical reasoning.</p>
+            <div class="mini-meta">TJCTF 2026 · Coming soon / replace with your real writeup</div>
+          </a>
 
-          <div class="cert-meta">
-            <span>Event: TJCTF 2026</span>
-            <span>Team: NovaRun</span>
-            <span>Placement: 106th</span>
-            <span>Type: Participation Certificate</span>
-          </div>
+          <a class="mini-card" href="/writeups/">
+            <span class="mini-tag">Pwn</span>
+            <h3>Heap Challenge Notes</h3>
+            <p>Heap exploitation notes, libc leak reasoning and exploit construction flow.</p>
+            <div class="mini-meta">Team practice · Replace after you finish your writeup</div>
+          </a>
 
-          <div class="cert-actions">
-            <a class="btn primary" href="/tjctf-2026-certificate.pdf" target="_blank">
-              <i class="bi bi-file-earmark-pdf"></i>
-              View Certificate
-            </a>
-            <a class="btn secondary" href="/writeups/ctf/tjctf-team-writeups/">
-              <i class="bi bi-journal-code"></i>
-              View TJCTF Writeups
-            </a>
-          </div>
+          <a class="mini-card" href="/writeups/">
+            <span class="mini-tag">Reverse</span>
+            <h3>Reverse Engineering Notes</h3>
+            <p>Challenge notes focused on understanding logic, not just extracting the flag.</p>
+            <div class="mini-meta">Reverse / CTF · Placeholder card</div>
+          </a>
+
+          <a class="mini-card" href="/achievements/">
+            <span class="mini-tag">Certificate</span>
+            <h3>TJCTF 2026 Participation</h3>
+            <p>Team participation milestone, certificate, and ranking summary.</p>
+            <div class="mini-meta">NovaRun · Rank 106</div>
+          </a>
         </div>
       </div>
-    </section>
 
-    <section class="section">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">CTF Activity</div>
-            <h2 class="section-title">Team rankings and contest practice.</h2>
-            <p class="section-desc">
-              These rankings are team placements from CTF participation with NovaRun.
-            </p>
-          </div>
-        </div>
+      <div class="section" id="lessons">
+        <h2>Lessons Learned</h2>
+        <p>
+          Team competitions improve more than just solving speed:
+        </p>
+        <ul class="clean-list">
+          <li>How to communicate ideas clearly under time pressure.</li>
+          <li>How to write reusable notes after solving a challenge.</li>
+          <li>How to convert a temporary solution into a polished public writeup.</li>
+          <li>How to document reasoning in a way that is useful to recruiters and teammates.</li>
+        </ul>
+      </div>
 
-        <div class="grid-2">
-          <div class="card">
-            <h3>CTF Rankings</h3>
-            <p>
-              Team-based CTF practice helps me train technical reasoning,
-              writeup documentation, and teamwork under time pressure.
-            </p>
-
-            <div class="rank-list">
-              <div class="rank-item">
-                <div>
-                  <strong>TJCTF 2026</strong>
-                  <span>Team NovaRun · Certificate of Participation</span>
-                </div>
-                <div class="rank-number">106</div>
-              </div>
-
-              <div class="rank-item">
-                <div>
-                  <strong>0xV01D CTF</strong>
-                  <span>Team NovaRun</span>
-                </div>
-                <div class="rank-number">44</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Learning Timeline</h3>
-
-            <div class="timeline">
-              <div class="timeline-item">
-                <div class="timeline-dot"><i class="bi bi-code-slash"></i></div>
-                <div class="timeline-content">
-                  <strong>Programming Foundation</strong>
-                  <span>C++ / Python, algorithmic thinking and provincial Informatics experience.</span>
-                </div>
-              </div>
-
-              <div class="timeline-item">
-                <div class="timeline-dot"><i class="bi bi-shield"></i></div>
-                <div class="timeline-content">
-                  <strong>Information Security at KMA</strong>
-                  <span>Second-year Information Security student at the Academy of Cryptography Techniques.</span>
-                </div>
-              </div>
-
-              <div class="timeline-item">
-                <div class="timeline-dot"><i class="bi bi-display"></i></div>
-                <div class="timeline-content">
-                  <strong>SOC & Blue Team Path</strong>
-                  <span>Cyberjutsu Blue Team, Blue Team Junior Analyst Pathway and TryHackMe SOC Level 1 practice.</span>
-                </div>
-              </div>
-
-              <div class="timeline-item">
-                <div class="timeline-dot"><i class="bi bi-award"></i></div>
-                <div class="timeline-content">
-                  <strong>Certificates Coming Soon</strong>
-                  <span>This section will be updated after more certificates are completed.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="footer-nav">
+        <a href="/writeups/">← Back to Writeups</a>
+        <a href="/">Back to Home ↑</a>
       </div>
     </section>
   </main>
-
-  <footer class="footer">
-    <div class="wrap footer-inner">
-      <span>© 2026 Nguyen Thai Ngoc. Built for SOC, Threat Hunting and CTF learning.</span>
-      <span><a href="/">Back to home ↑</a></span>
-    </div>
-  </footer>
 </body>
 </html>
