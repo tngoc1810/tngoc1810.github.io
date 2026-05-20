@@ -1,328 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>BTLO: Compromised WordPress — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style.css">
-
-  <style>
-    .writeup-layout{
-      display:grid;
-      grid-template-columns:260px minmax(0, 1fr);
-      gap:34px;
-      align-items:start;
-    }
-
-    .toc-panel{
-      position:sticky;
-      top:98px;
-      border:1px solid var(--line);
-      background:rgba(8,18,38,.62);
-      border-radius:24px;
-      padding:22px;
-      backdrop-filter:blur(16px);
-      box-shadow:var(--shadow);
-    }
-
-    .toc-title{
-      color:var(--subtle);
-      font-family:"JetBrains Mono",monospace;
-      text-transform:uppercase;
-      letter-spacing:.16em;
-      font-size:12px;
-      font-weight:900;
-      margin-bottom:14px;
-    }
-
-    .toc-panel a{
-      display:block;
-      color:#9edcff;
-      font-weight:700;
-      font-size:14px;
-      padding:7px 0;
-      transition:.16s ease;
-    }
-
-    .toc-panel a:hover{
-      color:#f3fbff;
-      transform:translateX(4px);
-    }
-
-    .toc-panel a.sub{
-      color:var(--subtle);
-      padding-left:14px;
-      font-size:13px;
-    }
-
-    .article-wrap{
-      min-width:0;
-    }
-
-    .writeup-hero{
-      border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(9,20,40,.82), rgba(8,18,38,.66));
-      border-radius:30px;
-      box-shadow:var(--shadow);
-      padding:34px;
-      margin-bottom:22px;
-      backdrop-filter:blur(18px);
-      position:relative;
-      overflow:hidden;
-    }
-
-    .writeup-hero::after{
-      content:"";
-      position:absolute;
-      right:-120px;
-      top:-160px;
-      width:520px;
-      height:520px;
-      border-radius:50%;
-      background:radial-gradient(circle, rgba(85,191,255,.18), rgba(85,191,255,.06) 40%, transparent 68%);
-      filter:blur(12px);
-      pointer-events:none;
-    }
-
-    .writeup-hero > *{
-      position:relative;
-      z-index:1;
-    }
-
-    .writeup-hero h1{
-      font-family:"Space Grotesk",sans-serif;
-      font-size:clamp(38px, 5vw, 72px);
-      line-height:.98;
-      letter-spacing:-.055em;
-      margin:16px 0 14px;
-      background:linear-gradient(135deg,#eff8ff 0%,#9ddfff 42%,#55bfff 72%,#2f80ff 100%);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      background-clip:text;
-    }
-
-    .writeup-meta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      color:var(--subtle);
-      font-size:14px;
-      margin-bottom:18px;
-      font-weight:700;
-    }
-
-    .info-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:14px;
-      margin-top:22px;
-    }
-
-    .info-box{
-      border:1px solid var(--line);
-      background:rgba(10,20,40,.62);
-      border-radius:18px;
-      padding:16px;
-    }
-
-    .info-label{
-      color:var(--dim);
-      font-size:11px;
-      letter-spacing:.13em;
-      text-transform:uppercase;
-      font-weight:900;
-      margin-bottom:6px;
-    }
-
-    .info-value{
-      color:var(--text);
-      font-weight:900;
-    }
-
-    .article-card{
-      border:1px solid var(--line);
-      background:rgba(8,18,38,.68);
-      border-radius:30px;
-      padding:34px;
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(18px);
-    }
-
-    .article-card h2{
-      font-family:"Space Grotesk",sans-serif;
-      font-size:34px;
-      line-height:1.08;
-      letter-spacing:-.04em;
-      margin:44px 0 14px;
-      padding-top:4px;
-    }
-
-    .article-card h2:first-child{
-      margin-top:0;
-    }
-
-    .article-card h3{
-      font-size:23px;
-      margin:26px 0 10px;
-      letter-spacing:-.02em;
-    }
-
-    .article-card p{
-      color:var(--muted);
-      font-size:16px;
-      margin:14px 0;
-    }
-
-    .article-card ul,
-    .article-card ol{
-      color:var(--muted);
-      padding-left:22px;
-      margin:12px 0 18px;
-    }
-
-    .article-card li{
-      margin:8px 0;
-    }
-
-    code{
-      font-family:"JetBrains Mono",monospace;
-      color:#9ee7ff;
-      background:rgba(85,191,255,.10);
-      border:1px solid rgba(85,191,255,.18);
-      border-radius:8px;
-      padding:2px 6px;
-      font-size:.92em;
-    }
-
-    pre{
-      border:1px solid var(--line);
-      background:#06101f;
-      border-radius:18px;
-      padding:18px;
-      overflow:auto;
-      margin:16px 0;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
-    }
-
-    pre code{
-      background:none;
-      border:none;
-      padding:0;
-      color:#d9f3ff;
-      font-size:13px;
-      line-height:1.7;
-    }
-
-    .callout{
-      border:1px solid rgba(85,191,255,.26);
-      border-left:4px solid var(--blue);
-      background:rgba(85,191,255,.08);
-      border-radius:18px;
-      padding:18px 20px;
-      margin:20px 0;
-      color:var(--muted);
-    }
-
-    .callout strong{
-      display:block;
-      color:#c9efff;
-      margin-bottom:6px;
-    }
-
-    .finding{
-      border:1px solid rgba(34,211,238,.20);
-      background:rgba(34,211,238,.07);
-      border-radius:20px;
-      padding:18px;
-      margin:18px 0;
-    }
-
-    .finding strong{
-      color:#a8eeff;
-    }
-
-    .timeline{
-      display:grid;
-      gap:12px;
-      margin:18px 0;
-    }
-
-    .timeline-item{
-      border:1px solid var(--line);
-      background:rgba(10,20,40,.54);
-      border-radius:18px;
-      padding:16px;
-      display:grid;
-      grid-template-columns:140px 1fr;
-      gap:14px;
-    }
-
-    .timeline-time{
-      font-family:"JetBrains Mono",monospace;
-      color:#9ee7ff;
-      font-weight:900;
-    }
-
-    .answer-card{
-      border:1px solid rgba(34,197,94,.24);
-      background:rgba(34,197,94,.08);
-      border-radius:18px;
-      padding:16px;
-      margin:14px 0;
-    }
-
-    .answer-card strong{
-      color:#9cf7b8;
-    }
-
-    .image-frame{
-      margin:18px 0;
-      border:1px solid var(--line);
-      border-radius:18px;
-      overflow:hidden;
-      background:rgba(8,18,38,.72);
-    }
-
-    .image-frame img{
-      width:100%;
-      height:auto;
-      display:block;
-    }
-
-    .image-caption{
-      padding:10px 14px;
-      color:var(--subtle);
-      font-size:13px;
-      border-top:1px solid var(--line);
-    }
-
-    .footer-nav{
-      display:flex;
-      justify-content:space-between;
-      gap:16px;
-      margin-top:28px;
-      padding-top:22px;
-      border-top:1px solid var(--line);
-      color:var(--subtle);
-      font-weight:800;
-    }
-
-    @media(max-width:1050px){
-      .writeup-layout{ grid-template-columns:1fr; }
-      .toc-panel{ position:static; }
-      .info-grid{ grid-template-columns:1fr; }
-      .timeline-item{ grid-template-columns:1fr; }
-    }
-
-    @media(max-width:650px){
-      .article-card,.writeup-hero{ padding:22px; border-radius:22px; }
-    }
-  </style>
 </head>
 
 <body>
@@ -341,8 +27,8 @@
   </header>
 
   <main class="page">
-    <div class="wrap writeup-layout">
-      <aside class="toc-panel">
+    <div class="wrap article-layout">
+      <aside class="toc">
         <div class="toc-title">On this page</div>
         <a href="#overview">Overview</a>
         <a href="#initial">Initial Log Review</a>
@@ -356,311 +42,344 @@
         <a href="#lessons">Lessons Learned</a>
       </aside>
 
-      <article class="article-wrap">
-        <section class="writeup-hero">
-          <div class="eyebrow">BTLO Writeup · Log Analysis</div>
-          <h1>Compromised WordPress</h1>
-          <div class="writeup-meta">
-            <span>Nguyen Thai Ngoc</span>
-            <span>Blue Team Labs Online</span>
-            <span>SOC / Log Analysis</span>
-            <span>Medium</span>
-          </div>
-          <p class="lead">
-            A forensic investigation of a compromised WordPress site, focusing on Apache access logs,
-            vulnerable plugins, attacker tooling, web shell activity and final attack reconstruction.
-          </p>
+      <article class="article-card glass">
+        <div class="eyebrow">BTLO Writeup · SOC / Log Analysis</div>
 
-          <div class="info-grid">
-            <div class="info-box">
-              <div class="info-label">Platform</div>
-              <div class="info-value">Blue Team Labs Online</div>
-            </div>
-            <div class="info-box">
-              <div class="info-label">Category</div>
-              <div class="info-value">Log Analysis</div>
-            </div>
-            <div class="info-box">
-              <div class="info-label">Difficulty</div>
-              <div class="info-value">Medium</div>
-            </div>
-          </div>
-        </section>
+        <h1 class="page-title">Compromised WordPress</h1>
 
-        <section class="article-card">
-          <h2 id="overview">Challenge Overview</h2>
-          <p>
-            The scenario starts with a compromised WordPress site. The main hypothesis is that a vulnerable
-            plugin allowed remote code execution and gave the attacker access to the underlying server.
-          </p>
+        <p class="lead">
+          A forensic investigation of a compromised WordPress site, focusing on Apache access logs,
+          vulnerable plugins, attacker tooling, web shell activity and final attack reconstruction.
+        </p>
 
-          <div class="callout">
-            <strong>Investigation Goal</strong>
-            Reconstruct how the attacker entered the environment, identify the vulnerable plugin,
-            determine attacker tooling, locate the web shell and summarize the full attack lifecycle.
+        <div class="info-card">
+          <div class="item">
+            <div class="label">Challenge</div>
+            <div class="value">Compromised WordPress</div>
           </div>
 
-          <h2 id="initial">Initial Log Review</h2>
-          <p>
-            I began by inspecting the first entries of <code>access.log</code> to understand normal traffic,
-            source identity, timestamps and user-agent behavior.
-          </p>
-
-          <pre><code>head -n 10 access.log</code></pre>
-
-          <div class="finding">
-            <strong>Key findings:</strong>
-            <ul>
-              <li>Activity starts at <code>12/Jan/2021:15:52:41 +0000</code>.</li>
-              <li>Initial requests originate from <code>172.21.0.1</code>, likely an internal Docker bridge or local proxy.</li>
-              <li>User-Agent indicates Linux Firefox 78: <code>Mozilla/5.0 (X11; Linux x86_64; rv:78.0)</code>.</li>
-              <li>Initial traffic includes normal WordPress static assets such as CSS, JS and PHP resources.</li>
-            </ul>
+          <div class="item">
+            <div class="label">Platform</div>
+            <div class="value">Blue Team Labs Online</div>
           </div>
 
-          <p>
-            Then I inspected the end of the log to identify later-stage activity and possible attacker success.
-          </p>
-
-          <pre><code>tail -n 20 access.log</code></pre>
-
-          <p>
-            The tail end showed aggressive probing of WordPress plugin/theme paths such as
-            <code>contact-form-7</code>, <code>simple-file-list</code> and <code>kadence</code>.
-            This pattern is consistent with automated directory brute forcing or fuzzing.
-          </p>
-
-          <div class="callout">
-            <strong>Smoking Gun</strong>
-            A successful request to <code>/YouShouldSeeThis.txt</code> returned <code>200 OK</code>.
-            The filename suggests a post-compromise marker or a key artifact left for the investigation.
+          <div class="item">
+            <div class="label">Category</div>
+            <div class="value accent">SOC / Log Analysis</div>
           </div>
 
-          <h2 id="threat-actor">Threat Actor Profiling</h2>
-          <p>
-            To identify suspicious sources, I counted unique IP addresses and sorted them by request volume.
-          </p>
-
-          <pre><code>cat access.log | awk '{print $1}' | sort | uniq -c | sort -nr</code></pre>
-
-          <p>
-            The external IP <code>119.241.22.121</code> stood out as the most active non-internal source,
-            suggesting automated scanning or brute-force behavior. The internal IP <code>172.21.0.1</code>
-            remained dominant because the application was likely behind a gateway or proxy.
-          </p>
-
-          <pre><code>cat access.log | awk '{print $1}' | sort | uniq -c | sort -nr &gt; IPS.txt</code></pre>
-
-          <h2 id="user-agents">User-Agent Analysis</h2>
-          <p>
-            I parsed the Apache User-Agent field to identify spoofed clients and automated security tools.
-          </p>
-
-          <pre><code>cat access.log | awk -F'"' '{print $6}' | sort | uniq -c | sort -nr</code></pre>
-
-          <div class="finding">
-            <strong>Suspicious User-Agents:</strong>
-            <ul>
-              <li><code>iPhone OS 5_1</code> — legacy device spoofing.</li>
-              <li><code>Opera/9.00 (Windows NT 5.1)</code> — outdated Windows XP era browser spoofing.</li>
-              <li><code>python-requests/2.24.0</code> — custom Python exploitation script.</li>
-              <li><code>WPScan v3.8.10</code> — WordPress vulnerability scanner.</li>
-              <li><code>sqlmap/1.4.11</code> — SQL injection automation tool.</li>
-            </ul>
+          <div class="item">
+            <div class="label">Difficulty</div>
+            <div class="value">Medium</div>
           </div>
 
-          <pre><code>cat access.log | awk -F'"' '{print $6}' | sort | uniq -c | sort -nr &gt; user-agents.txt</code></pre>
-
-          <h2 id="initial-access">Initial Access via Successful POST Requests</h2>
-          <p>
-            To move from reconnaissance to confirmed compromise, I filtered for successful POST requests
-            by excluding <code>403 Forbidden</code> responses.
-          </p>
-
-          <pre><code>grep "POST" access.log | grep -v "403"</code></pre>
-
-          <p>
-            The critical event was a successful POST to the WordPress plugin upload handler:
-          </p>
-
-          <pre><code>POST /wp-admin/update.php?action=upload-plugin HTTP/1.1" 200 6434</code></pre>
-
-          <p>
-            In WordPress, a successful malicious plugin upload can provide Remote Code Execution by installing
-            or dropping PHP code on the server. Repeated POST requests to <code>/wp-admin/admin-ajax.php</code>
-            also suggested scripted interaction or persistence behavior.
-          </p>
-
-          <h3 id="webshell">Web Shell Discovery</h3>
-          <p>
-            Correlating successful POST requests by source IP and target URI revealed the web shell path.
-          </p>
-
-          <pre><code>grep "POST" access.log | grep -v "403" | awk '{print $1 " " $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr</code></pre>
-
-          <div class="finding">
-            <strong>Confirmed Web Shell:</strong>
-            <ul>
-              <li>Source IP: <code>103.69.55.212</code></li>
-              <li>Web shell: <code>/wp-content/uploads/simple-file-list/fr34k.php</code></li>
-              <li>Count: 9 POST requests</li>
-              <li>Impact: Remote command execution through an uploaded PHP shell.</li>
-            </ul>
+          <div class="item">
+            <div class="label">Author</div>
+            <div class="value">Nguyen Thai Ngoc</div>
           </div>
 
-          <p>
-            The path is highly suspicious because <code>/uploads/</code> should contain media files,
-            not executable PHP scripts. The filename <code>fr34k.php</code> is also characteristic of a
-            web shell naming style.
-          </p>
+          <div class="item">
+            <div class="label">Focus</div>
+            <div class="value">WordPress compromise</div>
+          </div>
+        </div>
 
-          <pre><code>grep "POST" access.log | grep -v "403" | awk '{print $1}' | sort | uniq -c | sort -nr &gt; POST_IP.txt
+        <div class="callout">
+          <strong>Investigation Goal</strong>
+          Reconstruct how the attacker entered the environment, identify the vulnerable plugin,
+          determine attacker tooling, locate the web shell and summarize the full attack lifecycle.
+        </div>
+
+        <h2 id="overview">Challenge Overview</h2>
+
+        <p>
+          The scenario starts with a compromised WordPress site. The main hypothesis is that a vulnerable
+          plugin allowed remote code execution and gave the attacker access to the underlying server.
+        </p>
+
+        <p>
+          The investigation focuses on Apache access logs and tries to reconstruct the attacker’s path from
+          reconnaissance to successful web shell access.
+        </p>
+
+        <h2 id="initial">Initial Log Review</h2>
+
+        <p>
+          I began by inspecting the first entries of <code>access.log</code> to understand normal traffic,
+          source identity, timestamps and user-agent behavior.
+        </p>
+
+        <pre><code>head -n 10 access.log</code></pre>
+
+        <div class="callout">
+          <strong>Key Findings</strong>
+          <ul>
+            <li>Activity starts at <code>12/Jan/2021:15:52:41 +0000</code>.</li>
+            <li>Initial requests originate from <code>172.21.0.1</code>, likely an internal Docker bridge or local proxy.</li>
+            <li>User-Agent indicates Linux Firefox 78: <code>Mozilla/5.0 (X11; Linux x86_64; rv:78.0)</code>.</li>
+            <li>Initial traffic includes normal WordPress static assets such as CSS, JS and PHP resources.</li>
+          </ul>
+        </div>
+
+        <p>
+          Then I inspected the end of the log to identify later-stage activity and possible attacker success.
+        </p>
+
+        <pre><code>tail -n 20 access.log</code></pre>
+
+        <p>
+          The tail end showed aggressive probing of WordPress plugin/theme paths such as
+          <code>contact-form-7</code>, <code>simple-file-list</code> and <code>kadence</code>.
+          This pattern is consistent with automated directory brute forcing or fuzzing.
+        </p>
+
+        <div class="callout">
+          <strong>Smoking Gun</strong>
+          A successful request to <code>/YouShouldSeeThis.txt</code> returned <code>200 OK</code>.
+          The filename suggests a post-compromise marker or a key artifact left for the investigation.
+        </div>
+
+        <h2 id="threat-actor">Threat Actor Profiling</h2>
+
+        <p>
+          To identify suspicious sources, I counted unique IP addresses and sorted them by request volume.
+        </p>
+
+        <pre><code>cat access.log | awk '{print $1}' | sort | uniq -c | sort -nr</code></pre>
+
+        <p>
+          The external IP <code>119.241.22.121</code> stood out as the most active non-internal source,
+          suggesting automated scanning or brute-force behavior. The internal IP <code>172.21.0.1</code>
+          remained dominant because the application was likely behind a gateway or proxy.
+        </p>
+
+        <pre><code>cat access.log | awk '{print $1}' | sort | uniq -c | sort -nr &gt; IPS.txt</code></pre>
+
+        <h2 id="user-agents">User-Agent Analysis</h2>
+
+        <p>
+          I parsed the Apache User-Agent field to identify spoofed clients and automated security tools.
+        </p>
+
+        <pre><code>cat access.log | awk -F'"' '{print $6}' | sort | uniq -c | sort -nr</code></pre>
+
+        <div class="callout">
+          <strong>Suspicious User-Agents</strong>
+          <ul>
+            <li><code>iPhone OS 5_1</code> — legacy device spoofing.</li>
+            <li><code>Opera/9.00 (Windows NT 5.1)</code> — outdated Windows XP era browser spoofing.</li>
+            <li><code>python-requests/2.24.0</code> — custom Python exploitation script.</li>
+            <li><code>WPScan v3.8.10</code> — WordPress vulnerability scanner.</li>
+            <li><code>sqlmap/1.4.11</code> — SQL injection automation tool.</li>
+          </ul>
+        </div>
+
+        <pre><code>cat access.log | awk -F'"' '{print $6}' | sort | uniq -c | sort -nr &gt; user-agents.txt</code></pre>
+
+        <h2 id="initial-access">Initial Access via Successful POST Requests</h2>
+
+        <p>
+          To move from reconnaissance to confirmed compromise, I filtered for successful POST requests
+          by excluding <code>403 Forbidden</code> responses.
+        </p>
+
+        <pre><code>grep "POST" access.log | grep -v "403"</code></pre>
+
+        <p>
+          The critical event was a successful POST to the WordPress plugin upload handler:
+        </p>
+
+        <pre><code>POST /wp-admin/update.php?action=upload-plugin HTTP/1.1" 200 6434</code></pre>
+
+        <p>
+          In WordPress, a successful malicious plugin upload can provide Remote Code Execution by installing
+          or dropping PHP code on the server. Repeated POST requests to <code>/wp-admin/admin-ajax.php</code>
+          also suggested scripted interaction or persistence behavior.
+        </p>
+
+        <h3 id="webshell">Web Shell Discovery</h3>
+
+        <p>
+          Correlating successful POST requests by source IP and target URI revealed the web shell path.
+        </p>
+
+        <pre><code>grep "POST" access.log | grep -v "403" | awk '{print $1 " " $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr</code></pre>
+
+        <div class="callout">
+          <strong>Confirmed Web Shell</strong>
+          <ul>
+            <li>Source IP: <code>103.69.55.212</code></li>
+            <li>Web shell: <code>/wp-content/uploads/simple-file-list/fr34k.php</code></li>
+            <li>Count: 9 POST requests</li>
+            <li>Impact: Remote command execution through an uploaded PHP shell.</li>
+          </ul>
+        </div>
+
+        <p>
+          The path is highly suspicious because <code>/uploads/</code> should contain media files,
+          not executable PHP scripts. The filename <code>fr34k.php</code> is also characteristic of a
+          web shell naming style.
+        </p>
+
+        <pre><code>grep "POST" access.log | grep -v "403" | awk '{print $1}' | sort | uniq -c | sort -nr &gt; POST_IP.txt
 grep "POST" access.log | grep -v "403" | awk '{print $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr &gt; POST_URIpath.txt</code></pre>
 
-          <p>
-            Reputation checks for <code>103.69.55.212</code> showed geolocation in Taipei, Taiwan,
-            with no public blacklist hits. However, local log behavior confirmed malicious activity.
-          </p>
+        <p>
+          Reputation checks for <code>103.69.55.212</code> showed geolocation in Taipei, Taiwan,
+          with no public blacklist hits. However, local log behavior confirmed malicious activity.
+        </p>
 
-          <pre><code>grep "103.69.55.212" access.log &gt; suspect_activity.txt
+        <pre><code>grep "103.69.55.212" access.log &gt; suspect_activity.txt
 cat suspect_activity.txt</code></pre>
 
-          <div class="callout">
-            <strong>Execution Evidence</strong>
-            At <code>06:27:04 UTC</code>, the web shell returned <code>200 OK</code> with a
-            <code>1295-byte</code> response, indicating the shell was active and returned interface/output data.
-          </div>
+        <div class="callout">
+          <strong>Execution Evidence</strong>
+          At <code>06:27:04 UTC</code>, the web shell returned <code>200 OK</code> with a
+          <code>1295-byte</code> response, indicating the shell was active and returned interface/output data.
+        </div>
 
-          <h2 id="cves">CVE and Vulnerable Plugin Analysis</h2>
-          <p>
-            The attacker probed multiple WordPress plugins. The two major vulnerable components were:
-          </p>
+        <h2 id="cves">CVE and Vulnerable Plugin Analysis</h2>
 
-          <h3>CVE-2020-8380 — Simple File List RCE</h3>
-          <p>
-            This was the confirmed initial access vector. The attacker exploited
-            <code>ee-upload-engine.php</code> in the Simple File List plugin to upload
-            <code>fr34k.php</code> into the uploads directory.
-          </p>
+        <p>
+          The attacker probed multiple WordPress plugins. The two major vulnerable components were
+          Simple File List and Contact Form 7.
+        </p>
 
-          <pre><code>grep "simple-file-list" access.log | grep "POST" | grep -v "403"</code></pre>
+        <h3>CVE-2020-8380 — Simple File List RCE</h3>
 
-          <div class="finding">
-            <strong>Exploit chain:</strong>
-            <ol>
-              <li><code>119.241.22.121</code> sent a POST request to <code>ee-upload-engine.php</code>.</li>
-              <li>User-Agent <code>python-requests/2.24.0</code> indicated an automated Python exploit.</li>
-              <li>The payload <code>fr34k.php</code> was dropped into the uploads directory.</li>
-              <li><code>103.69.55.212</code> connected to the shell 13 seconds later.</li>
-            </ol>
-          </div>
+        <p>
+          This was the confirmed initial access vector. The attacker exploited
+          <code>ee-upload-engine.php</code> in the Simple File List plugin to upload
+          <code>fr34k.php</code> into the uploads directory.
+        </p>
 
-          <h3>CVE-2020-35489 — Contact Form 7 Unrestricted File Upload</h3>
-          <p>
-            Contact Form 7 was also probed. The attacker targeted the REST API feedback endpoint,
-            likely attempting unrestricted file upload exploitation.
-          </p>
+        <pre><code>grep "simple-file-list" access.log | grep "POST" | grep -v "403"</code></pre>
 
-          <pre><code>grep "contact-form-7" access.log | grep "POST" | grep -v "403"</code></pre>
+        <div class="callout">
+          <strong>Exploit Chain</strong>
+          <ol>
+            <li><code>119.241.22.121</code> sent a POST request to <code>ee-upload-engine.php</code>.</li>
+            <li>User-Agent <code>python-requests/2.24.0</code> indicated an automated Python exploit.</li>
+            <li>The payload <code>fr34k.php</code> was dropped into the uploads directory.</li>
+            <li><code>103.69.55.212</code> connected to the shell 13 seconds later.</li>
+          </ol>
+        </div>
 
-          <p>
-            The target endpoint was:
-          </p>
+        <h3>CVE-2020-35489 — Contact Form 7 Unrestricted File Upload</h3>
 
-          <pre><code>POST /wp-json/contact-form-7/v1/contact-forms/7/feedback</code></pre>
+        <p>
+          Contact Form 7 was also probed. The attacker targeted the REST API feedback endpoint,
+          likely attempting unrestricted file upload exploitation.
+        </p>
 
-          <p>
-            Multiple requests were accepted with <code>200 OK</code> over a short time window, indicating
-            automated attempts to test or exploit the plugin upload workflow. This appears to be a secondary
-            path or “Plan B”, while Simple File List became the successful entry point.
-          </p>
+        <pre><code>grep "contact-form-7" access.log | grep "POST" | grep -v "403"</code></pre>
 
-          <h2 id="timeline">Final Attack Timeline</h2>
+        <p>
+          The target endpoint was:
+        </p>
 
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-time">Jan 12 15:56</div>
-              <div>Administrator activates <strong>simple-file-list</strong>, introducing the vulnerable plugin.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-time">Jan 12 15:57</div>
-              <div>Administrator activates <strong>contact-form-7</strong>, another vulnerable plugin version.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-time">Jan 14 05:42</div>
-              <div>Reconnaissance begins from <code>119.241.22.121</code> using spoofed User-Agents.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-time">Jan 14 05:54</div>
-              <div>Brute-force attempts target <code>/wp-login.php?itsec-hb-token=adminlogin</code>, but return <code>403</code>.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-time">Jan 14 06:01</div>
-              <div><code>WPScan v3.8.10</code> is used for vulnerability scanning.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-time">Jan 14 06:08</div>
-              <div>A second IP, <code>103.69.55.212</code>, joins the operation.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-time">Jan 14 06:26</div>
-              <div>Initial access achieved through <code>Simple File List</code> upload engine.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-time">Jan 14 06:27</div>
-              <div><code>fr34k.php</code> is accessed successfully and returns <code>200 OK</code>.</div>
-            </div>
-          </div>
+        <pre><code>POST /wp-json/contact-form-7/v1/contact-forms/7/feedback</code></pre>
 
-          <h2 id="answers">Answers</h2>
+        <p>
+          Multiple requests were accepted with <code>200 OK</code> over a short time window, indicating
+          automated attempts to test or exploit the plugin upload workflow. This appears to be a secondary
+          path or “Plan B”, while Simple File List became the successful entry point.
+        </p>
 
-          <div class="answer-card">
-            <strong>1. Admin login panel URI:</strong>
-            <p><code>/wp-login.php?itsec-hb-token=adminlogin</code></p>
-          </div>
+        <h2 id="timeline">Final Attack Timeline</h2>
 
-          <div class="answer-card">
-            <strong>2. Two tools used by the attacker:</strong>
-            <p><code>WPScan</code> and <code>sqlmap</code></p>
-          </div>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Event</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Jan 12 15:56</code></td>
+              <td>Administrator activates <strong>simple-file-list</strong>, introducing the vulnerable plugin.</td>
+            </tr>
+            <tr>
+              <td><code>Jan 12 15:57</code></td>
+              <td>Administrator activates <strong>contact-form-7</strong>, another vulnerable plugin version.</td>
+            </tr>
+            <tr>
+              <td><code>Jan 14 05:42</code></td>
+              <td>Reconnaissance begins from <code>119.241.22.121</code> using spoofed User-Agents.</td>
+            </tr>
+            <tr>
+              <td><code>Jan 14 05:54</code></td>
+              <td>Brute-force attempts target <code>/wp-login.php?itsec-hb-token=adminlogin</code>, but return <code>403</code>.</td>
+            </tr>
+            <tr>
+              <td><code>Jan 14 06:01</code></td>
+              <td><code>WPScan v3.8.10</code> is used for vulnerability scanning.</td>
+            </tr>
+            <tr>
+              <td><code>Jan 14 06:08</code></td>
+              <td>A second IP, <code>103.69.55.212</code>, joins the operation.</td>
+            </tr>
+            <tr>
+              <td><code>Jan 14 06:26</code></td>
+              <td>Initial access achieved through <code>Simple File List</code> upload engine.</td>
+            </tr>
+            <tr>
+              <td><code>Jan 14 06:27</code></td>
+              <td><code>fr34k.php</code> is accessed successfully and returns <code>200 OK</code>.</td>
+            </tr>
+          </tbody>
+        </table>
 
-          <div class="answer-card">
-            <strong>3. Contact Form 7 CVE:</strong>
-            <p><code>CVE-2020-35489</code></p>
-          </div>
+        <h2 id="answers">Answers</h2>
 
-          <div class="answer-card">
-            <strong>4. Plugin exploited to get access:</strong>
-            <p><code>Simple File List</code></p>
-          </div>
+        <div class="callout">
+          <strong>1. Admin login panel URI</strong>
+          <code>/wp-login.php?itsec-hb-token=adminlogin</code>
+        </div>
 
-          <div class="answer-card">
-            <strong>5. PHP web shell filename:</strong>
-            <p><code>fr34k.php</code></p>
-          </div>
+        <div class="callout">
+          <strong>2. Two tools used by the attacker</strong>
+          <code>WPScan</code> and <code>sqlmap</code>
+        </div>
 
-          <div class="answer-card">
-            <strong>6. Final web shell response code:</strong>
-            <p><code>200 OK</code></p>
-          </div>
+        <div class="callout">
+          <strong>3. Contact Form 7 CVE</strong>
+          <code>CVE-2020-35489</code>
+        </div>
 
-          <h2 id="lessons">Lessons Learned</h2>
-          <div class="callout">
-            <strong>Key Takeaways</strong>
-            <ul>
-              <li>Successful POST requests are often the fastest path to isolate exploitation activity.</li>
-              <li>Legitimate-looking or clean public reputation IPs can still be malicious in local evidence.</li>
-              <li>Uploaded PHP files inside media directories are high-confidence web shell indicators.</li>
-              <li>WordPress plugin version fingerprinting is an important attacker reconnaissance step.</li>
-              <li>Defensive tools may block brute force but still fail if vulnerable plugins remain exposed.</li>
-            </ul>
-          </div>
+        <div class="callout">
+          <strong>4. Plugin exploited to get access</strong>
+          <code>Simple File List</code>
+        </div>
 
-          <div class="footer-nav">
-            <a href="/writeups/">← Back to Writeups</a>
-            <a href="/writeups/soc/soc-analyst-writeups/">SOC Writeups →</a>
-          </div>
-        </section>
+        <div class="callout">
+          <strong>5. PHP web shell filename</strong>
+          <code>fr34k.php</code>
+        </div>
+
+        <div class="callout">
+          <strong>6. Final web shell response code</strong>
+          <code>200 OK</code>
+        </div>
+
+        <h2 id="lessons">Lessons Learned</h2>
+
+        <div class="callout">
+          <strong>Key Takeaways</strong>
+          <ul>
+            <li>Successful POST requests are often the fastest path to isolate exploitation activity.</li>
+            <li>Legitimate-looking or clean public reputation IPs can still be malicious in local evidence.</li>
+            <li>Uploaded PHP files inside media directories are high-confidence web shell indicators.</li>
+            <li>WordPress plugin version fingerprinting is an important attacker reconnaissance step.</li>
+            <li>Defensive tools may block brute force but still fail if vulnerable plugins remain exposed.</li>
+          </ul>
+        </div>
+
+        <div class="footer-nav">
+          <a href="/writeups/">← Back to Writeups</a>
+          <a href="/">Home ↑</a>
+        </div>
       </article>
     </div>
   </main>
