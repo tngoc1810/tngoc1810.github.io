@@ -1,50 +1,53 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>0xV01D CTF Writeups — Nguyen Thai Ngoc</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-<header class="topbar"><div class="wrap"><nav class="nav"><a class="brand" href="/">ThaiNgoc :~$</a><div class="navlinks"><a href="/">Home</a><a href="/writeups/" class="active">Writeups</a><a href="/projects/">Projects</a><a href="/contact/">Contact</a></div><button class="theme-btn" data-theme-toggle>☾</button><button class="menu-btn" data-menu-btn>☰</button></nav><div class="mobile" data-mobile><a href="/">Home</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/contact/">Contact</a></div></div></header>
+<canvas id="fx-canvas"></canvas>
+<div class="aurora"></div>
+
+<header class="site-header">
+  <div class="wrap">
+    <nav class="nav">
+      <a class="brand" href="/"><span class="brand-mark">TN</span><span>ThaiNgoc :~$</span></a>
+      <div class="nav-links"><a class="" href="/">Home</a>
+<a class="active" href="/writeups/">Writeups</a>
+<a class="" href="/projects/">Projects</a>
+<a class="" href="/achievements/">Achievements</a>
+<a class="" href="/contact/">Contact</a></div>
+      <button class="icon-btn mobile-toggle">☰</button>
+    </nav>
+    <div class="mobile-panel"><a href="/">Home</a>
+<a href="/writeups/">Writeups</a>
+<a href="/projects/">Projects</a>
+<a href="/achievements/">Achievements</a>
+<a href="/contact/">Contact</a></div>
+  </div>
+</header>
+
 <main class="article-layout">
-  <aside class="toc">
-    <div class="toc-title">Contents</div>
-    <a href="#overview">Overview</a>
-    <a href="#context">Context</a>
-    <a href="#analysis">Analysis</a>
-    <a class="sub" href="#workflow">Workflow</a>
-    <a href="#notes">Technical Notes</a>
-    <a href="#lessons">Lessons Learned</a>
-  </aside>
-  <article class="article">
-    <div class="badge">CTF Writeup</div>
-    <h1>0xV01D CTF Writeups</h1>
-    <div class="meta"><span>Nguyen Thai Ngoc</span><span>2026</span><span>CTF / Team</span></div>
-    <section class="infogrid">
-      <div><div class="label">Topic</div><div class="value">0xV01D CTF</div></div>
-      <div><div class="label">Category</div><div class="value" style="color:var(--violet)">CTF / Team</div></div>
-      <div><div class="label">Status</div><div class="value">Team Rank 44</div></div>
-      <div><div class="label">Repository / Source</div><div class="flag">NovaRun</div></div>
+  <aside class="sidebar"><div class="sidebar-title">On this page</div><nav class="toc"><a href="#overview">Overview</a><a href="#context">Context</a><a href="#analysis">Analysis</a><a href="#selected-writeups">Selected Writeups</a><a href="#lessons">Lessons Learned</a></nav></aside>
+  <article>
+    <section class="article-hero">
+<div class="holo-orb">
+  <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <div class="mesh-line m1"></div><div class="mesh-line m2"></div><div class="mesh-line m3"></div><div class="mesh-line m4"></div><div class="mesh-line m5"></div><div class="mesh-line m6"></div><div class="mesh-line m7"></div><div class="mesh-line m8"></div><div class="mesh-line m9"></div><div class="mesh-line m10"></div>
+  <div class="node n1"></div><div class="node n2"></div><div class="node n3"></div><div class="node n4"></div><div class="node n5"></div><div class="node n6"></div><div class="node n7"></div><div class="node n8"></div>
+</div>
+<div class="badge">Writeup Hub</div><h1><span class="grad">0xV01D CTF Writeups</span></h1><div class="meta"><span>Nguyen Thai Ngoc</span><span>2026</span><span>CTF / Team</span></div>
+      <div class="info-card" id="context"><div class="info-block"><div class="label">Topic</div><div class="value">0xV01D CTF</div></div><div class="info-block"><div class="label">Category</div><div class="value accent">CTF / Team</div></div><div class="info-block"><div class="label">Status</div><div class="value">Team Rank 44</div></div><div class="info-block"><div class="label">Repository / Source</div><div class="value accent">NovaRun</div></div></div>
+      <p id="overview" class="lead">Multi-category CTF notes from pwn, reverse, forensics, OSINT and web challenges.</p><div class="callout"><strong>Key Insight</strong><br>A good writeup should show the thinking path, not just commands.</div>
     </section>
-    <p id="overview">Multi-category notes from pwn, reverse, forensics, OSINT and web challenges.</p>
-    <div class="callout"><strong>Key Insight</strong>Hard challenges are valuable because they expose weak spots in reasoning.</div>
-    <h2 id="context">Context</h2>
-    <p>0xV01D CTF writeups will collect the best challenges and lessons from team practice.</p>
-    <h2 id="analysis">Analysis</h2>
-    <p>I will group pwn, reverse, forensics, OSINT, crypto and web writeups here.</p>
-    <h3 id="workflow">Workflow</h3>
-    <pre><code>1. Triage challenge\n2. Extract artifacts\n3. Build solve path\n4. Verify flag\n5. Document lessons</code></pre>
-    <h2 id="notes">Technical Notes</h2>
-    <ul><li>Pwn</li><li>Reverse</li><li>Forensics</li><li>OSINT</li></ul>
-    <h2 id="lessons">Lessons Learned</h2>
-    <div class="success"><strong>What I learned:</strong><ul><li>Detailed notes help future practice.</li><li>OSINT and forensics require patience.</li><li>Verification matters before submitting.</li></ul></div>
-    <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Portfolio ↑</a></div>
+    <section class="article-section" id="analysis"><h2>Analysis</h2><p>This hub will collect my own notes and writeups as I finish labs and challenges.</p></section>
+    <section class="article-section" id="selected-writeups"><h2>Selected Writeups</h2><div class="mini-grid"><a class="mini-card" href="/writeups/"><span class="mini-tag">0xV01D</span><h3>Future 0xV01D writeup</h3><p>After you finish a writeup, add it here as a real link.</p></a></div></section>
+    <section class="article-section" id="lessons"><h2>Lessons Learned</h2><ul class="clean-list"><li>Document the reasoning process.</li><li>Keep commands, evidence and outcomes clear.</li><li>Turn every lab into reusable knowledge.</li></ul></section>
   </article>
 </main>
-<script src="/assets/js/main.js"></script>
-</body>
-</html>
+<footer class="footer"><div class="wrap footer-inner"><span>© 2026 Nguyen Thai Ngoc · SOC / Threat Hunting / CTF Portfolio</span><a href="/">Back home ↑</a></div></footer><script src="/assets/js/main.js"></script></body></html>

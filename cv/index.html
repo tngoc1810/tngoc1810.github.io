@@ -1,42 +1,46 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Nguyen Thai Ngoc — SOC Analyst and Threat Hunter in training." />
   <title>CV — Nguyen Thai Ngoc</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-<header class="topbar">
+<canvas id="fx-canvas"></canvas>
+<div class="aurora"></div>
+
+<header class="site-header">
   <div class="wrap">
     <nav class="nav">
-      <a class="brand" href="/">ThaiNgoc :~$</a>
-      <div class="navlinks">
-        <a href="/" >Home</a>
-        <a href="/writeups/" >Writeups</a>
-        <a href="/projects/" >Projects</a>
-        <a href="/achievements/" >Achievements</a>
-        <a href="/contact/" >Contact</a>
-      </div>
-      <button class="theme-btn" data-theme-toggle aria-label="Toggle theme">☾</button>
-      <button class="menu-btn" data-menu-btn aria-label="Menu">☰</button>
+      <a class="brand" href="/"><span class="brand-mark">TN</span><span>ThaiNgoc :~$</span></a>
+      <div class="nav-links"><a class="active" href="/">Home</a>
+<a class="" href="/writeups/">Writeups</a>
+<a class="" href="/projects/">Projects</a>
+<a class="" href="/achievements/">Achievements</a>
+<a class="" href="/contact/">Contact</a></div>
+      <button class="icon-btn mobile-toggle">☰</button>
     </nav>
-    <div class="mobile" data-mobile>
-      <a href="/">Home</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a>
-    </div>
+    <div class="mobile-panel"><a href="/">Home</a>
+<a href="/writeups/">Writeups</a>
+<a href="/projects/">Projects</a>
+<a href="/achievements/">Achievements</a>
+<a href="/contact/">Contact</a></div>
   </div>
 </header>
-<main><section class="hero"><div class="wrap"><div class="badge blue">CV</div><h1>CV Coming Soon<br><span class="grad">Portfolio first.</span></h1><p class="lead">This page is reserved for my future CV. For now, please view my writeups, projects and GitHub.</p></div></section><section><div class="wrap"><div class="grid-3"><a class="card" href="/writeups/"><div class="icon">✎</div><h3>View Writeups</h3><p>Read my current writeups and lab notes.</p></a><a class="card" href="/projects/"><div class="icon">☷</div><h3>View Projects</h3><p>See my current repositories and planned work.</p></a><a class="card" href="/contact/"><div class="icon">✉</div><h3>Contact</h3><p>Reach out by email, GitHub or LinkedIn.</p></a></div></div></section></main>
-<footer class="footer">
-  <div class="wrap footer-inner">
-    <span>© 2026 Nguyen Thai Ngoc. Built for SOC, Threat Hunting and CTF learning.</span>
-    <span><a href="/">Home ↑</a></span>
-  </div>
-</footer>
-<script src="/assets/js/main.js"></script>
-</body>
-</html>
+
+<main>
+<section class="hero"><div class="wrap hero-grid"><div><div class="kicker"><span class="pulse"></span>CV</div><h1>CV coming soon,<br><span class="grad">CV</span></h1><p class="lead">This page is reserved for my future resume. I will update it after finishing more labs, writeups and certificates.</p></div><div class="holo-card">
+<div class="holo-orb">
+  <div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <div class="mesh-line m1"></div><div class="mesh-line m2"></div><div class="mesh-line m3"></div><div class="mesh-line m4"></div><div class="mesh-line m5"></div><div class="mesh-line m6"></div><div class="mesh-line m7"></div><div class="mesh-line m8"></div><div class="mesh-line m9"></div><div class="mesh-line m10"></div>
+  <div class="node n1"></div><div class="node n2"></div><div class="node n3"></div><div class="node n4"></div><div class="node n5"></div><div class="node n6"></div><div class="node n7"></div><div class="node n8"></div>
+</div>
+</div></div></section>
+<section class="section"><div class="wrap"><div class="grid-3">
+<div class="card"><div class="icon-box">◇</div><h3>Status</h3><p>CV is currently being prepared.</p><div class="tags"><span class="tag amber">Coming Soon</span></div></div><div class="card"><div class="icon-box">◇</div><h3>Focus</h3><p>SOC Analyst, Threat Hunting and Blue Team internships.</p><div class="tags"><span class="tag blue">SOC</span></div></div><div class="card"><div class="icon-box">◇</div><h3>Portfolio</h3><p>Use the writeups and achievements pages for current proof of learning.</p><div class="tags"><span class="tag green">Active</span></div></div>
+</div></div></section></main>
+<footer class="footer"><div class="wrap footer-inner"><span>© 2026 Nguyen Thai Ngoc · SOC / Threat Hunting / CTF Portfolio</span><a href="/">Back home ↑</a></div></footer><script src="/assets/js/main.js"></script></body></html>
