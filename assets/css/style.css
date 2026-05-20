@@ -630,3 +630,156 @@ footer {
     margin-left: 0 !important;
   }
 }
+/* =========================================================
+   PREMIUM WRITEUP CONTENTS SIDEBAR
+   Make the fixed TOC look wider, cleaner and more professional
+   ========================================================= */
+
+@media (min-width: 1101px) {
+  .article-layout {
+    display: block !important;
+    position: relative !important;
+  }
+
+  .article-layout .toc {
+    position: fixed !important;
+    top: 116px !important;
+    left: max(32px, calc((100vw - 1320px) / 2)) !important;
+
+    width: 300px !important;
+    height: calc(100vh - 145px) !important;
+    max-height: calc(100vh - 145px) !important;
+
+    padding: 24px 22px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    border: 1px solid rgba(110, 210, 255, .18) !important;
+    border-radius: 24px !important;
+
+    background:
+      linear-gradient(180deg, rgba(8, 22, 48, .82), rgba(4, 13, 30, .72)) !important;
+
+    box-shadow:
+      0 18px 55px rgba(0, 0, 0, .26),
+      inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+
+    z-index: 80 !important;
+  }
+
+  .article-layout .article-card {
+    width: calc(100% - 355px) !important;
+    margin-left: 355px !important;
+  }
+
+  .toc-title {
+    margin-bottom: 18px !important;
+    padding-bottom: 14px !important;
+
+    color: #7ea2c9 !important;
+    font-family: "JetBrains Mono", monospace !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    letter-spacing: .22em !important;
+    text-transform: uppercase !important;
+
+    border-bottom: 1px solid rgba(110, 210, 255, .14) !important;
+  }
+
+  .toc a {
+    display: block !important;
+    padding: 9px 12px !important;
+    margin: 4px 0 !important;
+
+    border-radius: 12px !important;
+
+    color: #9edfff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+
+    transition:
+      background .18s ease,
+      color .18s ease,
+      transform .18s ease,
+      border-color .18s ease !important;
+
+    border: 1px solid transparent !important;
+  }
+
+  .toc a.sub {
+    margin-left: 10px !important;
+    padding: 8px 12px !important;
+
+    color: #82a3c7 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+
+  .toc a:hover {
+    color: #e5fbff !important;
+    background: rgba(86, 199, 255, .085) !important;
+    border-color: rgba(86, 199, 255, .16) !important;
+    transform: translateX(4px) !important;
+  }
+
+  .toc a.sub:hover {
+    color: #bdeeff !important;
+  }
+
+  .toc a::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 10px;
+    border-radius: 999px;
+    background: rgba(86, 199, 255, .42);
+    vertical-align: middle;
+    box-shadow: 0 0 10px rgba(86, 199, 255, .20);
+  }
+
+  .toc a.sub::before {
+    width: 4px;
+    height: 4px;
+    opacity: .75;
+  }
+
+  .toc::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .toc::-webkit-scrollbar-track {
+    background: rgba(4, 12, 24, .35);
+    border-radius: 999px;
+  }
+
+  .toc::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(65, 170, 255, .55), rgba(50, 220, 255, .42));
+    border-radius: 999px;
+  }
+}
+
+/* Tablet/mobile: keep TOC normal and clean */
+@media (max-width: 1100px) {
+  .article-layout .toc {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+
+    margin-bottom: 24px !important;
+    padding: 20px !important;
+
+    border: 1px solid rgba(110, 210, 255, .16) !important;
+    border-radius: 22px !important;
+
+    background:
+      linear-gradient(180deg, rgba(8, 22, 48, .76), rgba(4, 13, 30, .66)) !important;
+  }
+
+  .article-layout .article-card {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
