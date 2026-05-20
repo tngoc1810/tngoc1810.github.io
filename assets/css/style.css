@@ -836,3 +836,212 @@ body::before,
     opacity: 0.14 !important;
   }
 }
+/* === STABLE GLOBAL BACKGROUND PATCH === */
+/* This replaces heavy canvas repaint with lightweight CSS animation. */
+
+html,
+body {
+  background-color: #020816 !important;
+  min-height: 100%;
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Hide old canvas if any cached version still injects it */
+#site-bg {
+  display: none !important;
+}
+
+/* Keep content always above background layers */
+.topbar,
+.page,
+.wrap,
+.hero,
+.article-layout,
+.article-card,
+.glass,
+.card,
+.footer-nav {
+  position: relative;
+  z-index: 5;
+}
+
+.topbar {
+  z-index: 100 !important;
+}
+
+/* Background layers */
+.bg-stars,
+.bg-orb,
+.bg-radar,
+.bg-sweep {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0 !important;
+}
+
+/* Soft star/grid layer */
+.bg-stars {
+  inset: 0;
+  opacity: 0.45;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(124,240,255,.28) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 20%, rgba(86,199,255,.22) 0 1px, transparent 2px),
+    radial-gradient(circle at 40% 80%, rgba(45,140,255,.18) 0 1px, transparent 2px),
+    linear-gradient(rgba(86,199,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(86,199,255,.035) 1px, transparent 1px);
+  background-size:
+    180px 180px,
+    220px 220px,
+    260px 260px,
+    52px 52px,
+    52px 52px;
+  animation: bgDrift 28s linear infinite;
+}
+
+/* Big transparent cyber orb */
+.bg-orb {
+  left: 50%;
+  top: 46%;
+  width: 880px;
+  height: 880px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.42;
+  background:
+    radial-gradient(circle, rgba(124,240,255,.20), rgba(86,199,255,.12) 24%, rgba(45,140,255,.06) 46%, transparent 70%);
+  filter: blur(18px);
+  animation: stableOrb 12s ease-in-out infinite alternate;
+}
+
+/* Radar rings */
+.bg-radar {
+  left: 50%;
+  top: 48%;
+  width: 620px;
+  height: 620px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.20;
+  border: 1px solid rgba(124,240,255,.24);
+  animation: stableSpin 34s linear infinite;
+}
+
+.bg-radar::before,
+.bg-radar::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(124,240,255,.18);
+}
+
+.bg-radar::before {
+  inset: 18%;
+}
+
+.bg-radar::after {
+  inset: 36%;
+}
+
+/* Rotating light sweep */
+.bg-sweep {
+  left: 50%;
+  top: 48%;
+  width: 620px;
+  height: 620px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.13;
+  background: conic-gradient(
+    from 0deg,
+    rgba(124,240,255,.38),
+    rgba(86,199,255,.12) 28deg,
+    transparent 58deg,
+    transparent 360deg
+  );
+  animation: stableSpin 9s linear infinite;
+}
+
+/* Fix clipping for letters like y/g/p */
+.hero h1,
+.page-title {
+  line-height: 1.08 !important;
+  padding-bottom: 10px !important;
+  overflow: visible !important;
+}
+
+.hero-copy {
+  overflow: visible !important;
+}
+
+.glass,
+.card,
+.article-card,
+.topbar {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Animations */
+@keyframes stableOrb {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.34;
+  }
+  100% {
+    transform: translate(-50%, -52%) scale(1.06);
+    opacity: 0.48;
+  }
+}
+
+@keyframes stableSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes bgDrift {
+  from {
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 0,
+      0 0;
+  }
+  to {
+    background-position:
+      180px 180px,
+      -220px 220px,
+      260px -260px,
+      52px 52px,
+      52px 52px;
+  }
+}
+
+/* Mobile stability: reduce heavy fixed effects */
+@media (max-width: 760px) {
+  .bg-orb {
+    width: 620px;
+    height: 620px;
+    opacity: 0.32;
+    filter: blur(14px);
+  }
+
+  .bg-radar,
+  .bg-sweep {
+    width: 460px;
+    height: 460px;
+    opacity: 0.12;
+  }
+
+  .bg-stars {
+    opacity: 0.32;
+  }
+}
