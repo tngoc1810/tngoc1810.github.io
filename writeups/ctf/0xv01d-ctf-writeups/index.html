@@ -1,6 +1,213 @@
-<!DOCTYPE html><html lang="en"><head><title>0xV01D CTF Writeups — Nguyen Thai Ngoc</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/css/style.css"></head><body><header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header><main class="page"><div class="wrap article-layout"><aside class="toc"><div class="toc-title">Contents</div><a href="#overview">Overview</a><a href="#context">Context</a><a href="#notes">Technical Notes</a><a href="#planned">Planned Writeups</a><a href="#lessons">Lessons Learned</a></aside><article class="article-card glass"><div class="eyebrow">CTF Writeup</div><h1 class="page-title">0xV01D CTF Writeups</h1><div class="info-card" id="context"><div class="item"><div class="label">Topic</div><div class="value">0xV01D CTF Writeups</div></div><div class="item"><div class="label">Category</div><div class="value accent">CTF / Team</div></div><div class="item"><div class="label">Status</div><div class="value">Team Rank 44</div></div></div><p id="overview">Multi-category CTF notes from pwn, reverse, web, forensics and OSINT challenges.</p><div class="callout"><strong>Key idea</strong>This page is a hub. When I finish a real lab or CTF writeup, I will publish it as a dedicated page and link it here.</div><h2 id="notes">Technical Notes</h2><p>Notes will focus on methodology, evidence, commands, reasoning, failed attempts and lessons learned.</p><pre><code># Example structure
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>0xV01D CTF Writeups — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
+
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a class="active" href="/writeups/">Writeups</a>
+        <a href="/projects/">Projects</a>
+        <a href="/achievements/">Achievements</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap article-layout">
+      <aside class="toc">
+        <div class="toc-title">Contents</div>
+        <a href="#overview">Overview</a>
+        <a href="#context">Context</a>
+        <a href="#featured">Published Writeups</a>
+        <a class="sub" href="#reverse">Reverse</a>
+        <a class="sub" href="#planned">Planned Writeups</a>
+        <a href="#notes">Technical Notes</a>
+        <a href="#lessons">Lessons Learned</a>
+      </aside>
+
+      <article class="article-card glass">
+        <div class="eyebrow">CTF Writeup Hub</div>
+
+        <h1 class="page-title">0xV01D CTF Writeups</h1>
+
+        <div class="info-card" id="context">
+          <div class="item">
+            <div class="label">Event</div>
+            <div class="value">0xV01D CTF</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Category</div>
+            <div class="value accent">CTF / Team</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Status</div>
+            <div class="value">Team Rank 44</div>
+          </div>
+        </div>
+
+        <p id="overview">
+          This page is a dedicated hub for my 0xV01D CTF writeups. It collects
+          multi-category notes from reverse engineering, pwn, web, forensics,
+          OSINT and other challenges.
+        </p>
+
+        <div class="callout">
+          <strong>Key idea</strong>
+          I use this page to organize real writeups after solving each challenge.
+          Each card links to a dedicated article with commands, analysis,
+          reasoning, scripts and lessons learned.
+        </div>
+
+        <h2 id="featured">Published Writeups</h2>
+
+        <div class="grid two">
+          <a
+            class="card"
+            href="/writeups/ctf/0xv01d/misk-automaton/"
+            id="reverse"
+          >
+            <div class="card-top">
+              <span class="badge">Reverse</span>
+              <span class="badge secondary">Hard / 500</span>
+              <span class="card-date">2026</span>
+            </div>
+
+            <h3>Misk Automaton</h3>
+
+            <p>
+              Windows PE reverse engineering challenge with a fake flag bait,
+              argc trap, state-machine checker, target bytes and 8 transition tables.
+            </p>
+
+            <div class="tags">
+              <span class="tag">PE32+</span>
+              <span class="tag">Automaton</span>
+              <span class="tag">State Machine</span>
+              <span class="tag">Solver</span>
+            </div>
+          </a>
+
+          <a
+            class="card"
+            href="/writeups/ctf/0xv01d/"
+          >
+            <div class="card-top">
+              <span class="badge">Index</span>
+              <span class="badge secondary">0xV01D</span>
+              <span class="card-date">Hub</span>
+            </div>
+
+            <h3>0xV01D Challenge Index</h3>
+
+            <p>
+              A future index page for all detailed 0xV01D CTF writeups grouped by
+              category, difficulty and solving method.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Pwn</span>
+              <span class="tag">Reverse</span>
+              <span class="tag">Forensics</span>
+            </div>
+          </a>
+        </div>
+
+        <h2 id="planned">Planned Writeups</h2>
+
+        <div class="grid two">
+          <a class="card" href="/writeups/">
+            <div class="card-top">
+              <span class="badge">Coming Soon</span>
+              <span class="badge secondary">Pwn</span>
+            </div>
+
+            <h3>Binary Exploitation Challenge</h3>
+
+            <p>
+              Future pwn writeups will include heap layout, leaks, exploit strategy,
+              final script and lessons learned.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Heap</span>
+              <span class="tag">libc</span>
+              <span class="tag">Exploit</span>
+            </div>
+          </a>
+
+          <a class="card" href="/writeups/">
+            <div class="card-top">
+              <span class="badge">Coming Soon</span>
+              <span class="badge secondary">Forensics</span>
+            </div>
+
+            <h3>Forensics / OSINT Challenge</h3>
+
+            <p>
+              Future investigation writeups will include evidence collection,
+              timeline reconstruction, IOC extraction and final answer reasoning.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Evidence</span>
+              <span class="tag">Timeline</span>
+              <span class="tag">IOC</span>
+            </div>
+          </a>
+        </div>
+
+        <h2 id="notes">Technical Notes</h2>
+
+        <p>
+          My 0xV01D writeups focus on methodology, not only the final flag.
+          I try to preserve the reasoning path, including failed assumptions,
+          commands used, important artifacts and why each step matters.
+        </p>
+
+        <pre><code># Typical writeup structure
 Overview
+Challenge information
 Initial analysis
-Investigation / exploitation path
-Result
-Lessons learned</code></pre><h2 id="planned">Planned Writeups</h2><div class="grid two"><a class="card" href="/writeups/"><div class="card-top"><span class="badge">Coming Soon</span></div><h3>First detailed writeup</h3><p>This card will be replaced when a real writeup is published.</p></a><a class="card" href="/contact/"><div class="card-top"><span class="badge">Contact</span></div><h3>Collaboration</h3><p>Open for CTF collaboration and security learning discussions.</p></a></div><h2 id="lessons">Lessons Learned</h2><ul><li>Document the reasoning, not just the final result.</li><li>Keep commands, artifacts and indicators organized.</li><li>Turn every lab into reusable knowledge.</li></ul><div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Home ↑</a></div></article></div></main><script src="/assets/js/main.js"></script></body></html>
+Important artifacts
+Core vulnerability / reverse logic
+Solving strategy
+Script / commands
+Flag or final answer
+Lessons learned</code></pre>
+
+        <h2 id="lessons">Lessons Learned</h2>
+
+        <ul>
+          <li>Do not trust obvious strings immediately, especially in reverse challenges.</li>
+          <li>Document why a flag is fake, not only what the real flag is.</li>
+          <li>Translate assembly into pseudocode before writing a solver.</li>
+          <li>Keep every useful command, output and reasoning step for future review.</li>
+        </ul>
+
+        <div class="footer-nav">
+          <a href="/writeups/">← Back to Writeups</a>
+          <a href="/">Home ↑</a>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
