@@ -1,6 +1,168 @@
-<!DOCTYPE html><html lang="en"><head><title>SOC Analyst Writeups — Nguyen Thai Ngoc</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/css/style.css"></head><body><header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header><main class="page"><div class="wrap article-layout"><aside class="toc"><div class="toc-title">Contents</div><a href="#overview">Overview</a><a href="#context">Context</a><a href="#notes">Technical Notes</a><a href="#planned">Planned Writeups</a><a href="#lessons">Lessons Learned</a></aside><article class="article-card glass"><div class="eyebrow">SOC Writeup</div><h1 class="page-title">SOC Analyst Writeups</h1><div class="info-card" id="context"><div class="item"><div class="label">Topic</div><div class="value">SOC Analyst Writeups</div></div><div class="item"><div class="label">Category</div><div class="value accent">SOC / Blue Team</div></div><div class="item"><div class="label">Status</div><div class="value">Learning</div></div></div><p id="overview">A hub for SOC labs, log analysis, alert triage, SIEM practice and investigation writeups.</p><div class="callout"><strong>Key idea</strong>This page is a hub. When I finish a real lab or CTF writeup, I will publish it as a dedicated page and link it here.</div><h2 id="notes">Technical Notes</h2><p>Notes will focus on methodology, evidence, commands, reasoning, failed attempts and lessons learned.</p><pre><code># Example structure
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>SOC Analyst Writeups — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
+
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/writeups/">Writeups</a>
+        <a href="/projects/">Projects</a>
+        <a href="/achievements/">Achievements</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap article-layout">
+      <aside class="toc">
+        <div class="toc-title">Contents</div>
+        <a href="#overview">Overview</a>
+        <a href="#context">Context</a>
+        <a href="#published">Published Writeups</a>
+        <a href="#notes">Technical Notes</a>
+        <a href="#lessons">Lessons Learned</a>
+      </aside>
+
+      <article class="article-card glass">
+        <div class="eyebrow">SOC Writeup</div>
+
+        <h1 class="page-title">SOC Analyst Writeups</h1>
+
+        <div class="info-card" id="context">
+          <div class="item">
+            <div class="label">Topic</div>
+            <div class="value">SOC Analyst Writeups</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Category</div>
+            <div class="value accent">SOC / Blue Team</div>
+          </div>
+
+          <div class="item">
+            <div class="label">Status</div>
+            <div class="value">Active</div>
+          </div>
+        </div>
+
+        <p id="overview">
+          A hub for SOC labs, log analysis, alert triage, SIEM practice, network forensics
+          and investigation writeups.
+        </p>
+
+        <div class="callout">
+          <strong>Key idea</strong>
+          This page collects my defensive security investigations. Each writeup focuses on
+          evidence, timeline reconstruction, attacker behavior, indicators of compromise,
+          and lessons learned from the investigation.
+        </div>
+
+        <h2 id="published">Published Writeups</h2>
+
+        <div class="grid two">
+          <a
+            class="card"
+            href="/writeups/web-investigation/"
+            data-card
+            data-category="cyberdefenders soc network-forensics blue-team wireshark networkminer sql-injection"
+            data-text="cyberdefenders web investigation lab soc network forensics wireshark networkminer pcap sqlmap sql injection admin login credential disclosure customer pii malicious php upload reverse shell"
+          >
+            <div class="card-top">
+              <span class="badge">CyberDefenders</span>
+              <span class="badge secondary">Network Forensics</span>
+              <span class="card-date">2026</span>
+            </div>
+
+            <h3>Web Investigation Lab</h3>
+
+            <p>
+              PCAP investigation of sqlmap SQL Injection, database disclosure,
+              admin credential compromise, dashboard access and malicious PHP upload.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Wireshark</span>
+              <span class="tag">SQLi</span>
+              <span class="tag">Web Shell</span>
+            </div>
+          </a>
+
+          <a
+            class="card"
+            href="/writeups/soc/compromised-wordpress-log-analysis/"
+            data-card
+            data-category="btlo soc blue-team log-analysis wordpress"
+            data-text="btlo compromised wordpress log analysis soc apache wordpress simple file list contact form 7 web shell fr34k cve"
+          >
+            <div class="card-top">
+              <span class="badge">BTLO</span>
+              <span class="badge secondary">SOC</span>
+              <span class="card-date">2026</span>
+            </div>
+
+            <h3>Compromised WordPress</h3>
+
+            <p>
+              Apache access log investigation of a compromised WordPress site,
+              vulnerable plugins, web shell activity and attacker timeline.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Log Analysis</span>
+              <span class="tag">WordPress</span>
+              <span class="tag">Web Shell</span>
+            </div>
+          </a>
+        </div>
+
+        <h2 id="notes">Technical Notes</h2>
+
+        <p>
+          Notes focus on methodology, evidence, commands, reasoning, failed attempts,
+          indicators of compromise and lessons learned.
+        </p>
+
+        <pre><code># SOC writeup structure
 Overview
-Initial analysis
-Investigation / exploitation path
-Result
-Lessons learned</code></pre><h2 id="planned">Planned Writeups</h2><div class="grid two"><a class="card" href="/writeups/"><div class="card-top"><span class="badge">Coming Soon</span></div><h3>First detailed writeup</h3><p>This card will be replaced when a real writeup is published.</p></a><a class="card" href="/contact/"><div class="card-top"><span class="badge">Contact</span></div><h3>Collaboration</h3><p>Open for CTF collaboration and security learning discussions.</p></a></div><h2 id="lessons">Lessons Learned</h2><ul><li>Document the reasoning, not just the final result.</li><li>Keep commands, artifacts and indicators organized.</li><li>Turn every lab into reusable knowledge.</li></ul><div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Home ↑</a></div></article></div></main><script src="/assets/js/main.js"></script></body></html>
+Evidence source
+Initial triage
+Investigation methodology
+Timeline reconstruction
+Key findings
+Indicators of compromise
+Lessons learned</code></pre>
+
+        <h2 id="lessons">Lessons Learned</h2>
+
+        <ul>
+          <li>Document the reasoning, not just the final result.</li>
+          <li>Keep commands, artifacts and indicators organized.</li>
+          <li>Correlate logs, packets, timestamps and attacker actions into one timeline.</li>
+          <li>Turn every lab into reusable knowledge for future investigations.</li>
+        </ul>
+
+        <div class="footer-nav">
+          <a href="/writeups/">← Back to Writeups</a>
+          <a href="/">Home ↑</a>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
