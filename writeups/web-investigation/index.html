@@ -10,6 +10,42 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/assets/css/style.css">
+
+  <style>
+    .writeup-layout .hero {
+      overflow: visible;
+    }
+
+    .writeup-layout .hero h1 {
+      max-width: 100%;
+      font-size: clamp(3rem, 7vw, 6.2rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      overflow-wrap: normal;
+      word-break: normal;
+      hyphens: none;
+    }
+
+    .writeup-layout .hero h1 .title-line {
+      display: block;
+    }
+
+    .writeup-layout .hero h1 .gradient-word {
+      display: inline-block;
+      background: linear-gradient(90deg, #bff3ff, #38bdf8, #22d3ee);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    @media (max-width: 760px) {
+      .writeup-layout .hero h1 {
+        font-size: clamp(2.7rem, 14vw, 4.5rem);
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -47,7 +83,11 @@
     <article class="writeup-content">
       <section class="hero glass-card">
         <p class="eyebrow">CyberDefenders · Network Forensics · SOC Investigation</p>
-        <h1>Web Investigation Lab</h1>
+        <h1>
+          <span class="title-line">Web</span>
+          <span class="title-line gradient-word">Investigation</span>
+          <span class="title-line">Lab</span>
+        </h1>
         <p class="hero-subtitle">
           Investigating suspicious HTTP traffic, SQL Injection, credential disclosure,
           admin panel compromise, and malicious PHP upload in a captured network trace.
