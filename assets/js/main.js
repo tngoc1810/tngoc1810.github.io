@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initCyberBackground();
   setupFilters();
   initTocActiveHighlight();
+  initScrollReveal();
+  initCardTilt();
+  initCommandPalette();
+  initSocStatusBar();
 });
 
 /* =========================================================
@@ -97,14 +101,7 @@ function initHomeBackground() {
     const a = Math.floor(Math.random() * Math.max(1, endpoints.length));
     let b = Math.floor(Math.random() * Math.max(1, endpoints.length));
     if (a === b) b = (b + 1) % Math.max(1, endpoints.length);
-    return {
-      a,
-      b,
-      t: randomize ? Math.random() : 0,
-      speed: Math.random() * 0.006 + 0.003,
-      size: Math.random() * 2 + 1,
-      color: Math.random() > 0.78 ? "amber" : "cyan"
-    };
+    return { a, b, t: randomize ? Math.random() : 0, speed: Math.random() * 0.006 + 0.003, size: Math.random() * 2 + 1, color: Math.random() > 0.78 ? "amber" : "cyan" };
   }
 
   function drawBackground(time) {
@@ -380,6 +377,87 @@ function initReadingBackground(isArticlePage) {
 function removeOldBackgrounds() {
   const selectors = ["#site-bg", "#network-bg", ".bg-orb", ".bg-radar", ".bg-sweep", ".bg-stars"];
   for (const selector of selectors) document.querySelectorAll(selector).forEach((element) => element.remove());
+}
+
+/* =========================================================
+   PREMIUM MICRO INTERACTIONS
+   ========================================================= */
+
+function initScrollReveal() {
+  const items = document.querySelectorAll(".hero-copy, .profile-card, .section, .card, .article-card, .toc");
+  if (!items.length || !('IntersectionObserver' in window)) return;
+  items.forEach((item) => item.classList.add("reveal-item"));
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+    }
+  }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+  items.forEach((item) => observer.observe(item));
+}
+
+function initCardTilt() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.innerWidth <= 900) return;
+  const cards = document.querySelectorAll(".card");
+  for (const card of cards) {
+    card.addEventListener("pointermove", (event) => {
+      const rect = card.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      const rotateY = (x - 0.5) * 8;
+      const rotateX = (0.5 - y) * 8;
+      card.style.setProperty("--tilt-x", `${rotateX}deg`);
+      card.style.setProperty("--tilt-y", `${rotateY}deg`);
+      card.style.setProperty("--glow-x", `${x * 100}%`);
+      card.style.setProperty("--glow-y", `${y * 100}%`);
+      card.classList.add("tilting");
+    }, { passive: true });
+    card.addEventListener("pointerleave", () => {
+      card.classList.remove("tilting");
+      card.style.removeProperty("--tilt-x");
+      card.style.removeProperty("--tilt-y");
+    });
+  }
+}
+
+function initCommandPalette() {
+  if (document.querySelector(".cmdk-overlay")) return;
+  const overlay = document.createElement("div");
+  overlay.className = "cmdk-overlay";
+  overlay.innerHTML = `
+    <div class="cmdk-panel" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div class="cmdk-head"><span>Command Center</span><kbd>Esc</kbd></div>
+      <a href="/" class="cmdk-item"><span>⌂</span><strong>Home</strong><em>Overview</em></a>
+      <a href="/writeups/" class="cmdk-item"><span>▣</span><strong>Writeups</strong><em>Labs & CTF</em></a>
+      <a href="/#projects" class="cmdk-item"><span>◇</span><strong>Projects</strong><em>Security builds</em></a>
+      <a href="/#contact" class="cmdk-item"><span>✉</span><strong>Contact</strong><em>Connect</em></a>
+      <a href="https://github.com/tngoc1810" class="cmdk-item"><span>⌘</span><strong>GitHub</strong><em>Source</em></a>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const open = () => overlay.classList.add("open");
+  const close = () => overlay.classList.remove("open");
+  document.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      open();
+    }
+    if (event.key === "Escape") close();
+  });
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) close();
+  });
+  overlay.querySelectorAll("a").forEach((item) => item.addEventListener("click", close));
+}
+
+function initSocStatusBar() {
+  if (document.querySelector(".soc-status")) return;
+  const bar = document.createElement("div");
+  bar.className = "soc-status";
+  bar.innerHTML = `<span class="soc-dot"></span><span>SOC Analyst Mode</span><span>Threat Hunting</span><span>CTF</span><span>Blue Team</span><kbd>Ctrl K</kbd>`;
+  document.body.appendChild(bar);
 }
 
 function setupFilters() {
