@@ -5,21 +5,29 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================================================
-   CINEMATIC CYBER MESH BACKGROUND
-   Smooth canvas animation: aurora ribbons, node mesh, scanlines, and stars.
-   No libraries. FPS capped. Disabled on mobile/reduced-motion.
+   DUAL BACKGROUND SYSTEM
+   Home: cinematic animated hero field.
+   Writeups: lightweight reading background for smooth scrolling.
    ========================================================= */
 
 function initCyberBackground() {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  removeOldBackgrounds();
 
-  if (prefersReducedMotion) {
-    removeOldBackgrounds();
+  if (prefersReducedMotion || window.innerWidth <= 760) return;
+
+  const isArticlePage = Boolean(document.querySelector(".article-layout"));
+  const isWriteupsIndex = location.pathname.includes("writeups");
+
+  if (isArticlePage || isWriteupsIndex) {
+    initReadingBackground(isArticlePage);
     return;
   }
 
-  removeOldBackgrounds();
+  initHomeBackground();
+}
 
+function createBgCanvas() {
   const canvas = document.createElement("canvas");
   canvas.id = "network-bg";
   document.body.prepend(canvas);
@@ -29,270 +37,192 @@ function initCyberBackground() {
     desynchronized: true
   });
 
+  return { canvas, ctx };
+}
+
+function fitCanvas(canvas, ctx) {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.3);
+  canvas.width = Math.floor(width * dpr);
+  canvas.height = Math.floor(height * dpr);
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { width, height, dpr };
+}
+
+function initHomeBackground() {
+  const { canvas, ctx } = createBgCanvas();
   if (!ctx) return;
 
   let width = 0;
   let height = 0;
-  let dpr = 1;
-  let nodes = [];
+  let rings = [];
+  let shards = [];
   let stars = [];
-  let streaks = [];
   let lastFrame = 0;
-  let isScrolling = false;
-  let scrollTimer = null;
-  const isArticlePage = Boolean(document.querySelector(".article-layout"));
-  const fps = isArticlePage ? 20 : 30;
+  let pointerX = 0.5;
+  let pointerY = 0.5;
+  const fps = 30;
   const frameInterval = 1000 / fps;
 
-  function shouldDisableCanvas() {
-    return window.innerWidth <= 760;
-  }
-
-  if (shouldDisableCanvas()) return;
-
-  function setScrolling() {
-    isScrolling = true;
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => {
-      isScrolling = false;
-    }, 150);
-  }
-
-  window.addEventListener("scroll", setScrolling, { passive: true });
-  window.addEventListener("wheel", setScrolling, { passive: true });
-  window.addEventListener("touchmove", setScrolling, { passive: true });
-
-  function resizeCanvas() {
-    if (shouldDisableCanvas()) {
-      canvas.remove();
-      return;
-    }
-
-    width = window.innerWidth;
-    height = window.innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 1.3);
-
-    canvas.width = Math.floor(width * dpr);
-    canvas.height = Math.floor(height * dpr);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    createScene();
-  }
-
   function createScene() {
-    const nodeCount = isArticlePage ? 18 : width < 1200 ? 32 : 44;
-    const starCount = isArticlePage ? 34 : width < 1200 ? 55 : 78;
-    const streakCount = isArticlePage ? 3 : 5;
+    ({ width, height } = fitCanvas(canvas, ctx));
+    pointerX = 0.5;
+    pointerY = 0.5;
 
-    nodes = Array.from({ length: nodeCount }, (_, i) => ({
+    rings = Array.from({ length: 4 }, (_, i) => ({
+      x: width * (0.34 + i * 0.07),
+      y: height * (0.42 + i * 0.025),
+      r: Math.min(width, height) * (0.16 + i * 0.06),
+      speed: 0.00008 + i * 0.000025,
+      tilt: -0.55 + i * 0.18,
+      alpha: 0.11 - i * 0.016
+    }));
+
+    shards = Array.from({ length: width < 1200 ? 22 : 34 }, (_, i) => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.16,
-      vy: (Math.random() - 0.5) * 0.12,
-      r: Math.random() * 1.6 + 0.75,
-      phase: Math.random() * Math.PI * 2,
+      z: Math.random() * 0.8 + 0.2,
+      size: Math.random() * 24 + 12,
+      speed: Math.random() * 0.35 + 0.16,
+      angle: Math.random() * Math.PI,
       hue: i % 4
     }));
 
-    stars = Array.from({ length: starCount }, () => ({
+    stars = Array.from({ length: width < 1200 ? 70 : 110 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      r: Math.random() * 1.15 + 0.25,
-      a: Math.random() * 0.28 + 0.08,
-      twinkle: Math.random() * Math.PI * 2
+      r: Math.random() * 1.1 + 0.25,
+      a: Math.random() * 0.28 + 0.06,
+      tw: Math.random() * Math.PI * 2
     }));
-
-    streaks = Array.from({ length: streakCount }, () => createStreak(true));
   }
 
-  function createStreak(randomize = false) {
-    return {
-      x: randomize ? Math.random() * width : -160,
-      y: Math.random() * height,
-      len: Math.random() * 220 + 220,
-      speed: Math.random() * 0.8 + 0.45,
-      angle: -0.38 + Math.random() * 0.12,
-      alpha: Math.random() * 0.08 + 0.05
-    };
-  }
-
-  function drawBackgroundWash(time) {
-    const t = time * 0.00012;
-
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "rgba(3, 8, 24, 0.55)");
-    gradient.addColorStop(0.42, "rgba(5, 20, 42, 0.18)");
-    gradient.addColorStop(1, "rgba(2, 8, 22, 0.55)");
-    ctx.fillStyle = gradient;
+  function drawAurora(time) {
+    const t = time * 0.00013;
+    ctx.fillStyle = "rgba(2, 8, 22, 0.22)";
     ctx.fillRect(0, 0, width, height);
 
-    const auroras = [
-      [width * (0.18 + Math.sin(t) * 0.04), height * (0.16 + Math.cos(t * 1.3) * 0.05), Math.min(width, height) * 0.55, "rgba(86, 199, 255, 0.105)"],
-      [width * (0.84 + Math.cos(t * 0.8) * 0.05), height * (0.22 + Math.sin(t) * 0.04), Math.min(width, height) * 0.48, "rgba(45, 212, 191, 0.075)"],
-      [width * (0.50 + Math.sin(t * 0.7) * 0.05), height * (0.82 + Math.cos(t * 0.9) * 0.04), Math.min(width, height) * 0.62, "rgba(45, 140, 255, 0.095)"]
+    const points = [
+      [width * (0.22 + Math.sin(t) * 0.06), height * (0.18 + Math.cos(t * 1.3) * 0.05), Math.min(width, height) * 0.68, "rgba(86, 199, 255, 0.13)"],
+      [width * (0.78 + Math.cos(t * 0.8) * 0.05), height * (0.26 + Math.sin(t) * 0.05), Math.min(width, height) * 0.56, "rgba(45, 212, 191, 0.10)"],
+      [width * (0.52 + Math.sin(t * 0.7) * 0.06), height * (0.80 + Math.cos(t * 0.9) * 0.04), Math.min(width, height) * 0.62, "rgba(251, 191, 36, 0.07)"]
     ];
 
-    for (const [x, y, radius, color] of auroras) {
-      const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    for (const [x, y, r, color] of points) {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, color);
-      g.addColorStop(0.5, "rgba(0, 0, 0, 0)");
-      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+      g.addColorStop(0.48, "rgba(0,0,0,0)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g;
       ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
-  function drawHorizonGrid(time) {
-    if (isScrolling) return;
-
-    const horizon = height * 0.72;
-    const vanishingX = width * 0.52 + Math.sin(time * 0.00018) * 20;
-    const baseAlpha = isArticlePage ? 0.055 : 0.09;
-
-    ctx.save();
-    ctx.lineWidth = 1;
-
-    for (let i = 0; i < 15; i++) {
-      const y = horizon + Math.pow(i / 14, 1.8) * height * 0.34;
-      const alpha = baseAlpha * (1 - i / 18);
-      ctx.strokeStyle = `rgba(124, 240, 255, ${alpha})`;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    for (let i = -10; i <= 10; i++) {
-      const bottomX = width * 0.5 + i * width * 0.09;
-      ctx.strokeStyle = `rgba(86, 199, 255, ${baseAlpha * 0.9})`;
-      ctx.beginPath();
-      ctx.moveTo(vanishingX, horizon);
-      ctx.lineTo(bottomX, height);
-      ctx.stroke();
-    }
-
-    ctx.restore();
-  }
-
-  function drawStars(time) {
-    ctx.save();
+  function drawStars() {
     for (const s of stars) {
-      s.twinkle += 0.018;
-      const alpha = s.a * (0.68 + Math.sin(s.twinkle) * 0.32);
+      s.tw += 0.018;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(190, 245, 255, ${alpha})`;
+      ctx.fillStyle = `rgba(205, 245, 255, ${s.a * (0.65 + Math.sin(s.tw) * 0.35)})`;
       ctx.fill();
     }
-    ctx.restore();
   }
 
-  function updateNodes() {
-    const speed = isScrolling ? 0.18 : 1;
-    for (const n of nodes) {
-      n.x += n.vx * speed;
-      n.y += n.vy * speed;
-      n.phase += 0.012 * speed;
-      if (n.x < -30) n.x = width + 30;
-      if (n.x > width + 30) n.x = -30;
-      if (n.y < -30) n.y = height + 30;
-      if (n.y > height + 30) n.y = -30;
-    }
-  }
-
-  function drawMesh() {
-    const maxDistance = isArticlePage ? 95 : 138;
-    const maxDistanceSq = maxDistance * maxDistance;
+  function drawHoloCore(time) {
+    const cx = width * (0.54 + (pointerX - 0.5) * 0.035);
+    const cy = height * (0.46 + (pointerY - 0.5) * 0.03);
 
     ctx.save();
+    ctx.translate(cx, cy);
 
-    if (!isScrolling) {
-      for (let i = 0; i < nodes.length; i++) {
-        const a = nodes[i];
-        for (let j = i + 1; j < nodes.length; j++) {
-          const b = nodes[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const distSq = dx * dx + dy * dy;
-          if (distSq > maxDistanceSq) continue;
-
-          const distance = Math.sqrt(distSq);
-          const alpha = (1 - distance / maxDistance) * (isArticlePage ? 0.08 : 0.15);
-          const color = a.hue === 1 ? "45, 212, 191" : a.hue === 2 ? "251, 191, 36" : "86, 199, 255";
-
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(${color}, ${alpha})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      }
-    }
-
-    for (const n of nodes) {
-      const pulse = 0.72 + Math.sin(n.phase) * 0.28;
-      const color = n.hue === 1 ? "45, 212, 191" : n.hue === 2 ? "251, 191, 36" : "130, 240, 255";
+    for (const ring of rings) {
+      ctx.save();
+      ctx.rotate(time * ring.speed);
+      ctx.scale(1, 0.42 + Math.sin(ring.tilt) * 0.04);
       ctx.beginPath();
-      ctx.arc(n.x, n.y, n.r * pulse, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${color}, 0.42)`;
-      ctx.fill();
-    }
-
-    ctx.restore();
-  }
-
-  function drawStreaks() {
-    if (isScrolling || isArticlePage) return;
-
-    ctx.save();
-    ctx.lineCap = "round";
-    for (const s of streaks) {
-      const dx = Math.cos(s.angle) * s.len;
-      const dy = Math.sin(s.angle) * s.len;
-      const g = ctx.createLinearGradient(s.x, s.y, s.x + dx, s.y + dy);
-      g.addColorStop(0, "rgba(124, 240, 255, 0)");
-      g.addColorStop(0.55, `rgba(124, 240, 255, ${s.alpha})`);
-      g.addColorStop(1, "rgba(251, 191, 36, 0)");
-      ctx.strokeStyle = g;
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.moveTo(s.x, s.y);
-      ctx.lineTo(s.x + dx, s.y + dy);
+      ctx.arc(0, 0, ring.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(124, 240, 255, ${ring.alpha})`;
+      ctx.lineWidth = 1;
       ctx.stroke();
+      ctx.restore();
+    }
 
-      s.x += s.speed;
-      s.y += Math.sin(s.angle) * s.speed;
-      if (s.x > width + s.len || s.y < -s.len) Object.assign(s, createStreak(false));
+    for (let i = 0; i < 18; i++) {
+      const angle = (Math.PI * 2 * i) / 18 + time * 0.00012;
+      const inner = Math.min(width, height) * 0.10;
+      const outer = Math.min(width, height) * 0.34;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner * 0.45);
+      ctx.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer * 0.45);
+      ctx.strokeStyle = "rgba(86, 199, 255, 0.035)";
+      ctx.stroke();
+    }
+
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.min(width, height) * 0.22);
+    g.addColorStop(0, "rgba(124, 240, 255, 0.16)");
+    g.addColorStop(0.5, "rgba(45, 140, 255, 0.05)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, Math.min(width, height) * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawShards(time) {
+    ctx.save();
+    ctx.lineWidth = 1;
+    for (const sh of shards) {
+      sh.x += sh.speed * sh.z;
+      sh.y -= sh.speed * sh.z * 0.38;
+      sh.angle += 0.002 * sh.z;
+      if (sh.x > width + 80 || sh.y < -80) {
+        sh.x = -80;
+        sh.y = Math.random() * height + height * 0.2;
+      }
+
+      const color = sh.hue === 1 ? "45, 212, 191" : sh.hue === 2 ? "251, 191, 36" : "86, 199, 255";
+      ctx.save();
+      ctx.translate(sh.x + (pointerX - 0.5) * sh.z * 18, sh.y + (pointerY - 0.5) * sh.z * 12);
+      ctx.rotate(sh.angle);
+      ctx.beginPath();
+      ctx.moveTo(0, -sh.size * 0.35);
+      ctx.lineTo(sh.size * 0.55, 0);
+      ctx.lineTo(0, sh.size * 0.35);
+      ctx.closePath();
+      ctx.strokeStyle = `rgba(${color}, ${0.07 + sh.z * 0.09})`;
+      ctx.fillStyle = `rgba(${color}, ${0.012 + sh.z * 0.018})`;
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     }
     ctx.restore();
   }
 
-  function drawScanline(time) {
-    if (isScrolling || isArticlePage) return;
-    const y = (time * 0.035) % (height + 180) - 90;
-    const g = ctx.createLinearGradient(0, y - 45, 0, y + 45);
+  function drawScan(time) {
+    const y = (time * 0.045) % (height + 240) - 120;
+    const g = ctx.createLinearGradient(0, y - 70, 0, y + 70);
     g.addColorStop(0, "rgba(124, 240, 255, 0)");
-    g.addColorStop(0.5, "rgba(124, 240, 255, 0.055)");
+    g.addColorStop(0.5, "rgba(124, 240, 255, 0.06)");
     g.addColorStop(1, "rgba(124, 240, 255, 0)");
     ctx.fillStyle = g;
-    ctx.fillRect(0, y - 45, width, 90);
+    ctx.fillRect(0, y - 70, width, 140);
   }
 
   function render(time) {
     if (!document.body.contains(canvas)) return;
     ctx.clearRect(0, 0, width, height);
-    drawBackgroundWash(time);
-    drawStars(time);
-    drawHorizonGrid(time);
-    drawStreaks();
-    updateNodes();
-    drawMesh();
-    drawScanline(time);
+    drawAurora(time);
+    drawStars();
+    drawHoloCore(time);
+    drawShards(time);
+    drawScan(time);
   }
 
   function loop(time) {
@@ -303,8 +233,80 @@ function initCyberBackground() {
     requestAnimationFrame(loop);
   }
 
-  window.addEventListener("resize", debounce(resizeCanvas, 160), { passive: true });
-  resizeCanvas();
+  window.addEventListener("resize", debounce(createScene, 160), { passive: true });
+  window.addEventListener("pointermove", (event) => {
+    pointerX = event.clientX / window.innerWidth;
+    pointerY = event.clientY / window.innerHeight;
+  }, { passive: true });
+
+  createScene();
+  requestAnimationFrame(loop);
+}
+
+function initReadingBackground(isArticlePage) {
+  const { canvas, ctx } = createBgCanvas();
+  if (!ctx) return;
+
+  let width = 0;
+  let height = 0;
+  let dots = [];
+  let lastFrame = 0;
+  const fps = isArticlePage ? 12 : 16;
+  const frameInterval = 1000 / fps;
+
+  function createScene() {
+    ({ width, height } = fitCanvas(canvas, ctx));
+    dots = Array.from({ length: isArticlePage ? 16 : 24 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.07,
+      vy: (Math.random() - 0.5) * 0.06,
+      r: Math.random() * 1.1 + 0.5,
+      a: Math.random() * 0.12 + 0.06
+    }));
+  }
+
+  function render(time) {
+    if (!document.body.contains(canvas)) return;
+    ctx.clearRect(0, 0, width, height);
+
+    const t = time * 0.00008;
+    const g1 = ctx.createRadialGradient(width * (0.22 + Math.sin(t) * 0.02), height * 0.16, 0, width * 0.22, height * 0.16, Math.min(width, height) * 0.52);
+    g1.addColorStop(0, "rgba(86, 199, 255, 0.075)");
+    g1.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g1;
+    ctx.fillRect(0, 0, width, height);
+
+    const g2 = ctx.createRadialGradient(width * 0.82, height * (0.76 + Math.cos(t) * 0.02), 0, width * 0.82, height * 0.76, Math.min(width, height) * 0.55);
+    g2.addColorStop(0, "rgba(45, 212, 191, 0.045)");
+    g2.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g2;
+    ctx.fillRect(0, 0, width, height);
+
+    for (const d of dots) {
+      d.x += d.vx;
+      d.y += d.vy;
+      if (d.x < -20) d.x = width + 20;
+      if (d.x > width + 20) d.x = -20;
+      if (d.y < -20) d.y = height + 20;
+      if (d.y > height + 20) d.y = -20;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(150, 235, 255, ${d.a})`;
+      ctx.fill();
+    }
+  }
+
+  function loop(time) {
+    if (!lastFrame || time - lastFrame >= frameInterval) {
+      lastFrame = time;
+      render(time);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener("resize", debounce(createScene, 180), { passive: true });
+  createScene();
   requestAnimationFrame(loop);
 }
 
