@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* =========================================================
    DUAL BACKGROUND SYSTEM
-   Home: angular cinematic cyber city / neural grid, no circular portal.
+   Home: premium digital-ocean wave / data current theme.
    Writeups: lightweight elegant reading background.
    ========================================================= */
 
@@ -55,11 +55,9 @@ function initHomeBackground() {
 
   let width = 0;
   let height = 0;
-  let stars = [];
-  let towers = [];
-  let dataLines = [];
-  let drones = [];
-  let comets = [];
+  let particles = [];
+  let currents = [];
+  let glints = [];
   let lastFrame = 0;
   let pointerX = 0.5;
   let pointerY = 0.5;
@@ -69,85 +67,61 @@ function initHomeBackground() {
   function createScene() {
     ({ width, height } = fitCanvas(canvas, ctx));
 
-    stars = Array.from({ length: width < 1200 ? 120 : 190 }, () => ({
+    particles = Array.from({ length: width < 1200 ? 85 : 140 }, (_, i) => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      r: Math.random() * 1.4 + 0.22,
-      a: Math.random() * 0.38 + 0.08,
-      tw: Math.random() * Math.PI * 2,
-      drift: Math.random() * 0.055 + 0.015
+      vx: Math.random() * 0.22 + 0.04,
+      vy: (Math.random() - 0.5) * 0.11,
+      r: Math.random() * 1.6 + 0.35,
+      a: Math.random() * 0.22 + 0.07,
+      phase: Math.random() * Math.PI * 2,
+      color: i % 5
     }));
 
-    towers = Array.from({ length: width < 1200 ? 18 : 28 }, (_, i) => {
-      const w = Math.random() * 42 + 26;
-      const h = Math.random() * height * 0.34 + height * 0.16;
-      return {
-        x: (i / (width < 1200 ? 17 : 27)) * width + (Math.random() - 0.5) * 38,
-        w,
-        h,
-        depth: Math.random() * 0.6 + 0.4,
-        blink: Math.random() * Math.PI * 2,
-        color: i % 3
-      };
-    });
-
-    dataLines = Array.from({ length: width < 1200 ? 36 : 58 }, (_, i) => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      len: Math.random() * 160 + 70,
-      speed: Math.random() * 1.2 + 0.55,
-      alpha: Math.random() * 0.18 + 0.06,
-      vertical: i % 3 !== 0,
+    currents = Array.from({ length: width < 1200 ? 10 : 15 }, (_, i) => ({
+      y: height * (0.16 + i * 0.055) + Math.random() * 24,
+      amp: Math.random() * 34 + 26,
+      freq: Math.random() * 0.006 + 0.004,
+      speed: Math.random() * 0.0008 + 0.00042,
+      phase: Math.random() * Math.PI * 2,
+      alpha: Math.random() * 0.075 + 0.045,
       color: i % 4
     }));
 
-    drones = Array.from({ length: width < 1200 ? 18 : 30 }, (_, i) => ({
-      x: Math.random() * width,
-      y: Math.random() * height * 0.72,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: (Math.random() - 0.5) * 0.25,
-      r: Math.random() * 1.8 + 0.7,
-      pulse: Math.random() * Math.PI * 2,
-      color: i % 4
-    }));
-
-    comets = Array.from({ length: width < 1200 ? 2 : 3 }, () => resetComet(true));
+    glints = Array.from({ length: width < 1200 ? 7 : 11 }, () => resetGlint(true));
   }
 
-  function resetComet(randomize = false) {
+  function resetGlint(randomize = false) {
     return {
-      x: randomize ? Math.random() * width : -280,
-      y: randomize ? Math.random() * height * 0.65 : Math.random() * height * 0.45 + 40,
-      len: Math.random() * 340 + 360,
-      speed: Math.random() * 2.0 + 1.6,
-      alpha: Math.random() * 0.16 + 0.12,
-      angle: -0.25 + Math.random() * 0.08
+      x: randomize ? Math.random() * width : -240,
+      y: randomize ? Math.random() * height : Math.random() * height,
+      len: Math.random() * 260 + 210,
+      speed: Math.random() * 1.6 + 1.0,
+      alpha: Math.random() * 0.13 + 0.08,
+      curve: Math.random() * 0.7 + 0.3
     };
   }
 
-  function drawSpaceWash(time) {
+  function drawAtmosphere(time) {
     const t = time * 0.00012;
-    ctx.fillStyle = "#010512";
-    ctx.fillRect(0, 0, width, height);
-
     const bg = ctx.createLinearGradient(0, 0, width, height);
-    bg.addColorStop(0, "rgba(2, 8, 22, 1)");
-    bg.addColorStop(0.38, "rgba(4, 31, 57, 0.88)");
-    bg.addColorStop(0.76, "rgba(8, 18, 40, 0.92)");
-    bg.addColorStop(1, "rgba(2, 8, 22, 1)");
+    bg.addColorStop(0, "#020816");
+    bg.addColorStop(0.34, "#05223f");
+    bg.addColorStop(0.70, "#03172d");
+    bg.addColorStop(1, "#020816");
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
-    const blobs = [
-      [width * (0.18 + Math.sin(t) * 0.04), height * 0.12, Math.min(width, height) * 0.75, "rgba(86, 199, 255, 0.25)"],
-      [width * (0.84 + Math.cos(t) * 0.04), height * 0.30, Math.min(width, height) * 0.70, "rgba(45, 212, 191, 0.17)"],
-      [width * 0.48, height * 0.92, Math.min(width, height) * 0.72, "rgba(251, 191, 36, 0.11)"]
+    const blooms = [
+      [width * (0.18 + Math.sin(t) * 0.05), height * 0.22, Math.min(width, height) * 0.70, "rgba(86, 199, 255, 0.24)"],
+      [width * (0.78 + Math.cos(t) * 0.04), height * 0.42, Math.min(width, height) * 0.74, "rgba(45, 212, 191, 0.18)"],
+      [width * 0.50, height * (0.86 + Math.sin(t * 0.9) * 0.03), Math.min(width, height) * 0.70, "rgba(251, 191, 36, 0.09)"]
     ];
 
-    for (const [x, y, radius, color] of blobs) {
+    for (const [x, y, radius, color] of blooms) {
       const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
       g.addColorStop(0, color);
-      g.addColorStop(0.48, "rgba(0,0,0,0)");
+      g.addColorStop(0.42, "rgba(0,0,0,0)");
       g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g;
       ctx.beginPath();
@@ -156,219 +130,103 @@ function initHomeBackground() {
     }
   }
 
-  function drawStars() {
-    for (const s of stars) {
-      s.tw += 0.02;
-      s.y += s.drift;
-      if (s.y > height + 10) {
-        s.y = -10;
-        s.x = Math.random() * width;
-      }
-      const alpha = s.a * (0.56 + Math.sin(s.tw) * 0.44);
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(215, 252, 255, ${alpha})`;
-      ctx.fill();
-    }
-  }
-
-  function drawPerspectiveGrid() {
-    const horizon = height * 0.68;
-    const vanishingX = width * (0.52 + (pointerX - 0.5) * 0.05);
+  function drawWaveGrid(time) {
+    const t = time * 0.001;
     ctx.save();
     ctx.lineWidth = 1;
 
-    for (let i = 0; i < 22; i++) {
-      const y = horizon + Math.pow(i / 21, 1.9) * height * 0.36;
-      ctx.strokeStyle = `rgba(86, 199, 255, ${0.17 * (1 - i / 24)})`;
+    for (let i = 0; i < currents.length; i++) {
+      const c = currents[i];
+      const color = c.color === 1 ? "45, 212, 191" : c.color === 2 ? "251, 191, 36" : "86, 199, 255";
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    for (let i = -18; i <= 18; i++) {
-      const bottomX = width * 0.5 + i * width * 0.058;
-      ctx.strokeStyle = "rgba(124, 240, 255, 0.085)";
-      ctx.beginPath();
-      ctx.moveTo(vanishingX, horizon);
-      ctx.lineTo(bottomX, height);
-      ctx.stroke();
-    }
-
-    ctx.restore();
-  }
-
-  function drawCyberCity(time) {
-    const ground = height * 0.88;
-    ctx.save();
-
-    for (const b of towers) {
-      b.blink += 0.035;
-      const px = b.x + (pointerX - 0.5) * b.depth * 34;
-      const py = ground - b.h + (pointerY - 0.5) * b.depth * 14;
-      const alpha = 0.16 + b.depth * 0.16;
-
-      const wall = ctx.createLinearGradient(px, py, px + b.w, ground);
-      wall.addColorStop(0, `rgba(86, 199, 255, ${0.045 + b.depth * 0.035})`);
-      wall.addColorStop(1, `rgba(2, 8, 22, ${0.40 + b.depth * 0.22})`);
-      ctx.fillStyle = wall;
-      ctx.beginPath();
-      ctx.moveTo(px, ground);
-      ctx.lineTo(px + b.w * 0.12, py + b.w * 0.25);
-      ctx.lineTo(px + b.w * 0.88, py);
-      ctx.lineTo(px + b.w, ground);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.strokeStyle = b.color === 1 ? `rgba(45, 212, 191, ${alpha})` : b.color === 2 ? `rgba(251, 191, 36, ${alpha * 0.75})` : `rgba(86, 199, 255, ${alpha})`;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      const rows = Math.floor(b.h / 28);
-      for (let r = 1; r < rows; r++) {
-        if ((r + Math.floor(b.blink)) % 3 !== 0) continue;
-        const wy = ground - r * 24;
-        ctx.fillStyle = b.color === 2 ? "rgba(251, 191, 36, 0.22)" : "rgba(124, 240, 255, 0.18)";
-        ctx.fillRect(px + b.w * 0.24, wy, b.w * 0.12, 2);
-        ctx.fillRect(px + b.w * 0.58, wy - 4, b.w * 0.14, 2);
+      for (let x = -20; x <= width + 20; x += 18) {
+        const px = x;
+        const parallax = (pointerY - 0.5) * (i + 1) * 3;
+        const y = c.y + parallax + Math.sin(x * c.freq + t * (0.9 + c.speed * 1000) + c.phase) * c.amp;
+        if (x === -20) ctx.moveTo(px, y);
+        else ctx.lineTo(px, y);
       }
+      ctx.strokeStyle = `rgba(${color}, ${c.alpha})`;
+      ctx.stroke();
+    }
+
+    for (let x = -120; x < width + 120; x += 90) {
+      const shift = (time * 0.018 + pointerX * 22) % 90;
+      ctx.beginPath();
+      for (let y = height * 0.28; y <= height + 30; y += 20) {
+        const px = x + shift + Math.sin(y * 0.018 + t) * 24;
+        if (y === height * 0.28) ctx.moveTo(px, y);
+        else ctx.lineTo(px, y);
+      }
+      ctx.strokeStyle = "rgba(124, 240, 255, 0.045)";
+      ctx.stroke();
     }
 
     ctx.restore();
   }
 
-  function drawDataRain() {
+  function drawDataCurrents() {
     ctx.save();
     ctx.lineCap = "round";
-    for (const l of dataLines) {
-      const color = l.color === 1 ? "45, 212, 191" : l.color === 2 ? "251, 191, 36" : "86, 199, 255";
-      if (l.vertical) {
-        const g = ctx.createLinearGradient(l.x, l.y, l.x, l.y + l.len);
-        g.addColorStop(0, `rgba(${color}, 0)`);
-        g.addColorStop(0.45, `rgba(${color}, ${l.alpha})`);
-        g.addColorStop(1, `rgba(${color}, 0)`);
-        ctx.strokeStyle = g;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(l.x, l.y);
-        ctx.lineTo(l.x, l.y + l.len);
-        ctx.stroke();
-        l.y += l.speed;
-        if (l.y > height + l.len) {
-          l.y = -l.len;
-          l.x = Math.random() * width;
-        }
-      } else {
-        const g = ctx.createLinearGradient(l.x, l.y, l.x + l.len, l.y);
-        g.addColorStop(0, `rgba(${color}, 0)`);
-        g.addColorStop(0.5, `rgba(${color}, ${l.alpha * 0.75})`);
-        g.addColorStop(1, `rgba(${color}, 0)`);
-        ctx.strokeStyle = g;
-        ctx.beginPath();
-        ctx.moveTo(l.x, l.y);
-        ctx.lineTo(l.x + l.len, l.y);
-        ctx.stroke();
-        l.x += l.speed * 0.9;
-        if (l.x > width + l.len) {
-          l.x = -l.len;
-          l.y = Math.random() * height;
-        }
-      }
-    }
-    ctx.restore();
-  }
-
-  function drawNetworkDrones() {
-    const maxDist = 150;
-    const maxDistSq = maxDist * maxDist;
-    ctx.save();
-
-    for (let i = 0; i < drones.length; i++) {
-      const a = drones[i];
-      a.x += a.vx;
-      a.y += a.vy;
-      a.pulse += 0.03;
-      if (a.x < -30) a.x = width + 30;
-      if (a.x > width + 30) a.x = -30;
-      if (a.y < -30) a.y = height * 0.72;
-      if (a.y > height * 0.75) a.y = -30;
-
-      for (let j = i + 1; j < drones.length; j++) {
-        const b = drones[j];
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        const distSq = dx * dx + dy * dy;
-        if (distSq > maxDistSq) continue;
-        const alpha = (1 - Math.sqrt(distSq) / maxDist) * 0.18;
-        ctx.strokeStyle = `rgba(124, 240, 255, ${alpha})`;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
-      }
-    }
-
-    for (const d of drones) {
-      const color = d.color === 1 ? "45, 212, 191" : d.color === 2 ? "251, 191, 36" : "124, 240, 255";
-      const pulse = 0.7 + Math.sin(d.pulse) * 0.3;
+    for (const g of glints) {
+      const y = g.y + Math.sin(g.x * 0.009) * 34 * g.curve;
+      const gradient = ctx.createLinearGradient(g.x, y, g.x + g.len, y - 40);
+      gradient.addColorStop(0, "rgba(124, 240, 255, 0)");
+      gradient.addColorStop(0.36, `rgba(124, 240, 255, ${g.alpha})`);
+      gradient.addColorStop(0.70, `rgba(45, 212, 191, ${g.alpha * 0.55})`);
+      gradient.addColorStop(1, "rgba(251, 191, 36, 0)");
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r * pulse, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${color}, 0.72)`;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r * 4.5, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${color}, 0.055)`;
-      ctx.fill();
-    }
-
-    ctx.restore();
-  }
-
-  function drawComets() {
-    ctx.save();
-    ctx.lineCap = "round";
-    for (const c of comets) {
-      const dx = Math.cos(c.angle) * c.len;
-      const dy = Math.sin(c.angle) * c.len;
-      const g = ctx.createLinearGradient(c.x, c.y, c.x - dx, c.y - dy);
-      g.addColorStop(0, `rgba(255, 255, 255, ${c.alpha})`);
-      g.addColorStop(0.22, `rgba(124, 240, 255, ${c.alpha * 0.8})`);
-      g.addColorStop(1, "rgba(124, 240, 255, 0)");
-      ctx.strokeStyle = g;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(c.x, c.y);
-      ctx.lineTo(c.x - dx, c.y - dy);
+      ctx.moveTo(g.x, y);
+      ctx.quadraticCurveTo(g.x + g.len * 0.5, y - 46, g.x + g.len, y - 12);
       ctx.stroke();
-      c.x += c.speed;
-      c.y += Math.sin(c.angle) * c.speed;
-      if (c.x > width + c.len || c.y < -c.len) Object.assign(c, resetComet(false));
+
+      g.x += g.speed;
+      if (g.x > width + g.len) Object.assign(g, resetGlint(false));
     }
     ctx.restore();
   }
 
-  function drawScan(time) {
-    const y = (time * 0.07) % (height + 320) - 160;
-    const g = ctx.createLinearGradient(0, y - 95, 0, y + 95);
+  function drawParticles() {
+    ctx.save();
+    for (const p of particles) {
+      p.phase += 0.018;
+      p.x += p.vx;
+      p.y += p.vy + Math.sin(p.phase) * 0.025;
+      if (p.x > width + 20) p.x = -20;
+      if (p.y < -20) p.y = height + 20;
+      if (p.y > height + 20) p.y = -20;
+
+      const color = p.color === 1 ? "45, 212, 191" : p.color === 2 ? "251, 191, 36" : "180, 245, 255";
+      const alpha = p.a * (0.7 + Math.sin(p.phase) * 0.3);
+      ctx.beginPath();
+      ctx.arc(p.x + (pointerX - 0.5) * p.r * 10, p.y + (pointerY - 0.5) * p.r * 7, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color}, ${alpha})`;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawLightShelf(time) {
+    const y = height * 0.66 + Math.sin(time * 0.0006) * 18;
+    const g = ctx.createLinearGradient(0, y - 100, 0, y + 160);
     g.addColorStop(0, "rgba(124, 240, 255, 0)");
-    g.addColorStop(0.5, "rgba(124, 240, 255, 0.10)");
-    g.addColorStop(1, "rgba(124, 240, 255, 0)");
+    g.addColorStop(0.36, "rgba(124, 240, 255, 0.095)");
+    g.addColorStop(0.55, "rgba(45, 212, 191, 0.06)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = g;
-    ctx.fillRect(0, y - 95, width, 190);
+    ctx.fillRect(0, y - 100, width, 260);
   }
 
   function render(time) {
     if (!document.body.contains(canvas)) return;
     ctx.clearRect(0, 0, width, height);
-    drawSpaceWash(time);
-    drawStars();
-    drawPerspectiveGrid();
-    drawDataRain();
-    drawComets();
-    drawNetworkDrones();
-    drawCyberCity(time);
-    drawScan(time);
+    drawAtmosphere(time);
+    drawLightShelf(time);
+    drawWaveGrid(time);
+    drawDataCurrents();
+    drawParticles();
   }
 
   function loop(time) {
