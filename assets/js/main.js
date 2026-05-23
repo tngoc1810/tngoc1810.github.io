@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initTocActiveHighlight();
   initScrollReveal();
   initCardTilt();
-  initCommandPalette();
   initSocStatusBar();
 });
 
@@ -66,12 +65,20 @@ function initHomeBackground() {
   let lastFrame = 0;
   let pointerX = 0.5;
   let pointerY = 0.5;
-  const fps = 34;
+  let isScrolling = false;
+  let scrollTimer = null;
+  const fps = 30;
   const frameInterval = 1000 / fps;
+
+  function setScrolling() {
+    isScrolling = true;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => { isScrolling = false; }, 160);
+  }
 
   function createScene() {
     ({ width, height } = fitCanvas(canvas, ctx));
-    endpoints = Array.from({ length: width < 1200 ? 34 : 56 }, (_, i) => ({
+    endpoints = Array.from({ length: width < 1200 ? 30 : 48 }, (_, i) => ({
       x: Math.random() * width,
       y: height * 0.12 + Math.random() * height * 0.70,
       vx: (Math.random() - 0.5) * 0.12,
@@ -81,19 +88,19 @@ function initHomeBackground() {
       type: i % 7 === 0 ? "alert" : i % 5 === 0 ? "asset" : "node"
     }));
 
-    packets = Array.from({ length: width < 1200 ? 14 : 24 }, () => createPacket(true));
-    alerts = Array.from({ length: width < 1200 ? 4 : 7 }, () => ({
+    packets = Array.from({ length: width < 1200 ? 12 : 20 }, () => createPacket(true));
+    alerts = Array.from({ length: width < 1200 ? 3 : 5 }, () => ({
       x: Math.random() * width,
       y: height * 0.16 + Math.random() * height * 0.58,
       t: Math.random() * 1000,
       life: Math.random() * 260 + 220,
       max: Math.random() * 88 + 70
     }));
-    scanBeams = Array.from({ length: width < 1200 ? 3 : 5 }, () => ({
+    scanBeams = Array.from({ length: width < 1200 ? 2 : 4 }, () => ({
       x: Math.random() * width,
-      speed: Math.random() * 0.55 + 0.35,
+      speed: Math.random() * 0.45 + 0.25,
       w: Math.random() * 90 + 80,
-      alpha: Math.random() * 0.055 + 0.035
+      alpha: Math.random() * 0.045 + 0.028
     }));
   }
 
@@ -133,6 +140,7 @@ function initHomeBackground() {
   }
 
   function drawMapGrid(time) {
+    if (isScrolling) return;
     const drift = (time * 0.014) % 58;
     ctx.save();
     ctx.lineWidth = 1;
@@ -154,10 +162,11 @@ function initHomeBackground() {
   }
 
   function updateEndpoints() {
+    const speed = isScrolling ? 0.35 : 1;
     for (const e of endpoints) {
-      e.x += e.vx;
-      e.y += e.vy;
-      e.pulse += 0.028;
+      e.x += e.vx * speed;
+      e.y += e.vy * speed;
+      e.pulse += 0.028 * speed;
       if (e.x < -30) e.x = width + 30;
       if (e.x > width + 30) e.x = -30;
       if (e.y < height * 0.08) e.y = height * 0.80;
@@ -166,6 +175,7 @@ function initHomeBackground() {
   }
 
   function drawNetwork() {
+    if (isScrolling) return;
     const maxDist = width < 1200 ? 150 : 180;
     const maxDistSq = maxDist * maxDist;
     ctx.save();
@@ -194,7 +204,7 @@ function initHomeBackground() {
       const a = endpoints[p.a];
       const b = endpoints[p.b];
       if (!a || !b) continue;
-      p.t += p.speed;
+      p.t += p.speed * (isScrolling ? 0.35 : 1);
       if (p.t >= 1) Object.assign(p, createPacket(false));
       const x = a.x + (b.x - a.x) * p.t;
       const y = a.y + (b.y - a.y) * p.t;
@@ -229,6 +239,7 @@ function initHomeBackground() {
   }
 
   function drawAlerts() {
+    if (isScrolling) return;
     ctx.save();
     for (const a of alerts) {
       a.t += 1.5;
@@ -248,6 +259,7 @@ function initHomeBackground() {
   }
 
   function drawScanBeams() {
+    if (isScrolling) return;
     ctx.save();
     for (const b of scanBeams) {
       const g = ctx.createLinearGradient(b.x - b.w, 0, b.x + b.w, 0);
@@ -263,6 +275,7 @@ function initHomeBackground() {
   }
 
   function drawHudLabels(time) {
+    if (isScrolling) return;
     ctx.save();
     ctx.font = "11px JetBrains Mono, monospace";
     ctx.fillStyle = "rgba(160,230,255,0.16)";
@@ -290,6 +303,10 @@ function initHomeBackground() {
   }
 
   function loop(time) {
+    if (document.hidden) {
+      requestAnimationFrame(loop);
+      return;
+    }
     if (!lastFrame || time - lastFrame >= frameInterval) {
       lastFrame = time;
       render(time);
@@ -298,6 +315,8 @@ function initHomeBackground() {
   }
 
   window.addEventListener("resize", debounce(createScene, 160), { passive: true });
+  window.addEventListener("scroll", setScrolling, { passive: true });
+  window.addEventListener("wheel", setScrolling, { passive: true });
   window.addEventListener("pointermove", (event) => {
     pointerX = event.clientX / window.innerWidth;
     pointerY = event.clientY / window.innerHeight;
@@ -315,34 +334,34 @@ function initReadingBackground(isArticlePage) {
   let height = 0;
   let dots = [];
   let lastFrame = 0;
-  const fps = isArticlePage ? 10 : 14;
+  const fps = isArticlePage ? 8 : 12;
   const frameInterval = 1000 / fps;
 
   function createScene() {
     ({ width, height } = fitCanvas(canvas, ctx));
-    dots = Array.from({ length: isArticlePage ? 12 : 18 }, () => ({
+    dots = Array.from({ length: isArticlePage ? 10 : 14 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.045,
-      vy: (Math.random() - 0.5) * 0.04,
+      vx: (Math.random() - 0.5) * 0.035,
+      vy: (Math.random() - 0.5) * 0.03,
       r: Math.random() * 1 + 0.45,
-      a: Math.random() * 0.10 + 0.045
+      a: Math.random() * 0.09 + 0.04
     }));
   }
 
   function render(time) {
     if (!document.body.contains(canvas)) return;
     ctx.clearRect(0, 0, width, height);
-    const t = time * 0.000055;
+    const t = time * 0.000045;
 
     const g1 = ctx.createRadialGradient(width * (0.22 + Math.sin(t) * 0.018), height * 0.16, 0, width * 0.22, height * 0.16, Math.min(width, height) * 0.55);
-    g1.addColorStop(0, "rgba(86, 199, 255, 0.065)");
+    g1.addColorStop(0, "rgba(86, 199, 255, 0.060)");
     g1.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = g1;
     ctx.fillRect(0, 0, width, height);
 
     const g2 = ctx.createRadialGradient(width * 0.82, height * (0.76 + Math.cos(t) * 0.018), 0, width * 0.82, height * 0.76, Math.min(width, height) * 0.55);
-    g2.addColorStop(0, "rgba(45, 212, 191, 0.038)");
+    g2.addColorStop(0, "rgba(45, 212, 191, 0.034)");
     g2.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = g2;
     ctx.fillRect(0, 0, width, height);
@@ -362,6 +381,10 @@ function initReadingBackground(isArticlePage) {
   }
 
   function loop(time) {
+    if (document.hidden) {
+      requestAnimationFrame(loop);
+      return;
+    }
     if (!lastFrame || time - lastFrame >= frameInterval) {
       lastFrame = time;
       render(time);
@@ -375,7 +398,7 @@ function initReadingBackground(isArticlePage) {
 }
 
 function removeOldBackgrounds() {
-  const selectors = ["#site-bg", "#network-bg", ".bg-orb", ".bg-radar", ".bg-sweep", ".bg-stars"];
+  const selectors = ["#site-bg", "#network-bg", ".bg-orb", ".bg-radar", ".bg-sweep", ".bg-stars", ".cmdk-overlay"];
   for (const selector of selectors) document.querySelectorAll(selector).forEach((element) => element.remove());
 }
 
@@ -422,41 +445,11 @@ function initCardTilt() {
   }
 }
 
-function initCommandPalette() {
-  if (document.querySelector(".cmdk-overlay")) return;
-  const overlay = document.createElement("div");
-  overlay.className = "cmdk-overlay";
-  overlay.innerHTML = `
-    <div class="cmdk-panel" role="dialog" aria-modal="true" aria-label="Command palette">
-      <div class="cmdk-head"><span>Command Center</span><kbd>Esc</kbd></div>
-      <a href="/" class="cmdk-item"><span>⌂</span><strong>Home</strong><em>Overview</em></a>
-      <a href="/writeups/" class="cmdk-item"><span>▣</span><strong>Writeups</strong><em>Labs & CTF</em></a>
-      <a href="/#projects" class="cmdk-item"><span>◇</span><strong>Projects</strong><em>Security builds</em></a>
-      <a href="/#contact" class="cmdk-item"><span>✉</span><strong>Contact</strong><em>Connect</em></a>
-      <a href="https://github.com/tngoc1810" class="cmdk-item"><span>⌘</span><strong>GitHub</strong><em>Source</em></a>
-    </div>`;
-  document.body.appendChild(overlay);
-
-  const open = () => overlay.classList.add("open");
-  const close = () => overlay.classList.remove("open");
-  document.addEventListener("keydown", (event) => {
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-      event.preventDefault();
-      open();
-    }
-    if (event.key === "Escape") close();
-  });
-  overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) close();
-  });
-  overlay.querySelectorAll("a").forEach((item) => item.addEventListener("click", close));
-}
-
 function initSocStatusBar() {
   if (document.querySelector(".soc-status")) return;
   const bar = document.createElement("div");
   bar.className = "soc-status";
-  bar.innerHTML = `<span class="soc-dot"></span><span>SOC Analyst Mode</span><span>Threat Hunting</span><span>CTF</span><span>Blue Team</span><kbd>Ctrl K</kbd>`;
+  bar.innerHTML = `<span class="soc-dot"></span><span>SOC Analyst Mode</span><span>Threat Hunting</span><span>CTF</span><span>Blue Team</span>`;
   document.body.appendChild(bar);
 }
 
