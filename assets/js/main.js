@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* =========================================================
    DUAL BACKGROUND SYSTEM
-   Home: aurora security lab theme.
+   Home: SOC threat map / defensive cybersecurity theme.
    Writeups: lightweight elegant reading background.
    ========================================================= */
 
@@ -55,67 +55,78 @@ function initHomeBackground() {
 
   let width = 0;
   let height = 0;
-  let stars = [];
-  let beams = [];
-  let nodes = [];
+  let endpoints = [];
+  let packets = [];
+  let alerts = [];
+  let scanBeams = [];
   let lastFrame = 0;
   let pointerX = 0.5;
   let pointerY = 0.5;
-  const fps = 32;
+  const fps = 34;
   const frameInterval = 1000 / fps;
 
   function createScene() {
     ({ width, height } = fitCanvas(canvas, ctx));
-
-    stars = Array.from({ length: width < 1200 ? 120 : 190 }, () => ({
+    endpoints = Array.from({ length: width < 1200 ? 34 : 56 }, (_, i) => ({
       x: Math.random() * width,
-      y: Math.random() * height,
-      r: Math.random() * 1.35 + 0.22,
-      a: Math.random() * 0.34 + 0.08,
-      tw: Math.random() * Math.PI * 2,
-      drift: Math.random() * 0.035 + 0.01
-    }));
-
-    beams = Array.from({ length: width < 1200 ? 7 : 11 }, (_, i) => ({
-      x: (i / (width < 1200 ? 6 : 10)) * width + (Math.random() - 0.5) * 80,
-      w: Math.random() * 90 + 80,
-      speed: Math.random() * 0.00035 + 0.00018,
-      phase: Math.random() * Math.PI * 2,
-      alpha: Math.random() * 0.07 + 0.045,
-      color: i % 4
-    }));
-
-    nodes = Array.from({ length: width < 1200 ? 26 : 42 }, (_, i) => ({
-      x: Math.random() * width,
-      y: Math.random() * height * 0.72,
-      vx: (Math.random() - 0.5) * 0.24,
-      vy: (Math.random() - 0.5) * 0.18,
-      r: Math.random() * 1.6 + 0.7,
+      y: height * 0.12 + Math.random() * height * 0.70,
+      vx: (Math.random() - 0.5) * 0.12,
+      vy: (Math.random() - 0.5) * 0.10,
+      r: Math.random() * 1.7 + 0.8,
       pulse: Math.random() * Math.PI * 2,
-      color: i % 4
+      type: i % 7 === 0 ? "alert" : i % 5 === 0 ? "asset" : "node"
+    }));
+
+    packets = Array.from({ length: width < 1200 ? 14 : 24 }, () => createPacket(true));
+    alerts = Array.from({ length: width < 1200 ? 4 : 7 }, () => ({
+      x: Math.random() * width,
+      y: height * 0.16 + Math.random() * height * 0.58,
+      t: Math.random() * 1000,
+      life: Math.random() * 260 + 220,
+      max: Math.random() * 88 + 70
+    }));
+    scanBeams = Array.from({ length: width < 1200 ? 3 : 5 }, () => ({
+      x: Math.random() * width,
+      speed: Math.random() * 0.55 + 0.35,
+      w: Math.random() * 90 + 80,
+      alpha: Math.random() * 0.055 + 0.035
     }));
   }
 
-  function drawNightSky(time) {
-    const t = time * 0.0001;
-    const bg = ctx.createLinearGradient(0, 0, 0, height);
-    bg.addColorStop(0, "#010512");
-    bg.addColorStop(0.35, "#06172d");
-    bg.addColorStop(0.72, "#03101f");
+  function createPacket(randomize = false) {
+    const a = Math.floor(Math.random() * Math.max(1, endpoints.length));
+    let b = Math.floor(Math.random() * Math.max(1, endpoints.length));
+    if (a === b) b = (b + 1) % Math.max(1, endpoints.length);
+    return {
+      a,
+      b,
+      t: randomize ? Math.random() : 0,
+      speed: Math.random() * 0.006 + 0.003,
+      size: Math.random() * 2 + 1,
+      color: Math.random() > 0.78 ? "amber" : "cyan"
+    };
+  }
+
+  function drawBackground(time) {
+    const t = time * 0.00012;
+    const bg = ctx.createLinearGradient(0, 0, width, height);
+    bg.addColorStop(0, "#010612");
+    bg.addColorStop(0.38, "#061a31");
+    bg.addColorStop(0.74, "#020d1d");
     bg.addColorStop(1, "#020816");
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
     const blooms = [
-      [width * (0.18 + Math.sin(t) * 0.04), height * 0.18, Math.min(width, height) * 0.70, "rgba(86,199,255,0.20)"],
-      [width * (0.82 + Math.cos(t) * 0.04), height * 0.22, Math.min(width, height) * 0.68, "rgba(45,212,191,0.15)"],
-      [width * 0.56, height * 0.78, Math.min(width, height) * 0.66, "rgba(251,191,36,0.075)"]
+      [width * (0.16 + Math.sin(t) * 0.04), height * 0.18, Math.min(width, height) * 0.70, "rgba(86,199,255,0.18)"],
+      [width * (0.86 + Math.cos(t) * 0.04), height * 0.30, Math.min(width, height) * 0.72, "rgba(45,212,191,0.13)"],
+      [width * 0.56, height * 0.88, Math.min(width, height) * 0.68, "rgba(251,191,36,0.075)"]
     ];
 
     for (const [x, y, radius, color] of blooms) {
       const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
       g.addColorStop(0, color);
-      g.addColorStop(0.45, "rgba(0,0,0,0)");
+      g.addColorStop(0.46, "rgba(0,0,0,0)");
       g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g;
       ctx.beginPath();
@@ -124,148 +135,161 @@ function initHomeBackground() {
     }
   }
 
-  function drawStars() {
-    for (const s of stars) {
-      s.tw += 0.018;
-      s.y += s.drift;
-      if (s.y > height + 10) {
-        s.y = -10;
-        s.x = Math.random() * width;
-      }
-      const alpha = s.a * (0.55 + Math.sin(s.tw) * 0.45);
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(215,252,255,${alpha})`;
-      ctx.fill();
-    }
-  }
-
-  function drawAurora(time) {
-    const t = time * 0.001;
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-
-    for (const b of beams) {
-      const color = b.color === 1 ? "45,212,191" : b.color === 2 ? "251,191,36" : "86,199,255";
-      const x = b.x + Math.sin(t * b.speed * 900 + b.phase) * 70 + (pointerX - 0.5) * 26;
-      const top = height * 0.08;
-      const bottom = height * 0.82;
-      const gradient = ctx.createLinearGradient(x, top, x + b.w * 0.5, bottom);
-      gradient.addColorStop(0, `rgba(${color},0)`);
-      gradient.addColorStop(0.18, `rgba(${color},${b.alpha * 0.55})`);
-      gradient.addColorStop(0.48, `rgba(${color},${b.alpha})`);
-      gradient.addColorStop(1, `rgba(${color},0)`);
-
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.moveTo(x - b.w * 0.7, top);
-      for (let y = top; y <= bottom; y += 34) {
-        const wave = Math.sin(y * 0.012 + t + b.phase) * 42;
-        ctx.lineTo(x + wave, y);
-      }
-      for (let y = bottom; y >= top; y -= 34) {
-        const wave = Math.sin(y * 0.012 + t + b.phase + 1.6) * 42;
-        ctx.lineTo(x + b.w + wave, y);
-      }
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    ctx.restore();
-  }
-
-  function drawLabGrid(time) {
-    const horizon = height * 0.70;
-    const vanishingX = width * (0.52 + (pointerX - 0.5) * 0.04);
+  function drawMapGrid(time) {
+    const drift = (time * 0.014) % 58;
     ctx.save();
     ctx.lineWidth = 1;
-
-    for (let i = 0; i < 18; i++) {
-      const y = horizon + Math.pow(i / 17, 1.85) * height * 0.34;
-      ctx.strokeStyle = `rgba(86,199,255,${0.13 * (1 - i / 20)})`;
+    for (let x = -58 + drift; x < width + 58; x += 58) {
+      ctx.strokeStyle = "rgba(124,240,255,0.045)";
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
+      ctx.moveTo(x + (pointerX - 0.5) * 18, 0);
+      ctx.lineTo(x + height * 0.12 + (pointerX - 0.5) * 18, height);
       ctx.stroke();
     }
-
-    for (let i = -14; i <= 14; i++) {
-      const bottomX = width * 0.5 + i * width * 0.072;
-      ctx.strokeStyle = "rgba(124,240,255,0.07)";
+    for (let y = -58 + drift; y < height + 58; y += 58) {
+      ctx.strokeStyle = "rgba(124,240,255,0.04)";
       ctx.beginPath();
-      ctx.moveTo(vanishingX, horizon);
-      ctx.lineTo(bottomX, height);
+      ctx.moveTo(0, y + (pointerY - 0.5) * 12);
+      ctx.lineTo(width, y - width * 0.04 + (pointerY - 0.5) * 12);
       ctx.stroke();
     }
-
     ctx.restore();
   }
 
-  function drawSecurityNodes() {
-    const maxDist = 135;
+  function updateEndpoints() {
+    for (const e of endpoints) {
+      e.x += e.vx;
+      e.y += e.vy;
+      e.pulse += 0.028;
+      if (e.x < -30) e.x = width + 30;
+      if (e.x > width + 30) e.x = -30;
+      if (e.y < height * 0.08) e.y = height * 0.80;
+      if (e.y > height * 0.83) e.y = height * 0.08;
+    }
+  }
+
+  function drawNetwork() {
+    const maxDist = width < 1200 ? 150 : 180;
     const maxDistSq = maxDist * maxDist;
     ctx.save();
-
-    for (let i = 0; i < nodes.length; i++) {
-      const a = nodes[i];
-      a.x += a.vx;
-      a.y += a.vy;
-      a.pulse += 0.028;
-      if (a.x < -30) a.x = width + 30;
-      if (a.x > width + 30) a.x = -30;
-      if (a.y < -30) a.y = height * 0.72;
-      if (a.y > height * 0.74) a.y = -30;
-
-      for (let j = i + 1; j < nodes.length; j++) {
-        const b = nodes[j];
+    for (let i = 0; i < endpoints.length; i++) {
+      const a = endpoints[i];
+      for (let j = i + 1; j < endpoints.length; j++) {
+        const b = endpoints[j];
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const distSq = dx * dx + dy * dy;
         if (distSq > maxDistSq) continue;
         const alpha = (1 - Math.sqrt(distSq) / maxDist) * 0.16;
-        ctx.strokeStyle = `rgba(124,240,255,${alpha})`;
+        ctx.strokeStyle = a.type === "alert" || b.type === "alert" ? `rgba(251,191,36,${alpha * 0.9})` : `rgba(124,240,255,${alpha})`;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.stroke();
       }
     }
-
-    for (const n of nodes) {
-      const color = n.color === 1 ? "45,212,191" : n.color === 2 ? "251,191,36" : "124,240,255";
-      const pulse = 0.7 + Math.sin(n.pulse) * 0.3;
-      ctx.beginPath();
-      ctx.arc(n.x + (pointerX - 0.5) * n.r * 9, n.y + (pointerY - 0.5) * n.r * 6, n.r * pulse, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${color},0.72)`;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, n.r * 4.2, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${color},0.055)`;
-      ctx.fill();
-    }
-
     ctx.restore();
   }
 
-  function drawScan(time) {
-    const y = (time * 0.055) % (height + 280) - 140;
-    const g = ctx.createLinearGradient(0, y - 85, 0, y + 85);
-    g.addColorStop(0, "rgba(124,240,255,0)");
-    g.addColorStop(0.5, "rgba(124,240,255,0.085)");
-    g.addColorStop(1, "rgba(124,240,255,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, y - 85, width, 170);
+  function drawPackets() {
+    ctx.save();
+    for (const p of packets) {
+      const a = endpoints[p.a];
+      const b = endpoints[p.b];
+      if (!a || !b) continue;
+      p.t += p.speed;
+      if (p.t >= 1) Object.assign(p, createPacket(false));
+      const x = a.x + (b.x - a.x) * p.t;
+      const y = a.y + (b.y - a.y) * p.t;
+      const color = p.color === "amber" ? "251,191,36" : "124,240,255";
+      ctx.beginPath();
+      ctx.arc(x, y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color},0.85)`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x, y, p.size * 4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color},0.08)`;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawEndpoints() {
+    ctx.save();
+    for (const e of endpoints) {
+      const color = e.type === "alert" ? "251,191,36" : e.type === "asset" ? "45,212,191" : "124,240,255";
+      const pulse = 0.72 + Math.sin(e.pulse) * 0.28;
+      ctx.beginPath();
+      ctx.arc(e.x + (pointerX - 0.5) * e.r * 8, e.y + (pointerY - 0.5) * e.r * 6, e.r * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color},0.78)`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.r * (e.type === "alert" ? 8 : 4.5), 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color},${e.type === "alert" ? 0.075 : 0.045})`;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawAlerts() {
+    ctx.save();
+    for (const a of alerts) {
+      a.t += 1.5;
+      const radius = (a.t % a.life) / a.life * a.max;
+      const opacity = Math.max(0, 1 - radius / a.max) * 0.22;
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(251,191,36,${opacity})`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      if (radius > a.max - 2) {
+        a.x = Math.random() * width;
+        a.y = height * 0.16 + Math.random() * height * 0.58;
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawScanBeams() {
+    ctx.save();
+    for (const b of scanBeams) {
+      const g = ctx.createLinearGradient(b.x - b.w, 0, b.x + b.w, 0);
+      g.addColorStop(0, "rgba(124,240,255,0)");
+      g.addColorStop(0.5, `rgba(124,240,255,${b.alpha})`);
+      g.addColorStop(1, "rgba(124,240,255,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(b.x - b.w, 0, b.w * 2, height);
+      b.x += b.speed;
+      if (b.x - b.w > width) b.x = -b.w;
+    }
+    ctx.restore();
+  }
+
+  function drawHudLabels(time) {
+    ctx.save();
+    ctx.font = "11px JetBrains Mono, monospace";
+    ctx.fillStyle = "rgba(160,230,255,0.16)";
+    const labels = ["SIEM", "EDR", "IDS", "SOC", "LOG", "IOC", "DNS", "FW"];
+    for (let i = 0; i < labels.length; i++) {
+      const x = ((i * 173 + time * 0.012) % (width + 120)) - 60;
+      const y = height * (0.18 + (i % 5) * 0.12);
+      ctx.fillText(labels[i], x, y);
+    }
+    ctx.restore();
   }
 
   function render(time) {
     if (!document.body.contains(canvas)) return;
     ctx.clearRect(0, 0, width, height);
-    drawNightSky(time);
-    drawStars();
-    drawAurora(time);
-    drawLabGrid(time);
-    drawSecurityNodes();
-    drawScan(time);
+    drawBackground(time);
+    drawMapGrid(time);
+    drawScanBeams();
+    drawHudLabels(time);
+    updateEndpoints();
+    drawNetwork();
+    drawPackets();
+    drawEndpoints();
+    drawAlerts();
   }
 
   function loop(time) {
@@ -376,7 +400,6 @@ function setupFilters() {
     const activeFilter = normalize(getActiveFilter());
     const keyword = normalize(searchInput ? searchInput.value : "");
     let visibleCount = 0;
-
     for (const card of cards) {
       const category = normalize(card.dataset.category);
       const text = normalize(card.dataset.text || card.textContent);
