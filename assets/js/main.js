@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* =========================================================
    DUAL BACKGROUND SYSTEM
-   Home: bold cinematic cyber hero.
+   Home: angular cinematic cyber city / neural grid, no circular portal.
    Writeups: lightweight elegant reading background.
    ========================================================= */
 
@@ -56,9 +56,9 @@ function initHomeBackground() {
   let width = 0;
   let height = 0;
   let stars = [];
-  let shards = [];
-  let streams = [];
-  let orbitNodes = [];
+  let towers = [];
+  let dataLines = [];
+  let drones = [];
   let comets = [];
   let lastFrame = 0;
   let pointerX = 0.5;
@@ -68,79 +68,86 @@ function initHomeBackground() {
 
   function createScene() {
     ({ width, height } = fitCanvas(canvas, ctx));
-    stars = Array.from({ length: width < 1200 ? 130 : 210 }, () => ({
+
+    stars = Array.from({ length: width < 1200 ? 120 : 190 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      r: Math.random() * 1.45 + 0.22,
-      a: Math.random() * 0.42 + 0.10,
+      r: Math.random() * 1.4 + 0.22,
+      a: Math.random() * 0.38 + 0.08,
       tw: Math.random() * Math.PI * 2,
-      drift: Math.random() * 0.07 + 0.018
+      drift: Math.random() * 0.055 + 0.015
     }));
 
-    shards = Array.from({ length: width < 1200 ? 52 : 82 }, (_, i) => ({
+    towers = Array.from({ length: width < 1200 ? 18 : 28 }, (_, i) => {
+      const w = Math.random() * 42 + 26;
+      const h = Math.random() * height * 0.34 + height * 0.16;
+      return {
+        x: (i / (width < 1200 ? 17 : 27)) * width + (Math.random() - 0.5) * 38,
+        w,
+        h,
+        depth: Math.random() * 0.6 + 0.4,
+        blink: Math.random() * Math.PI * 2,
+        color: i % 3
+      };
+    });
+
+    dataLines = Array.from({ length: width < 1200 ? 36 : 58 }, (_, i) => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      z: Math.random() * 1.1 + 0.25,
-      size: Math.random() * 42 + 18,
-      speed: Math.random() * 0.55 + 0.25,
-      angle: Math.random() * Math.PI,
-      spin: (Math.random() - 0.5) * 0.008,
-      hue: i % 4
+      len: Math.random() * 160 + 70,
+      speed: Math.random() * 1.2 + 0.55,
+      alpha: Math.random() * 0.18 + 0.06,
+      vertical: i % 3 !== 0,
+      color: i % 4
     }));
 
-    streams = Array.from({ length: width < 1200 ? 8 : 12 }, () => ({
+    drones = Array.from({ length: width < 1200 ? 18 : 30 }, (_, i) => ({
       x: Math.random() * width,
-      y: Math.random() * height,
-      len: Math.random() * 420 + 330,
-      speed: Math.random() * 1.15 + 0.75,
-      angle: -0.42 + Math.random() * 0.16,
-      alpha: Math.random() * 0.17 + 0.10
+      y: Math.random() * height * 0.72,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.25,
+      r: Math.random() * 1.8 + 0.7,
+      pulse: Math.random() * Math.PI * 2,
+      color: i % 4
     }));
 
     comets = Array.from({ length: width < 1200 ? 2 : 3 }, () => resetComet(true));
-
-    orbitNodes = Array.from({ length: 34 }, (_, i) => ({
-      angle: (Math.PI * 2 * i) / 34,
-      r: Math.min(width, height) * (0.13 + (i % 5) * 0.043),
-      speed: 0.00022 + (i % 5) * 0.00004,
-      size: 1.4 + (i % 4) * 0.48
-    }));
   }
 
   function resetComet(randomize = false) {
     return {
-      x: randomize ? Math.random() * width : -260,
-      y: randomize ? Math.random() * height * 0.8 : Math.random() * height * 0.45 + 40,
-      len: Math.random() * 360 + 380,
-      speed: Math.random() * 2.2 + 1.8,
-      alpha: Math.random() * 0.18 + 0.12,
-      angle: -0.33 + Math.random() * 0.08
+      x: randomize ? Math.random() * width : -280,
+      y: randomize ? Math.random() * height * 0.65 : Math.random() * height * 0.45 + 40,
+      len: Math.random() * 340 + 360,
+      speed: Math.random() * 2.0 + 1.6,
+      alpha: Math.random() * 0.16 + 0.12,
+      angle: -0.25 + Math.random() * 0.08
     };
   }
 
   function drawSpaceWash(time) {
-    const t = time * 0.00013;
+    const t = time * 0.00012;
     ctx.fillStyle = "#010512";
     ctx.fillRect(0, 0, width, height);
 
     const bg = ctx.createLinearGradient(0, 0, width, height);
     bg.addColorStop(0, "rgba(2, 8, 22, 1)");
-    bg.addColorStop(0.35, "rgba(4, 31, 57, 0.92)");
-    bg.addColorStop(0.72, "rgba(8, 18, 40, 0.9)");
+    bg.addColorStop(0.38, "rgba(4, 31, 57, 0.88)");
+    bg.addColorStop(0.76, "rgba(8, 18, 40, 0.92)");
     bg.addColorStop(1, "rgba(2, 8, 22, 1)");
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
     const blobs = [
-      [width * (0.20 + Math.sin(t) * 0.06), height * (0.15 + Math.cos(t * 1.2) * 0.05), Math.min(width, height) * 0.82, "rgba(86, 199, 255, 0.34)"],
-      [width * (0.82 + Math.cos(t * 0.9) * 0.05), height * (0.25 + Math.sin(t) * 0.05), Math.min(width, height) * 0.70, "rgba(45, 212, 191, 0.24)"],
-      [width * (0.56 + Math.sin(t * 0.7) * 0.05), height * (0.82 + Math.cos(t * 0.8) * 0.04), Math.min(width, height) * 0.72, "rgba(251, 191, 36, 0.16)"]
+      [width * (0.18 + Math.sin(t) * 0.04), height * 0.12, Math.min(width, height) * 0.75, "rgba(86, 199, 255, 0.25)"],
+      [width * (0.84 + Math.cos(t) * 0.04), height * 0.30, Math.min(width, height) * 0.70, "rgba(45, 212, 191, 0.17)"],
+      [width * 0.48, height * 0.92, Math.min(width, height) * 0.72, "rgba(251, 191, 36, 0.11)"]
     ];
 
     for (const [x, y, radius, color] of blobs) {
       const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
       g.addColorStop(0, color);
-      g.addColorStop(0.42, "rgba(0,0,0,0)");
+      g.addColorStop(0.48, "rgba(0,0,0,0)");
       g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g;
       ctx.beginPath();
@@ -151,13 +158,13 @@ function initHomeBackground() {
 
   function drawStars() {
     for (const s of stars) {
-      s.tw += 0.022;
+      s.tw += 0.02;
       s.y += s.drift;
       if (s.y > height + 10) {
         s.y = -10;
         s.x = Math.random() * width;
       }
-      const alpha = s.a * (0.55 + Math.sin(s.tw) * 0.45);
+      const alpha = s.a * (0.56 + Math.sin(s.tw) * 0.44);
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(215, 252, 255, ${alpha})`;
@@ -165,90 +172,156 @@ function initHomeBackground() {
     }
   }
 
-  function drawHeroPortal(time) {
-    const cx = width * (0.60 + (pointerX - 0.5) * 0.07);
-    const cy = height * (0.42 + (pointerY - 0.5) * 0.055);
-    const base = Math.min(width, height);
-
+  function drawPerspectiveGrid() {
+    const horizon = height * 0.68;
+    const vanishingX = width * (0.52 + (pointerX - 0.5) * 0.05);
     ctx.save();
-    ctx.translate(cx, cy);
+    ctx.lineWidth = 1;
 
-    const coreGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, base * 0.48);
-    coreGlow.addColorStop(0, "rgba(124, 240, 255, 0.40)");
-    coreGlow.addColorStop(0.28, "rgba(45, 140, 255, 0.18)");
-    coreGlow.addColorStop(0.65, "rgba(45, 212, 191, 0.06)");
-    coreGlow.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = coreGlow;
-    ctx.beginPath();
-    ctx.arc(0, 0, base * 0.48, 0, Math.PI * 2);
-    ctx.fill();
-
-    for (let i = 0; i < 9; i++) {
-      ctx.save();
-      ctx.rotate(time * (0.00016 + i * 0.00004));
-      ctx.scale(1, 0.32 + i * 0.027);
+    for (let i = 0; i < 22; i++) {
+      const y = horizon + Math.pow(i / 21, 1.9) * height * 0.36;
+      ctx.strokeStyle = `rgba(86, 199, 255, ${0.17 * (1 - i / 24)})`;
       ctx.beginPath();
-      ctx.arc(0, 0, base * (0.11 + i * 0.04), 0, Math.PI * 2);
-      ctx.strokeStyle = i % 3 === 0 ? `rgba(251, 191, 36, ${0.22 - i * 0.012})` : i % 2 === 0 ? `rgba(124, 240, 255, ${0.34 - i * 0.024})` : `rgba(45, 212, 191, ${0.25 - i * 0.018})`;
-      ctx.lineWidth = i < 2 ? 2.2 : 1;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    for (let i = 0; i < 44; i++) {
-      const angle = (Math.PI * 2 * i) / 44 + time * 0.00025;
-      const inner = base * 0.055;
-      const outer = base * (0.30 + (i % 6) * 0.016);
-      ctx.beginPath();
-      ctx.moveTo(Math.cos(angle) * inner, Math.sin(angle) * inner * 0.38);
-      ctx.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer * 0.38);
-      ctx.strokeStyle = i % 5 === 0 ? "rgba(251, 191, 36, 0.28)" : "rgba(124, 240, 255, 0.13)";
-      ctx.lineWidth = i % 5 === 0 ? 1.8 : 1;
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
       ctx.stroke();
     }
 
-    for (const n of orbitNodes) {
-      const a = n.angle + time * n.speed;
-      const x = Math.cos(a) * n.r;
-      const y = Math.sin(a) * n.r * 0.38;
+    for (let i = -18; i <= 18; i++) {
+      const bottomX = width * 0.5 + i * width * 0.058;
+      ctx.strokeStyle = "rgba(124, 240, 255, 0.085)";
       ctx.beginPath();
-      ctx.arc(x, y, n.size, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(210, 255, 255, 0.92)";
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(x, y, n.size * 4.2, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(86, 199, 255, 0.13)";
-      ctx.fill();
+      ctx.moveTo(vanishingX, horizon);
+      ctx.lineTo(bottomX, height);
+      ctx.stroke();
     }
 
     ctx.restore();
   }
 
-  function drawStreams() {
+  function drawCyberCity(time) {
+    const ground = height * 0.88;
     ctx.save();
-    ctx.lineCap = "round";
-    for (const s of streams) {
-      const dx = Math.cos(s.angle) * s.len;
-      const dy = Math.sin(s.angle) * s.len;
-      const g = ctx.createLinearGradient(s.x, s.y, s.x + dx, s.y + dy);
-      g.addColorStop(0, "rgba(124, 240, 255, 0)");
-      g.addColorStop(0.38, `rgba(124, 240, 255, ${s.alpha})`);
-      g.addColorStop(0.72, `rgba(251, 191, 36, ${s.alpha * 0.62})`);
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.strokeStyle = g;
-      ctx.lineWidth = 1.8;
+
+    for (const b of towers) {
+      b.blink += 0.035;
+      const px = b.x + (pointerX - 0.5) * b.depth * 34;
+      const py = ground - b.h + (pointerY - 0.5) * b.depth * 14;
+      const alpha = 0.16 + b.depth * 0.16;
+
+      const wall = ctx.createLinearGradient(px, py, px + b.w, ground);
+      wall.addColorStop(0, `rgba(86, 199, 255, ${0.045 + b.depth * 0.035})`);
+      wall.addColorStop(1, `rgba(2, 8, 22, ${0.40 + b.depth * 0.22})`);
+      ctx.fillStyle = wall;
       ctx.beginPath();
-      ctx.moveTo(s.x, s.y);
-      ctx.lineTo(s.x + dx, s.y + dy);
+      ctx.moveTo(px, ground);
+      ctx.lineTo(px + b.w * 0.12, py + b.w * 0.25);
+      ctx.lineTo(px + b.w * 0.88, py);
+      ctx.lineTo(px + b.w, ground);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = b.color === 1 ? `rgba(45, 212, 191, ${alpha})` : b.color === 2 ? `rgba(251, 191, 36, ${alpha * 0.75})` : `rgba(86, 199, 255, ${alpha})`;
+      ctx.lineWidth = 1;
       ctx.stroke();
 
-      s.x += s.speed;
-      s.y += Math.sin(s.angle) * s.speed;
-      if (s.x > width + s.len || s.y < -s.len) {
-        s.x = -s.len;
-        s.y = Math.random() * height + height * 0.25;
+      const rows = Math.floor(b.h / 28);
+      for (let r = 1; r < rows; r++) {
+        if ((r + Math.floor(b.blink)) % 3 !== 0) continue;
+        const wy = ground - r * 24;
+        ctx.fillStyle = b.color === 2 ? "rgba(251, 191, 36, 0.22)" : "rgba(124, 240, 255, 0.18)";
+        ctx.fillRect(px + b.w * 0.24, wy, b.w * 0.12, 2);
+        ctx.fillRect(px + b.w * 0.58, wy - 4, b.w * 0.14, 2);
       }
     }
+
+    ctx.restore();
+  }
+
+  function drawDataRain() {
+    ctx.save();
+    ctx.lineCap = "round";
+    for (const l of dataLines) {
+      const color = l.color === 1 ? "45, 212, 191" : l.color === 2 ? "251, 191, 36" : "86, 199, 255";
+      if (l.vertical) {
+        const g = ctx.createLinearGradient(l.x, l.y, l.x, l.y + l.len);
+        g.addColorStop(0, `rgba(${color}, 0)`);
+        g.addColorStop(0.45, `rgba(${color}, ${l.alpha})`);
+        g.addColorStop(1, `rgba(${color}, 0)`);
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(l.x, l.y);
+        ctx.lineTo(l.x, l.y + l.len);
+        ctx.stroke();
+        l.y += l.speed;
+        if (l.y > height + l.len) {
+          l.y = -l.len;
+          l.x = Math.random() * width;
+        }
+      } else {
+        const g = ctx.createLinearGradient(l.x, l.y, l.x + l.len, l.y);
+        g.addColorStop(0, `rgba(${color}, 0)`);
+        g.addColorStop(0.5, `rgba(${color}, ${l.alpha * 0.75})`);
+        g.addColorStop(1, `rgba(${color}, 0)`);
+        ctx.strokeStyle = g;
+        ctx.beginPath();
+        ctx.moveTo(l.x, l.y);
+        ctx.lineTo(l.x + l.len, l.y);
+        ctx.stroke();
+        l.x += l.speed * 0.9;
+        if (l.x > width + l.len) {
+          l.x = -l.len;
+          l.y = Math.random() * height;
+        }
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawNetworkDrones() {
+    const maxDist = 150;
+    const maxDistSq = maxDist * maxDist;
+    ctx.save();
+
+    for (let i = 0; i < drones.length; i++) {
+      const a = drones[i];
+      a.x += a.vx;
+      a.y += a.vy;
+      a.pulse += 0.03;
+      if (a.x < -30) a.x = width + 30;
+      if (a.x > width + 30) a.x = -30;
+      if (a.y < -30) a.y = height * 0.72;
+      if (a.y > height * 0.75) a.y = -30;
+
+      for (let j = i + 1; j < drones.length; j++) {
+        const b = drones[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq > maxDistSq) continue;
+        const alpha = (1 - Math.sqrt(distSq) / maxDist) * 0.18;
+        ctx.strokeStyle = `rgba(124, 240, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    }
+
+    for (const d of drones) {
+      const color = d.color === 1 ? "45, 212, 191" : d.color === 2 ? "251, 191, 36" : "124, 240, 255";
+      const pulse = 0.7 + Math.sin(d.pulse) * 0.3;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color}, 0.72)`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r * 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color}, 0.055)`;
+      ctx.fill();
+    }
+
     ctx.restore();
   }
 
@@ -275,68 +348,14 @@ function initHomeBackground() {
     ctx.restore();
   }
 
-  function drawShards(time) {
-    ctx.save();
-    ctx.lineWidth = 1;
-    for (const sh of shards) {
-      sh.x += sh.speed * sh.z;
-      sh.y -= sh.speed * sh.z * 0.42;
-      sh.angle += sh.spin;
-      if (sh.x > width + 90 || sh.y < -90) {
-        sh.x = -90;
-        sh.y = Math.random() * height + height * 0.22;
-      }
-
-      const color = sh.hue === 1 ? "45, 212, 191" : sh.hue === 2 ? "251, 191, 36" : "86, 199, 255";
-      ctx.save();
-      ctx.translate(sh.x + (pointerX - 0.5) * sh.z * 34, sh.y + (pointerY - 0.5) * sh.z * 22);
-      ctx.rotate(sh.angle);
-      ctx.beginPath();
-      ctx.moveTo(0, -sh.size * 0.5);
-      ctx.lineTo(sh.size * 0.82, 0);
-      ctx.lineTo(0, sh.size * 0.5);
-      ctx.closePath();
-      ctx.strokeStyle = `rgba(${color}, ${0.16 + sh.z * 0.16})`;
-      ctx.fillStyle = `rgba(${color}, ${0.025 + sh.z * 0.034})`;
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-    }
-    ctx.restore();
-  }
-
-  function drawDepthGrid() {
-    const horizon = height * 0.72;
-    const vanishingX = width * (0.60 + (pointerX - 0.5) * 0.045);
-    ctx.save();
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 18; i++) {
-      const y = horizon + Math.pow(i / 17, 1.85) * height * 0.34;
-      ctx.strokeStyle = `rgba(86, 199, 255, ${0.18 * (1 - i / 20)})`;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-    for (let i = -15; i <= 15; i++) {
-      const bottomX = width * 0.5 + i * width * 0.07;
-      ctx.strokeStyle = "rgba(124, 240, 255, 0.095)";
-      ctx.beginPath();
-      ctx.moveTo(vanishingX, horizon);
-      ctx.lineTo(bottomX, height);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
   function drawScan(time) {
-    const y = (time * 0.065) % (height + 300) - 150;
-    const g = ctx.createLinearGradient(0, y - 90, 0, y + 90);
+    const y = (time * 0.07) % (height + 320) - 160;
+    const g = ctx.createLinearGradient(0, y - 95, 0, y + 95);
     g.addColorStop(0, "rgba(124, 240, 255, 0)");
     g.addColorStop(0.5, "rgba(124, 240, 255, 0.10)");
     g.addColorStop(1, "rgba(124, 240, 255, 0)");
     ctx.fillStyle = g;
-    ctx.fillRect(0, y - 90, width, 180);
+    ctx.fillRect(0, y - 95, width, 190);
   }
 
   function render(time) {
@@ -344,11 +363,11 @@ function initHomeBackground() {
     ctx.clearRect(0, 0, width, height);
     drawSpaceWash(time);
     drawStars();
-    drawDepthGrid();
-    drawStreams();
+    drawPerspectiveGrid();
+    drawDataRain();
     drawComets();
-    drawHeroPortal(time);
-    drawShards(time);
+    drawNetworkDrones();
+    drawCyberCity(time);
     drawScan(time);
   }
 
