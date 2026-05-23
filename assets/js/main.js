@@ -8,9 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================================================
-   DUAL BACKGROUND SYSTEM
-   Home: SOC threat map / defensive cybersecurity theme.
-   Writeups: lightweight elegant reading background.
+   BACKGROUND SYSTEM
+   Use the same SOC threat map background for Home and Writeups.
    ========================================================= */
 
 function initCyberBackground() {
@@ -19,17 +18,9 @@ function initCyberBackground() {
 
   if (prefersReducedMotion || window.innerWidth <= 760) return;
 
-  const isArticlePage = Boolean(document.querySelector(".article-layout"));
-  const isWriteupsIndex = location.pathname.includes("writeups");
-
-  if (isArticlePage || isWriteupsIndex) {
-    document.body.classList.add("reading-bg-mode");
-    initReadingBackground(isArticlePage);
-    return;
-  }
-
-  document.body.classList.add("home-bg-mode");
-  initHomeBackground();
+  const isWriteupsPage = location.pathname.includes("writeups");
+  document.body.classList.add(isWriteupsPage ? "writeups-bg-mode" : "home-bg-mode");
+  initHomeBackground(isWriteupsPage);
 }
 
 function createBgCanvas() {
@@ -52,7 +43,7 @@ function fitCanvas(canvas, ctx) {
   return { width, height, dpr };
 }
 
-function initHomeBackground() {
+function initHomeBackground(isWriteupsPage = false) {
   const { canvas, ctx } = createBgCanvas();
   if (!ctx) return;
 
@@ -67,7 +58,7 @@ function initHomeBackground() {
   let pointerY = 0.5;
   let isScrolling = false;
   let scrollTimer = null;
-  const fps = 30;
+  const fps = isWriteupsPage ? 24 : 30;
   const frameInterval = 1000 / fps;
 
   function setScrolling() {
@@ -78,7 +69,12 @@ function initHomeBackground() {
 
   function createScene() {
     ({ width, height } = fitCanvas(canvas, ctx));
-    endpoints = Array.from({ length: width < 1200 ? 30 : 48 }, (_, i) => ({
+    const nodeCount = isWriteupsPage ? (width < 1200 ? 24 : 38) : (width < 1200 ? 30 : 48);
+    const packetCount = isWriteupsPage ? (width < 1200 ? 9 : 15) : (width < 1200 ? 12 : 20);
+    const alertCount = isWriteupsPage ? (width < 1200 ? 2 : 4) : (width < 1200 ? 3 : 5);
+    const beamCount = isWriteupsPage ? (width < 1200 ? 2 : 3) : (width < 1200 ? 2 : 4);
+
+    endpoints = Array.from({ length: nodeCount }, (_, i) => ({
       x: Math.random() * width,
       y: height * 0.12 + Math.random() * height * 0.70,
       vx: (Math.random() - 0.5) * 0.12,
@@ -88,15 +84,15 @@ function initHomeBackground() {
       type: i % 7 === 0 ? "alert" : i % 5 === 0 ? "asset" : "node"
     }));
 
-    packets = Array.from({ length: width < 1200 ? 12 : 20 }, () => createPacket(true));
-    alerts = Array.from({ length: width < 1200 ? 3 : 5 }, () => ({
+    packets = Array.from({ length: packetCount }, () => createPacket(true));
+    alerts = Array.from({ length: alertCount }, () => ({
       x: Math.random() * width,
       y: height * 0.16 + Math.random() * height * 0.58,
       t: Math.random() * 1000,
       life: Math.random() * 260 + 220,
       max: Math.random() * 88 + 70
     }));
-    scanBeams = Array.from({ length: width < 1200 ? 2 : 4 }, () => ({
+    scanBeams = Array.from({ length: beamCount }, () => ({
       x: Math.random() * width,
       speed: Math.random() * 0.45 + 0.25,
       w: Math.random() * 90 + 80,
@@ -322,77 +318,6 @@ function initHomeBackground() {
     pointerY = event.clientY / window.innerHeight;
   }, { passive: true });
 
-  createScene();
-  requestAnimationFrame(loop);
-}
-
-function initReadingBackground(isArticlePage) {
-  const { canvas, ctx } = createBgCanvas();
-  if (!ctx) return;
-
-  let width = 0;
-  let height = 0;
-  let dots = [];
-  let lastFrame = 0;
-  const fps = isArticlePage ? 8 : 12;
-  const frameInterval = 1000 / fps;
-
-  function createScene() {
-    ({ width, height } = fitCanvas(canvas, ctx));
-    dots = Array.from({ length: isArticlePage ? 10 : 14 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.035,
-      vy: (Math.random() - 0.5) * 0.03,
-      r: Math.random() * 1 + 0.45,
-      a: Math.random() * 0.09 + 0.04
-    }));
-  }
-
-  function render(time) {
-    if (!document.body.contains(canvas)) return;
-    ctx.clearRect(0, 0, width, height);
-    const t = time * 0.000045;
-
-    const g1 = ctx.createRadialGradient(width * (0.22 + Math.sin(t) * 0.018), height * 0.16, 0, width * 0.22, height * 0.16, Math.min(width, height) * 0.55);
-    g1.addColorStop(0, "rgba(86, 199, 255, 0.060)");
-    g1.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g1;
-    ctx.fillRect(0, 0, width, height);
-
-    const g2 = ctx.createRadialGradient(width * 0.82, height * (0.76 + Math.cos(t) * 0.018), 0, width * 0.82, height * 0.76, Math.min(width, height) * 0.55);
-    g2.addColorStop(0, "rgba(45, 212, 191, 0.034)");
-    g2.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g2;
-    ctx.fillRect(0, 0, width, height);
-
-    for (const d of dots) {
-      d.x += d.vx;
-      d.y += d.vy;
-      if (d.x < -20) d.x = width + 20;
-      if (d.x > width + 20) d.x = -20;
-      if (d.y < -20) d.y = height + 20;
-      if (d.y > height + 20) d.y = -20;
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(150, 235, 255, ${d.a})`;
-      ctx.fill();
-    }
-  }
-
-  function loop(time) {
-    if (document.hidden) {
-      requestAnimationFrame(loop);
-      return;
-    }
-    if (!lastFrame || time - lastFrame >= frameInterval) {
-      lastFrame = time;
-      render(time);
-    }
-    requestAnimationFrame(loop);
-  }
-
-  window.addEventListener("resize", debounce(createScene, 180), { passive: true });
   createScene();
   requestAnimationFrame(loop);
 }
