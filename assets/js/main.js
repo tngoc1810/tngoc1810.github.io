@@ -5,8 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================================================
-   PREMIUM CYBER BACKGROUND
-   Canvas-only, FPS capped, disabled on small screens and reduced motion.
+   CINEMATIC CYBER MESH BACKGROUND
+   Smooth canvas animation: aurora ribbons, node mesh, scanlines, and stars.
+   No libraries. FPS capped. Disabled on mobile/reduced-motion.
    ========================================================= */
 
 function initCyberBackground() {
@@ -33,14 +34,14 @@ function initCyberBackground() {
   let width = 0;
   let height = 0;
   let dpr = 1;
-  let particles = [];
-  let streams = [];
-  let pulses = [];
+  let nodes = [];
+  let stars = [];
+  let streaks = [];
   let lastFrame = 0;
   let isScrolling = false;
   let scrollTimer = null;
   const isArticlePage = Boolean(document.querySelector(".article-layout"));
-  const fps = isArticlePage ? 20 : 28;
+  const fps = isArticlePage ? 20 : 30;
   const frameInterval = 1000 / fps;
 
   function shouldDisableCanvas() {
@@ -54,28 +55,12 @@ function initCyberBackground() {
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
       isScrolling = false;
-    }, 160);
+    }, 150);
   }
 
   window.addEventListener("scroll", setScrolling, { passive: true });
   window.addEventListener("wheel", setScrolling, { passive: true });
   window.addEventListener("touchmove", setScrolling, { passive: true });
-
-  function particleCount() {
-    if (isArticlePage) {
-      if (width < 1000) return 16;
-      return 22;
-    }
-    if (width < 1000) return 24;
-    if (width < 1500) return 34;
-    return 42;
-  }
-
-  function streamCount() {
-    if (isArticlePage) return 4;
-    if (width < 1000) return 5;
-    return 7;
-  }
 
   function resizeCanvas() {
     if (shouldDisableCanvas()) {
@@ -85,7 +70,7 @@ function initCyberBackground() {
 
     width = window.innerWidth;
     height = window.innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 1.35);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.3);
 
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
@@ -97,198 +82,217 @@ function initCyberBackground() {
   }
 
   function createScene() {
-    const count = particleCount();
-    particles = Array.from({ length: count }, (_, index) => ({
+    const nodeCount = isArticlePage ? 18 : width < 1200 ? 32 : 44;
+    const starCount = isArticlePage ? 34 : width < 1200 ? 55 : 78;
+    const streakCount = isArticlePage ? 3 : 5;
+
+    nodes = Array.from({ length: nodeCount }, (_, i) => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.18,
-      vy: (Math.random() - 0.5) * 0.18,
-      r: Math.random() * 1.45 + 0.75,
-      alpha: Math.random() * 0.24 + 0.18,
+      vx: (Math.random() - 0.5) * 0.16,
+      vy: (Math.random() - 0.5) * 0.12,
+      r: Math.random() * 1.6 + 0.75,
       phase: Math.random() * Math.PI * 2,
-      group: index % 3
+      hue: i % 4
     }));
 
-    streams = Array.from({ length: streamCount() }, () => ({
+    stars = Array.from({ length: starCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      len: Math.random() * 180 + 150,
-      speed: Math.random() * 0.42 + 0.22,
-      alpha: Math.random() * 0.08 + 0.035,
-      angle: -0.58 + Math.random() * 0.18
+      r: Math.random() * 1.15 + 0.25,
+      a: Math.random() * 0.28 + 0.08,
+      twinkle: Math.random() * Math.PI * 2
     }));
 
-    pulses = Array.from({ length: isArticlePage ? 1 : 2 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      t: Math.random() * 1000,
-      speed: Math.random() * 0.55 + 0.35,
-      max: Math.min(width, height) * (Math.random() * 0.18 + 0.22)
-    }));
+    streaks = Array.from({ length: streakCount }, () => createStreak(true));
   }
 
-  function drawAurora(time) {
-    const t = time * 0.00018;
-    const x1 = width * (0.25 + Math.sin(t) * 0.045);
-    const y1 = height * (0.25 + Math.cos(t * 1.15) * 0.035);
-    const x2 = width * (0.78 + Math.cos(t * 0.9) * 0.045);
-    const y2 = height * (0.18 + Math.sin(t * 1.1) * 0.04);
-    const x3 = width * (0.56 + Math.sin(t * 0.7) * 0.04);
-    const y3 = height * (0.78 + Math.cos(t * 0.8) * 0.035);
+  function createStreak(randomize = false) {
+    return {
+      x: randomize ? Math.random() * width : -160,
+      y: Math.random() * height,
+      len: Math.random() * 220 + 220,
+      speed: Math.random() * 0.8 + 0.45,
+      angle: -0.38 + Math.random() * 0.12,
+      alpha: Math.random() * 0.08 + 0.05
+    };
+  }
 
-    for (const orb of [
-      [x1, y1, Math.min(width, height) * 0.55, "rgba(124, 240, 255, 0.10)", "rgba(45, 140, 255, 0.02)"],
-      [x2, y2, Math.min(width, height) * 0.50, "rgba(45, 140, 255, 0.11)", "rgba(124, 240, 255, 0.015)"],
-      [x3, y3, Math.min(width, height) * 0.58, "rgba(45, 212, 191, 0.07)", "rgba(0, 0, 0, 0)"]
-    ]) {
-      const [x, y, radius, inner, outer] = orb;
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-      gradient.addColorStop(0, inner);
-      gradient.addColorStop(0.48, outer);
-      gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = gradient;
+  function drawBackgroundWash(time) {
+    const t = time * 0.00012;
+
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, "rgba(3, 8, 24, 0.55)");
+    gradient.addColorStop(0.42, "rgba(5, 20, 42, 0.18)");
+    gradient.addColorStop(1, "rgba(2, 8, 22, 0.55)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    const auroras = [
+      [width * (0.18 + Math.sin(t) * 0.04), height * (0.16 + Math.cos(t * 1.3) * 0.05), Math.min(width, height) * 0.55, "rgba(86, 199, 255, 0.105)"],
+      [width * (0.84 + Math.cos(t * 0.8) * 0.05), height * (0.22 + Math.sin(t) * 0.04), Math.min(width, height) * 0.48, "rgba(45, 212, 191, 0.075)"],
+      [width * (0.50 + Math.sin(t * 0.7) * 0.05), height * (0.82 + Math.cos(t * 0.9) * 0.04), Math.min(width, height) * 0.62, "rgba(45, 140, 255, 0.095)"]
+    ];
+
+    for (const [x, y, radius, color] of auroras) {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      g.addColorStop(0, color);
+      g.addColorStop(0.5, "rgba(0, 0, 0, 0)");
+      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
-  function drawGrid(time) {
+  function drawHorizonGrid(time) {
     if (isScrolling) return;
 
-    const gap = 64;
-    const drift = (time * 0.012) % gap;
+    const horizon = height * 0.72;
+    const vanishingX = width * 0.52 + Math.sin(time * 0.00018) * 20;
+    const baseAlpha = isArticlePage ? 0.055 : 0.09;
+
     ctx.save();
-    ctx.globalAlpha = isArticlePage ? 0.10 : 0.16;
-    ctx.strokeStyle = "rgba(124, 240, 255, 0.16)";
     ctx.lineWidth = 1;
 
-    for (let x = -gap + drift; x < width + gap; x += gap) {
+    for (let i = 0; i < 15; i++) {
+      const y = horizon + Math.pow(i / 14, 1.8) * height * 0.34;
+      const alpha = baseAlpha * (1 - i / 18);
+      ctx.strokeStyle = `rgba(124, 240, 255, ${alpha})`;
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x + height * 0.16, height);
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
       ctx.stroke();
     }
 
-    for (let y = -gap + drift; y < height + gap; y += gap) {
+    for (let i = -10; i <= 10; i++) {
+      const bottomX = width * 0.5 + i * width * 0.09;
+      ctx.strokeStyle = `rgba(86, 199, 255, ${baseAlpha * 0.9})`;
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y - width * 0.08);
+      ctx.moveTo(vanishingX, horizon);
+      ctx.lineTo(bottomX, height);
       ctx.stroke();
     }
 
     ctx.restore();
   }
 
-  function updateParticles() {
+  function drawStars(time) {
+    ctx.save();
+    for (const s of stars) {
+      s.twinkle += 0.018;
+      const alpha = s.a * (0.68 + Math.sin(s.twinkle) * 0.32);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(190, 245, 255, ${alpha})`;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function updateNodes() {
     const speed = isScrolling ? 0.18 : 1;
-    for (const p of particles) {
-      p.x += p.vx * speed;
-      p.y += p.vy * speed;
-      p.phase += 0.012 * speed;
-      if (p.x < -24) p.x = width + 24;
-      if (p.x > width + 24) p.x = -24;
-      if (p.y < -24) p.y = height + 24;
-      if (p.y > height + 24) p.y = -24;
+    for (const n of nodes) {
+      n.x += n.vx * speed;
+      n.y += n.vy * speed;
+      n.phase += 0.012 * speed;
+      if (n.x < -30) n.x = width + 30;
+      if (n.x > width + 30) n.x = -30;
+      if (n.y < -30) n.y = height + 30;
+      if (n.y > height + 30) n.y = -30;
     }
   }
 
-  function drawParticles() {
-    const maxDistance = isArticlePage ? 92 : 132;
+  function drawMesh() {
+    const maxDistance = isArticlePage ? 95 : 138;
     const maxDistanceSq = maxDistance * maxDistance;
 
+    ctx.save();
+
     if (!isScrolling) {
-      for (let i = 0; i < particles.length; i++) {
-        const a = particles[i];
-        for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          if (a.group !== b.group && Math.random() > 0.35) continue;
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
           const dx = a.x - b.x;
           const dy = a.y - b.y;
           const distSq = dx * dx + dy * dy;
-          if (distSq < maxDistanceSq) {
-            const distance = Math.sqrt(distSq);
-            const opacity = (1 - distance / maxDistance) * (isArticlePage ? 0.09 : 0.17);
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(90, 225, 255, ${opacity})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
+          if (distSq > maxDistanceSq) continue;
+
+          const distance = Math.sqrt(distSq);
+          const alpha = (1 - distance / maxDistance) * (isArticlePage ? 0.08 : 0.15);
+          const color = a.hue === 1 ? "45, 212, 191" : a.hue === 2 ? "251, 191, 36" : "86, 199, 255";
+
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(${color}, ${alpha})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
         }
       }
     }
 
-    for (const p of particles) {
-      const pulse = Math.sin(p.phase) * 0.25 + 0.75;
+    for (const n of nodes) {
+      const pulse = 0.72 + Math.sin(n.phase) * 0.28;
+      const color = n.hue === 1 ? "45, 212, 191" : n.hue === 2 ? "251, 191, 36" : "130, 240, 255";
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(150, 245, 255, ${p.alpha})`;
+      ctx.arc(n.x, n.y, n.r * pulse, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${color}, 0.42)`;
       ctx.fill();
     }
+
+    ctx.restore();
   }
 
-  function drawStreams() {
+  function drawStreaks() {
     if (isScrolling || isArticlePage) return;
 
     ctx.save();
     ctx.lineCap = "round";
-    for (const s of streams) {
+    for (const s of streaks) {
       const dx = Math.cos(s.angle) * s.len;
       const dy = Math.sin(s.angle) * s.len;
-      const gradient = ctx.createLinearGradient(s.x, s.y, s.x + dx, s.y + dy);
-      gradient.addColorStop(0, "rgba(124, 240, 255, 0)");
-      gradient.addColorStop(0.5, `rgba(124, 240, 255, ${s.alpha})`);
-      gradient.addColorStop(1, "rgba(45, 140, 255, 0)");
-      ctx.strokeStyle = gradient;
-      ctx.lineWidth = 1.2;
+      const g = ctx.createLinearGradient(s.x, s.y, s.x + dx, s.y + dy);
+      g.addColorStop(0, "rgba(124, 240, 255, 0)");
+      g.addColorStop(0.55, `rgba(124, 240, 255, ${s.alpha})`);
+      g.addColorStop(1, "rgba(251, 191, 36, 0)");
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
       ctx.moveTo(s.x, s.y);
       ctx.lineTo(s.x + dx, s.y + dy);
       ctx.stroke();
 
       s.x += s.speed;
-      s.y -= s.speed * 0.55;
-      if (s.x > width + s.len || s.y < -s.len) {
-        s.x = -s.len;
-        s.y = Math.random() * height + height * 0.2;
-      }
+      s.y += Math.sin(s.angle) * s.speed;
+      if (s.x > width + s.len || s.y < -s.len) Object.assign(s, createStreak(false));
     }
     ctx.restore();
   }
 
-  function drawPulses() {
-    if (isScrolling) return;
-
-    ctx.save();
-    for (const pulse of pulses) {
-      pulse.t += pulse.speed;
-      const radius = pulse.t % pulse.max;
-      const opacity = Math.max(0, 1 - radius / pulse.max) * (isArticlePage ? 0.08 : 0.12);
-      ctx.beginPath();
-      ctx.arc(pulse.x, pulse.y, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(124, 240, 255, ${opacity})`;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      if (radius > pulse.max - 2) {
-        pulse.x = Math.random() * width;
-        pulse.y = Math.random() * height;
-      }
-    }
-    ctx.restore();
+  function drawScanline(time) {
+    if (isScrolling || isArticlePage) return;
+    const y = (time * 0.035) % (height + 180) - 90;
+    const g = ctx.createLinearGradient(0, y - 45, 0, y + 45);
+    g.addColorStop(0, "rgba(124, 240, 255, 0)");
+    g.addColorStop(0.5, "rgba(124, 240, 255, 0.055)");
+    g.addColorStop(1, "rgba(124, 240, 255, 0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, y - 45, width, 90);
   }
 
   function render(time) {
     if (!document.body.contains(canvas)) return;
     ctx.clearRect(0, 0, width, height);
-    drawAurora(time);
-    drawGrid(time);
-    drawStreams();
-    drawPulses();
-    updateParticles();
-    drawParticles();
+    drawBackgroundWash(time);
+    drawStars(time);
+    drawHorizonGrid(time);
+    drawStreaks();
+    updateNodes();
+    drawMesh();
+    drawScanline(time);
   }
 
   function loop(time) {
@@ -404,11 +408,6 @@ function initTocActiveHighlight() {
   window.addEventListener("resize", debounce(setActiveToc, 120), { passive: true });
 }
 
-/* =========================================================
-   OPTIONAL CODE COPY BUTTON SUPPORT
-   Works if your HTML has buttons with onclick="copyCode(this)".
-   ========================================================= */
-
 function copyCode(button) {
   const wrapper = button.closest(".code-block-wrapper");
   const code = wrapper ? wrapper.querySelector("pre code") : null;
@@ -432,10 +431,6 @@ function copyCode(button) {
 }
 
 window.copyCode = copyCode;
-
-/* =========================================================
-   UTILITIES
-   ========================================================= */
 
 function debounce(fn, wait = 100) {
   let timer = null;
