@@ -19,7 +19,6 @@
   --green: #2dd4bf;
   --amber: #fbbf24;
   --danger: #fb7185;
-  --purple: #a78bfa;
   --orange: #fb923c;
   --radius: 26px;
   --gradient: linear-gradient(135deg, #7cf0ff 0%, #56c7ff 42%, #2d8cff 100%);
@@ -148,12 +147,12 @@ img { max-width: 100%; display: block; }
 .card:nth-child(6n+1) { --accent:#56c7ff; --accent2:#2d8cff; }
 .card:nth-child(6n+2) { --accent:#2dd4bf; --accent2:#22c55e; }
 .card:nth-child(6n+3) { --accent:#fbbf24; --accent2:#fb923c; }
-.card:nth-child(6n+4) { --accent:#a78bfa; --accent2:#7c3aed; }
+.card:nth-child(6n+4) { --accent:#38bdf8; --accent2:#0ea5e9; }
 .card:nth-child(6n+5) { --accent:#fb7185; --accent2:#f43f5e; }
 .card:nth-child(6n) { --accent:#38bdf8; --accent2:#06b6d4; }
 .card[href*="soc"], .card[data-category*="soc"] { --accent:#38bdf8; --accent2:#2563eb; }
-.card[href*="network"], .card[data-category*="network"], .card:has(.tag:nth-child(1):contains("Wireshark")) { --accent:#2dd4bf; --accent2:#10b981; }
-.card[href*="reverse"], .card[data-category*="reverse"], .card[href*="ctf"] { --accent:#a78bfa; --accent2:#7c3aed; }
+.card[href*="network"], .card[data-category*="network"] { --accent:#2dd4bf; --accent2:#10b981; }
+.card[href*="reverse"], .card[data-category*="reverse"], .card[href*="ctf"] { --accent:#fbbf24; --accent2:#fb923c; }
 .card[href*="malware"], .card[data-category*="malware"] { --accent:#fb7185; --accent2:#ef4444; }
 .card[href*="project"], .card[data-category*="project"] { --accent:#fbbf24; --accent2:#fb923c; }
 .card[href*="contact"] { --accent:#2dd4bf; --accent2:#06b6d4; }
