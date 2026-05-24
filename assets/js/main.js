@@ -332,9 +332,22 @@ function removeOldBackgrounds() {
    ========================================================= */
 
 function initScrollReveal() {
-  const items = document.querySelectorAll(".hero-copy, .profile-card, .section, .card, .article-card, .toc");
-  if (!items.length || !('IntersectionObserver' in window)) return;
+  const items = Array.from(document.querySelectorAll(".hero-copy, .profile-card, .section, .card, .article-card, .toc"));
+  if (!items.length) return;
+
+  // Fail-safe: content must never stay invisible if IntersectionObserver is blocked,
+  // delayed, or a card was hidden/shown by the writeup filters before being observed.
+  function revealAll() {
+    for (const item of items) item.classList.add("is-visible");
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    revealAll();
+    return;
+  }
+
   items.forEach((item) => item.classList.add("reveal-item"));
+
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (entry.isIntersecting) {
@@ -342,8 +355,11 @@ function initScrollReveal() {
         observer.unobserve(entry.target);
       }
     }
-  }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+  }, { threshold: 0.05, rootMargin: "0px 0px 120px 0px" });
+
   items.forEach((item) => observer.observe(item));
+  window.addEventListener("load", () => setTimeout(revealAll, 600), { once: true });
+  setTimeout(revealAll, 1500);
 }
 
 function initCardTilt() {
@@ -403,8 +419,11 @@ function setupFilters() {
       const textMatch = !keyword || text.includes(keyword);
       if (categoryMatch && textMatch) {
         card.classList.remove("hidden");
+        card.classList.add("is-visible");
         visibleCount++;
-      } else card.classList.add("hidden");
+      } else {
+        card.classList.add("hidden");
+      }
     }
     if (emptyState) emptyState.style.display = visibleCount === 0 ? "block" : "none";
   }
