@@ -9,18 +9,77 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* =========================================================
    BACKGROUND SYSTEM
-   Use the same SOC threat map background for Home and Writeups.
+   Home uses animated SOC map. Writeups use a calmer reading background.
    ========================================================= */
 
 function initCyberBackground() {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   removeOldBackgrounds();
 
-  if (prefersReducedMotion || window.innerWidth <= 760) return;
-
   const isWriteupsPage = location.pathname.includes("writeups");
   document.body.classList.add(isWriteupsPage ? "writeups-bg-mode" : "home-bg-mode");
-  initHomeBackground(isWriteupsPage);
+
+  if (isWriteupsPage) {
+    initWriteupsReadingBackground();
+    return;
+  }
+
+  if (prefersReducedMotion || window.innerWidth <= 760) return;
+  initHomeBackground(false);
+}
+
+function initWriteupsReadingBackground() {
+  if (document.getElementById("writeups-reading-bg-style")) return;
+
+  const style = document.createElement("style");
+  style.id = "writeups-reading-bg-style";
+  style.textContent = `
+    body.writeups-bg-mode {
+      background:
+        radial-gradient(circle at 12% 8%, rgba(56,189,248,.10), transparent 28%),
+        radial-gradient(circle at 86% 18%, rgba(168,85,247,.11), transparent 30%),
+        radial-gradient(circle at 55% 92%, rgba(20,184,166,.08), transparent 34%),
+        linear-gradient(180deg, #030712 0%, #07111f 42%, #0b1020 100%) !important;
+    }
+
+    body.writeups-bg-mode::before {
+      opacity: .45;
+      background:
+        linear-gradient(rgba(148,163,184,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,.03) 1px, transparent 1px),
+        radial-gradient(circle at 20% 20%, rgba(56,189,248,.08), transparent 30%),
+        radial-gradient(circle at 78% 35%, rgba(168,85,247,.08), transparent 34%) !important;
+      background-size: 44px 44px, 44px 44px, 900px 900px, 960px 960px !important;
+      animation: writeupGridDrift 55s linear infinite !important;
+    }
+
+    body.writeups-bg-mode::after {
+      opacity: .22;
+      width: min(680px, 84vw);
+      height: min(680px, 84vw);
+      background:
+        radial-gradient(circle, transparent 0 34%, rgba(56,189,248,.08) 34.4%, transparent 35.2%, transparent 58%, rgba(168,85,247,.055) 58.4%, transparent 59.2%, transparent 100%),
+        conic-gradient(from 150deg, transparent 0deg, rgba(56,189,248,.08) 26deg, rgba(168,85,247,.06) 54deg, transparent 86deg, transparent 360deg) !important;
+      animation: writeupSlowRotate 44s linear infinite !important;
+    }
+
+    body.writeups-bg-mode .glass-card,
+    body.writeups-bg-mode .section-card,
+    body.writeups-bg-mode .toc,
+    body.writeups-bg-mode .glass,
+    body.writeups-bg-mode .card {
+      background-color: rgba(6, 13, 27, .72);
+    }
+
+    @keyframes writeupGridDrift {
+      to { background-position: 44px 44px, 44px 44px, 120px -90px, -120px 110px; }
+    }
+
+    @keyframes writeupSlowRotate {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 function createBgCanvas() {
