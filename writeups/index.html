@@ -373,5 +373,15 @@
   </main>
 
   <script src="/assets/js/main.js"></script>
+  <script>
+    function initCyberBackground() {
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      removeOldBackgrounds();
+      document.body.classList.remove("writeups-bg-mode");
+      document.body.classList.add("home-bg-mode");
+      if (prefersReducedMotion || window.innerWidth <= 760) return;
+      initHomeBackground(false);
+    }
+  </script>
 </body>
 </html>
