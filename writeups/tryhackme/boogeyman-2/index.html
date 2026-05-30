@@ -10,72 +10,66 @@
   <link rel="stylesheet" href="/assets/css/style.css">
   <style>
     @media (min-width:1101px){.boogeyman-page .article-layout{display:grid!important;grid-template-columns:300px minmax(0,1fr)!important;gap:34px!important;align-items:start!important;width:min(1280px,calc(100% - 48px))!important;max-width:1280px!important;margin:0 auto!important}.boogeyman-page .toc{position:sticky!important;top:96px!important;width:300px!important;height:calc(100vh - 118px)!important;max-height:calc(100vh - 118px)!important;margin:0!important;padding:24px 22px!important;overflow-y:auto!important;border:1px solid rgba(56,189,248,.24)!important;border-radius:34px!important;background:linear-gradient(180deg,rgba(5,30,48,.92),rgba(5,16,36,.86))!important}.boogeyman-page .article-card{width:100%!important;max-width:none!important;margin:0!important;padding:34px!important;border-radius:34px!important}}
-    @media (max-width:1100px){.boogeyman-page .article-layout{display:block!important;width:min(100%,calc(100% - 28px))!important;margin:0 auto!important}.boogeyman-page .toc{position:static!important;width:100%!important;margin:0 0 24px 0!important;padding:20px 18px!important;border:1px solid rgba(56,189,248,.18)!important;border-radius:28px!important;background:linear-gradient(180deg,rgba(5,30,48,.90),rgba(5,16,36,.84))!important}.boogeyman-page .article-card{padding:24px!important}}
-    .boogeyman-page .toc-title{margin:0 0 16px 0;padding-bottom:14px;border-bottom:1px solid rgba(56,189,248,.18);color:rgba(220,245,255,.88);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase}.boogeyman-page .toc a{display:block;margin:4px 0;padding:10px 12px;border-radius:15px;color:#d9f7ff;font-size:15px;font-weight:700;line-height:1.45}.boogeyman-page .toc a.sub{padding-left:24px;color:rgba(205,232,244,.78);font-size:13px}.boogeyman-page .toc a:hover{background:rgba(56,189,248,.10);color:#7dd3fc}.evidence-shot{margin:22px 0 30px;overflow:hidden;border:1px solid rgba(56,189,248,.18);border-radius:24px;background:rgba(2,8,18,.82);box-shadow:0 18px 40px rgba(0,0,0,.24)}.evidence-shot figcaption{display:flex;justify-content:space-between;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(56,189,248,.15);color:rgba(220,245,255,.90);font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:800}.evidence-shot img{display:block;width:100%;height:auto;background:#020813}.timeline-table,.ioc-table,.answer-table{width:100%;border-collapse:collapse;margin:18px 0 28px;border-radius:20px;border:1px solid rgba(56,189,248,.18);overflow:hidden}.timeline-table th,.timeline-table td,.ioc-table th,.ioc-table td,.answer-table th,.answer-table td{padding:13px 14px;border-bottom:1px solid rgba(56,189,248,.10);vertical-align:top}.timeline-table th,.ioc-table th,.answer-table th{color:#7dd3fc;text-align:left;font-family:"JetBrains Mono",monospace;font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:rgba(56,189,248,.08)}.note,.decision,.pivot{padding:15px 17px;border:1px solid rgba(56,189,248,.18);border-radius:20px;background:linear-gradient(135deg,rgba(56,189,248,.075),rgba(34,211,238,.045));color:rgba(220,245,255,.88);margin:16px 0}.decision strong,.pivot strong,.note strong{color:#7dd3fc}.warning{border-left:4px solid #fbbf24;background:rgba(251,191,36,.07)}.code-tight code,pre code{white-space:pre-wrap;word-break:break-word}.breadcrumb{font-family:"JetBrains Mono",monospace;font-size:12px;color:rgba(205,232,244,.70);margin-bottom:16px}.breadcrumb a{color:#7dd3fc}.flow{padding:18px;border-radius:22px;border:1px solid rgba(56,189,248,.16);background:rgba(2,8,18,.56)}.step-list li{margin:10px 0}.answer-block{margin:18px 0 24px;padding:18px;border:1px solid rgba(56,189,248,.18);border-radius:22px;background:rgba(8,34,54,.42)}.answer-block h3{margin-top:0}.small-muted{color:rgba(205,232,244,.72);font-size:14px}.safe-list li{margin:8px 0}.ok{color:#7dd3fc;font-weight:800}.why{color:rgba(220,245,255,.88)}
+    @media (max-width:1100px){.boogeyman-page .article-layout{display:block!important;width:min(100%,calc(100% - 28px))!important;margin:0 auto!important}.boogeyman-page .toc{position:static!important;width:100%!important;margin:0 0 24px 0!important;padding:20px 18px!important}.boogeyman-page .article-card{padding:24px!important}}
+    .boogeyman-page .toc-title{margin:0 0 16px;padding-bottom:14px;border-bottom:1px solid rgba(56,189,248,.18);color:rgba(220,245,255,.88);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase}.boogeyman-page .toc a{display:block;margin:4px 0;padding:10px 12px;border-radius:15px;color:#d9f7ff;font-size:15px;font-weight:700;line-height:1.45}.boogeyman-page .toc a.sub{padding-left:24px;color:rgba(205,232,244,.78);font-size:13px}.boogeyman-page .toc a:hover{background:rgba(56,189,248,.10);color:#7dd3fc}.breadcrumb{font-family:"JetBrains Mono",monospace;font-size:12px;color:rgba(205,232,244,.70);margin-bottom:16px}.breadcrumb a{color:#7dd3fc}.evidence-shot{margin:22px 0 30px;overflow:hidden;border:1px solid rgba(56,189,248,.18);border-radius:24px;background:rgba(2,8,18,.82);box-shadow:0 18px 40px rgba(0,0,0,.24)}.evidence-shot figcaption{display:flex;justify-content:space-between;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(56,189,248,.15);color:rgba(220,245,255,.90);font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:800}.evidence-shot img{display:block;width:100%;height:auto;background:#020813}.note,.decision,.pivot{padding:15px 17px;border:1px solid rgba(56,189,248,.18);border-radius:20px;background:linear-gradient(135deg,rgba(56,189,248,.075),rgba(34,211,238,.045));color:rgba(220,245,255,.88);margin:16px 0}.warning{border-left:4px solid #fbbf24;background:rgba(251,191,36,.07)}.flow{padding:18px;border-radius:22px;border:1px solid rgba(56,189,248,.16);background:rgba(2,8,18,.56);margin:16px 0}.step-list li{margin:10px 0}.boogeyman-page code{font-family:"JetBrains Mono",monospace;overflow-wrap:anywhere!important;word-break:break-word!important;white-space:normal!important}.boogeyman-page pre{max-width:100%;overflow-x:auto;white-space:pre-wrap!important}.boogeyman-page pre code{white-space:pre-wrap!important;overflow-wrap:anywhere!important;word-break:break-word!important}.ioc-table,.timeline-table{width:100%;table-layout:fixed;border-collapse:collapse;margin:18px 0 28px;border-radius:20px;border:1px solid rgba(56,189,248,.18);overflow:hidden}.ioc-table th,.ioc-table td,.timeline-table th,.timeline-table td{padding:13px 14px;border-bottom:1px solid rgba(56,189,248,.10);vertical-align:top;overflow-wrap:anywhere;word-break:break-word}.ioc-table th,.timeline-table th{color:#7dd3fc;text-align:left;font-family:"JetBrains Mono",monospace;font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:rgba(56,189,248,.08)}.ioc-table th:nth-child(1){width:18%}.ioc-table th:nth-child(2){width:34%}.ioc-table th:nth-child(3){width:22%}.ioc-table th:nth-child(4){width:26%}.answer-list{display:grid;grid-template-columns:1fr;gap:14px;margin:18px 0 28px}.answer-item{border:1px solid rgba(56,189,248,.18);border-radius:22px;background:rgba(8,34,54,.42);padding:16px 18px;overflow:hidden}.answer-item .q{font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#7dd3fc;margin-bottom:8px}.answer-item .a{font-family:"JetBrains Mono",monospace;color:#dceeff;background:rgba(2,8,18,.55);border:1px solid rgba(56,189,248,.14);border-radius:14px;padding:12px;overflow-wrap:anywhere;word-break:break-word;white-space:pre-wrap}.answer-item p{margin-top:10px}.answer-block{margin:18px 0 24px;padding:18px;border:1px solid rgba(56,189,248,.18);border-radius:22px;background:rgba(8,34,54,.42)}.answer-block h3{margin-top:0}.safe-list li{margin:8px 0}
   </style>
 </head>
 <body>
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page boogeyman-page"><div class="wrap article-layout">
-    <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#approach">How I approached it</a><a href="#email">Email triage</a><a class="sub" href="#attachment">Attachment checks</a><a href="#macro">Macro analysis</a><a href="#memory">Memory validation</a><a href="#stage2">Stage 2 binary</a><a href="#c2">C2 analysis</a><a href="#persistence">Persistence</a><a href="#timeline">Timeline</a><a href="#iocs">IOCs</a><a href="#answer-logic">How the answers were derived</a><a href="#answers">Final answers</a></aside>
+    <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#approach">Approach</a><a href="#email">Email triage</a><a href="#attachment">Attachment</a><a href="#macro">Macro</a><a href="#memory">Memory</a><a href="#stage2">Stage 2</a><a href="#c2">C2</a><a href="#persistence">Persistence</a><a href="#timeline">Timeline</a><a href="#iocs">IOCs</a><a href="#answer-logic">Answer logic</a><a href="#answers">Final answers</a></aside>
     <article class="article-card glass">
       <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / TryHackMe / Boogeyman 2</div>
       <div class="eyebrow">TryHackMe · SOC Level 1 / Memory Forensics</div>
       <h1 class="page-title">Boogeyman 2: Following the Evidence from Phishing Email to Persistence</h1>
-      <p class="lead">This writeup documents the investigation flow: what I saw in each artifact, why it mattered, which command I ran next, and how each finding led to the final answers.</p>
+      <p class="lead">This writeup documents the investigation flow: what I saw, what I thought it meant, which command I used next, and how each piece of evidence led to the final answers.</p>
       <div class="info-card"><div class="item"><div class="label">Room</div><div class="value">Boogeyman 2</div></div><div class="item"><div class="label">Platform</div><div class="value">TryHackMe</div></div><div class="item"><div class="label">Focus</div><div class="value accent">SOC / DFIR</div></div><div class="item"><div class="label">Artifacts</div><div class="value">EML, DOC, Memory Dump</div></div><div class="item"><div class="label">Tools</div><div class="value">olevba, Volatility, strings</div></div><div class="item"><div class="label">Core idea</div><div class="value">Correlate, do not guess</div></div></div>
       <div class="callout"><strong>Investigation goal:</strong> prove how the HR workstation was compromised, identify what the Word document executed, confirm it in memory, find the binary and C2 connection, then recover how the attacker maintained access.</div>
 
       <h2 id="overview">Scenario Overview</h2>
-      <p>Maxine Beck, an HR employee at Quick Logistics LLC, received a resume application email. At first glance, that does not look strange because HR staff normally receive resumes from external applicants. That is what made the lure believable.</p>
-      <p>I did not start by answering the questions one by one. I first tried to rebuild the intrusion in order:</p>
+      <p>Maxine Beck, an HR employee at Quick Logistics LLC, received a resume application email. A resume sent to HR is believable, so I treated the attachment carefully instead of assuming it was obviously malicious from the beginning.</p>
       <div class="flow"><pre><code>Email → Word attachment → Macro → JavaScript stage → EXE payload → C2 callback → Scheduled task persistence</code></pre></div>
 
       <h2 id="approach">How I Approached the Case</h2>
-      <ol class="step-list"><li><strong>Read the visible evidence first.</strong> Sender, recipient, attachment, process parent, command line, network owner.</li><li><strong>Ask what the evidence proves.</strong> A macro proves intent. A process tree proves execution. A socket proves communication.</li><li><strong>Choose the next command with a purpose.</strong> Each command should answer a specific question.</li><li><strong>Correlate before concluding.</strong> I only treated something as confirmed when it matched the chain across at least one strong artifact source.</li></ol>
-      <div class="decision"><strong>Rule I followed:</strong> I can use VirusTotal or sandbox output to guide the investigation, but I should not rely on reputation alone. The strongest proof comes from the document, memory dump, command lines and network artifacts.</div>
+      <ol class="step-list"><li><strong>Start from the visible artifact.</strong> Identify sender, recipient, attachment and subject.</li><li><strong>Inspect the file safely.</strong> Use <code>file</code>, hashes and <code>olevba</code> instead of opening the document.</li><li><strong>Validate in memory.</strong> Use Volatility to prove the process chain actually executed.</li><li><strong>Correlate before concluding.</strong> A string alone is only a clue. A string plus process/file/network evidence becomes much stronger.</li></ol>
 
-      <h2 id="email">1. Starting with the Email</h2>
-      <p>The first artifact was the phishing email. I looked for the sender, target, subject and attachment because these fields define the initial access vector.</p>
+      <h2 id="email">1. Email Triage</h2>
       <figure class="evidence-shot"><figcaption><span>Evidence 01</span><span>Phishing email preview</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-01-email-preview.png" alt="Phishing email sent to Maxine Beck with resume attachment"></figure>
       <pre><code>From: westaylor23@outlook.com
 To: maxine.beck@quicklogisticsorg.onmicrosoft.com
 Subject: Resume - Application for Junior IT Analyst Role
 Attachment: resume_WesleyTaylor.doc</code></pre>
-      <p>The email fits the victim's role. An HR specialist receiving a resume is normal, so the document could realistically get opened.</p>
-      <div class="decision"><strong>Next command choice:</strong> I did not open the Word file normally. I moved to file triage and hashing first.</div>
+      <p>I took the sender and victim directly from the email. The attachment was the obvious next artifact because it was the object the victim would open.</p>
 
-      <h2 id="attachment">2. Checking the Attachment Without Opening It</h2>
+      <h2 id="attachment">2. Attachment Triage</h2>
       <pre><code>file Resume_WesleyTaylor.doc
 sha256sum Resume_WesleyTaylor.doc
 md5sum Resume_WesleyTaylor.doc</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 02</span><span>File type and SHA256</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-02-file-type-and-sha256.png" alt="file and sha256sum output"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 06</span><span>MD5 hash</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-06-md5-hash.png" alt="md5sum output"></figure>
-      <p>The file was a legacy Word/OLE document, which is important because <code>.doc</code> files can contain VBA macro streams. The MD5 was:</p><pre><code>52c4384a0b9e248b95804352ebec6c5b</code></pre>
-      <p>I also checked reputation and sandbox context.</p>
+      <p>The document was a legacy Word/OLE file, which can contain VBA macro streams. The MD5 used later in the answer summary was:</p><pre><code>52c4384a0b9e248b95804352ebec6c5b</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 03</span><span>VirusTotal document detection</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-03-virustotal-document-detection.png" alt="VirusTotal detections"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 04</span><span>VMRay behavior identifiers</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-04-vmray-threat-identifiers.png" alt="VMRay identifiers"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 05</span><span>Sandbox process chain</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-05-vmray-process-chain.png" alt="Sandbox chain"></figure>
-      <p>The sandbox hinted at a <code>winword.exe → wscript.exe</code> process chain. I kept that in mind, but still needed to prove it from the original artifacts.</p>
+      <p>The reputation results and sandbox behavior were useful hints, especially the <code>winword.exe → wscript.exe</code> chain, but I still needed primary evidence from the document and memory dump.</p>
 
-      <h2 id="macro">3. Reading the Word Macro with olevba</h2>
+      <h2 id="macro">3. Macro Analysis</h2>
       <pre><code>olevba Resume_WesleyTaylor.doc</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 07</span><span>AutoOpen macro</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-07-olevba-autoopen.png" alt="AutoOpen macro"></figure>
-      <p>The macro contained <code>Sub AutoOpen()</code>, which means it runs when the document opens. That changed the document from a suspicious attachment into an execution vector.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 08</span><span>Stage 2 download and execution</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-08-olevba-stage2-download.png" alt="stage 2 download"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 09</span><span>olevba indicators</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-09-olevba-indicators.png" alt="olevba IOCs"></figure>
-      <pre><code>Download URL:
+      <p>The macro used <code>AutoOpen()</code>, so it was designed to run when the document opened. It downloaded <code>update.png</code>, saved the response body as <code>C:\ProgramData\update.js</code>, then executed it with <code>wscript.exe</code>.</p>
+      <pre><code>Stage 2 URL:
 https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.png
 
-Saved locally as:
+Saved payload:
 C:\ProgramData\update.js
 
-Executed with:
-wscript.exe C:\ProgramData\update.js</code></pre>
-      <p>The interesting part was the mismatch: the remote payload looked like <code>update.png</code>, but the macro saved it as <code>update.js</code> and executed it with <code>wscript.exe</code>. I treated the PNG extension as camouflage.</p>
-      <div class="decision"><strong>Next question:</strong> did this actually happen on Maxine's machine? That required memory evidence.</div>
+Executed by:
+wscript.exe</code></pre>
+      <p>The extension mismatch mattered: the remote payload looked like an image, but the macro saved and executed it as JavaScript.</p>
 
-      <h2 id="memory">4. Validating Execution in Memory</h2>
+      <h2 id="memory">4. Memory Validation</h2>
       <pre><code>vol -f WKSTN-2961.raw windows.pstree</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 10</span><span>Process tree context</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-10-pstree-system-context.png" alt="pstree context"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 11</span><span>Attack process chain</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-11-pstree-attack-chain.png" alt="pstree attack chain"></figure>
@@ -83,44 +77,41 @@ wscript.exe C:\ProgramData\update.js</code></pre>
 └── WINWORD.EXE PID 1124
     └── wscript.exe PID 4260
         └── updater.exe PID 6216</code></pre>
-      <p>This matched the macro behavior. Word spawned <code>wscript.exe</code>, and that script led to <code>updater.exe</code>.</p>
+      <p>This confirmed the macro behavior at runtime. Word launched <code>wscript.exe</code>, and the script led to <code>updater.exe</code>.</p>
       <pre><code>vol -f WKSTN-2961.raw windows.cmdline &gt; cmdline.txt
 cat cmdline.txt</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 12</span><span>Command-line validation</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-12-cmdline-runtime-validation.png" alt="cmdline validation"></figure>
       <pre><code>Attachment runtime path:
 C:\Users\maxine.beck\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\WQHGCZFT\Resume_WesleyTaylor (002).doc
 
-Stage 2 execution:
+Stage 2 command:
 wscript.exe C:\ProgramData\update.js
 
 Malicious binary path:
 C:\Windows\Tasks\updater.exe</code></pre>
 
-      <h2 id="stage2">5. Finding What update.js Did Next</h2>
+      <h2 id="stage2">5. Stage 2 Binary</h2>
       <pre><code>vol -f WKSTN-2961.raw windows.filescan &gt; filescan.txt
 grep -i "update" filescan.txt</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 13</span><span>File artifacts</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-14-filescan-update-artifacts.png" alt="filescan artifacts"></figure>
-      <p>The memory dump showed <code>update[1].png</code>, <code>update[1].exe</code> and <code>\Windows\Tasks\updater.exe</code>. That suggested a staged download: first JavaScript, then executable.</p>
+      <p><code>filescan</code> showed <code>update[1].png</code>, <code>update[1].exe</code> and <code>\Windows\Tasks\updater.exe</code>. That suggested the JavaScript stage downloaded an executable.</p>
       <pre><code>strings WKSTN-2961.raw | grep -i "boogeymanisback"</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 14</span><span>Binary download URL</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-15-strings-update-exe-url.png" alt="update.exe URL"></figure>
       <pre><code>https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.exe</code></pre>
-      <p>I accepted this as the binary download URL because it connected cleanly to <code>update[1].exe</code> in cache and <code>updater.exe</code> running from disk.</p>
 
-      <h2 id="c2">6. Proving the C2 Connection</h2>
+      <h2 id="c2">6. C2 Analysis</h2>
       <pre><code>vol -f WKSTN-2961.raw windows.netscan &gt; netscan.txt
 grep "6216" netscan.txt</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 15</span><span>C2 connections</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-13-netscan-c2-connections.png" alt="netscan C2"></figure>
       <pre><code>Process: updater.exe
 PID: 6216
 Remote endpoint: 128.199.95.189:8080</code></pre>
-      <p>The IP was confirmed as C2 because the connection belonged to the suspicious <code>updater.exe</code> process, not because of reputation alone.</p>
+      <p>I treated this as confirmed C2 because the endpoint was connected to the malicious process, not because of a reputation score alone.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 16</span><span>C2 IP enrichment</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-19-c2-ip-virustotal.png" alt="C2 VT"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 17</span><span>IP information</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-20-c2-ip-information.png" alt="C2 IP info"></figure>
 
-      <h2 id="persistence">7. Recovering the Persistence Command</h2>
-      <p>I first searched the recovered command lines:</p><pre><code>grep -i "schtasks" cmdline.txt
-grep -i "tasks" cmdline.txt</code></pre>
-      <p>That did not recover the full scheduled task creation command. I did not stop there because short-lived commands can exit before memory capture. So I moved to raw strings:</p>
+      <h2 id="persistence">7. Persistence</h2>
+      <p><code>windows.cmdline</code> did not show the full task creation command, so I moved to raw strings. On Windows, Unicode strings are often more useful for command-line artifacts.</p>
       <pre><code>strings -a -n 5 WKSTN-2961.raw &gt; ascii_strings.txt
 strings -a -el -n 5 WKSTN-2961.raw &gt; unicode_strings.txt
 
@@ -129,46 +120,50 @@ grep -ni "schtasks" unicode_strings.txt</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 18</span><span>schtasks fragments</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-16-strings-schtasks-fragments-1.png" alt="schtasks strings 1"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 19</span><span>Scheduled task fragments</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-17-strings-schtasks-fragments-2.png" alt="schtasks strings 2"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 20</span><span>Additional persistence strings</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-18-strings-schtasks-fragments-3.png" alt="schtasks strings 3"></figure>
-      <p>The ASCII strings were noisy, but the Unicode strings recovered the full command:</p>
-      <pre class="code-tight"><code>schtasks /Create /F /SC DAILY /ST 09:00 /TN Updater /TR "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonI -W hidden -c \"IEX ([Text.Encoding]::UNICODE.GetString([Convert]::FromBase64String((gp HKCU:\Software\Microsoft\Windows\CurrentVersion debug).debug)))\""</code></pre>
-      <p>This command creates a task named <code>Updater</code>, runs it daily at <code>09:00</code>, starts hidden PowerShell, reads an encoded registry value from <code>HKCU:\Software\Microsoft\Windows\CurrentVersion\debug</code>, decodes it as Unicode and executes it with <code>IEX</code>.</p>
+      <pre><code>schtasks /Create /F /SC DAILY /ST 09:00 /TN Updater /TR "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonI -W hidden -c \"IEX ([Text.Encoding]::UNICODE.GetString([Convert]::FromBase64String((gp HKCU:\Software\Microsoft\Windows\CurrentVersion debug).debug)))\""</code></pre>
+      <p>This creates a task named <code>Updater</code>, runs it every day at <code>09:00</code>, starts hidden PowerShell, reads an encoded payload from the registry and executes it with <code>IEX</code>.</p>
 
       <h2 id="timeline">Attack Timeline</h2>
-      <table class="timeline-table"><thead><tr><th>Time</th><th>Evidence</th><th>What it means</th></tr></thead><tbody><tr><td>14:09:04</td><td><code>OUTLOOK.EXE</code></td><td>Victim interacted with the email.</td></tr><tr><td>14:12:31</td><td><code>WINWORD.EXE</code></td><td>Word opened the resume attachment from Outlook cache.</td></tr><tr><td>14:12:47</td><td><code>wscript.exe C:\ProgramData\update.js</code></td><td>The JavaScript stage ran.</td></tr><tr><td>14:12:48</td><td><code>C:\Windows\Tasks\updater.exe</code></td><td>The next-stage executable launched.</td></tr><tr><td>14:14:13+</td><td><code>updater.exe → 128.199.95.189:8080</code></td><td>C2 callback observed.</td></tr><tr><td>Post-callback</td><td><code>schtasks /Create ... /TN Updater</code></td><td>Scheduled task persistence created.</td></tr></tbody></table>
+      <table class="timeline-table"><thead><tr><th>Time</th><th>Evidence</th><th>Meaning</th></tr></thead><tbody><tr><td>14:09:04</td><td><code>OUTLOOK.EXE</code></td><td>Victim interacted with the email.</td></tr><tr><td>14:12:31</td><td><code>WINWORD.EXE</code></td><td>Word opened the malicious resume attachment.</td></tr><tr><td>14:12:47</td><td><code>wscript.exe C:\ProgramData\update.js</code></td><td>JavaScript stage executed.</td></tr><tr><td>14:12:48</td><td><code>C:\Windows\Tasks\updater.exe</code></td><td>Executable payload launched.</td></tr><tr><td>14:14:13+</td><td><code>updater.exe → 128.199.95.189:8080</code></td><td>C2 callback observed.</td></tr><tr><td>Post-callback</td><td><code>schtasks /Create ... /TN Updater</code></td><td>Persistence created.</td></tr></tbody></table>
 
       <h2 id="iocs">Confirmed IOCs</h2>
-      <p>The earlier version of this section was too cramped because long URLs and Windows commands were placed inside small cards. I rewrote it as a proper table and split long values into readable blocks so it does not break the layout.</p>
-      <table class="ioc-table"><thead><tr><th>Type</th><th>Indicator</th><th>Evidence source</th><th>Why it is included</th></tr></thead><tbody><tr><td>Email sender</td><td><code>westaylor23@outlook.com</code></td><td>Email preview</td><td>External sender of the resume-themed phishing email.</td></tr><tr><td>Victim email</td><td><code>maxine.beck@quicklogisticsorg.onmicrosoft.com</code></td><td>Email preview</td><td>Targeted HR employee mailbox.</td></tr><tr><td>Attachment</td><td><code>Resume_WesleyTaylor.doc</code></td><td>Email attachment and local artifact</td><td>Macro-capable Word document used for initial execution.</td></tr><tr><td>File hash</td><td><code>52c4384a0b9e248b95804352ebec6c5b</code></td><td><code>md5sum</code></td><td>Stable identifier for the malicious document.</td></tr><tr><td>Stage 2 URL</td><td><code>https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.png</code></td><td><code>olevba</code></td><td>Downloaded by the macro and saved as JavaScript.</td></tr><tr><td>Stage 2 path</td><td><code>C:\ProgramData\update.js</code></td><td>Macro + <code>windows.cmdline</code></td><td>Local JavaScript payload executed by <code>wscript.exe</code>.</td></tr><tr><td>Binary URL</td><td><code>https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.exe</code></td><td><code>strings</code> + filescan</td><td>Executable downloaded by the JavaScript stage.</td></tr><tr><td>Binary path</td><td><code>C:\Windows\Tasks\updater.exe</code></td><td><code>windows.cmdline</code> + <code>windows.filescan</code></td><td>Executed payload that later communicated with C2.</td></tr><tr><td>C2 endpoint</td><td><code>128.199.95.189:8080</code></td><td><code>windows.netscan</code></td><td>Remote endpoint contacted by <code>updater.exe</code> PID 6216.</td></tr><tr><td>Persistence</td><td><code>Scheduled Task: Updater</code></td><td>Unicode strings</td><td>Task configured to run daily at 09:00.</td></tr><tr><td>Registry path</td><td><code>HKCU:\Software\Microsoft\Windows\CurrentVersion\debug</code></td><td>Recovered scheduled task command</td><td>Stores the encoded payload executed by hidden PowerShell.</td></tr></tbody></table>
-      <div class="pivot warning"><strong>What I did not include:</strong> raw strings contained other suspicious-looking domains and IPs, but I did not list them as confirmed IOCs because I could not tie them to the process tree, filescan results, or network connections in this case.</div>
+      <p>I rewrote this section so long paths and commands wrap correctly instead of breaking the page width. I only included indicators that were tied to the observed attack chain.</p>
+      <table class="ioc-table"><thead><tr><th>Type</th><th>Indicator</th><th>Evidence</th><th>Reason</th></tr></thead><tbody><tr><td>Email sender</td><td><code>westaylor23@outlook.com</code></td><td>Email preview</td><td>Sender of the phishing email.</td></tr><tr><td>Victim</td><td><code>maxine.beck@quicklogisticsorg.onmicrosoft.com</code></td><td>Email preview</td><td>Targeted HR mailbox.</td></tr><tr><td>Attachment</td><td><code>Resume_WesleyTaylor.doc</code></td><td>Email + file artifact</td><td>Macro-capable Word document.</td></tr><tr><td>MD5</td><td><code>52c4384a0b9e248b95804352ebec6c5b</code></td><td><code>md5sum</code></td><td>Stable identifier for the malicious document.</td></tr><tr><td>Stage 2 URL</td><td><code>https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.png</code></td><td><code>olevba</code></td><td>Macro download URL.</td></tr><tr><td>Stage 2 path</td><td><code>C:\ProgramData\update.js</code></td><td>Macro + cmdline</td><td>JavaScript payload executed by <code>wscript.exe</code>.</td></tr><tr><td>Binary URL</td><td><code>https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.exe</code></td><td><code>strings</code> + filescan</td><td>Executable downloaded by stage 2.</td></tr><tr><td>Binary path</td><td><code>C:\Windows\Tasks\updater.exe</code></td><td>cmdline + filescan</td><td>Malicious process path.</td></tr><tr><td>C2</td><td><code>128.199.95.189:8080</code></td><td><code>windows.netscan</code></td><td>Remote endpoint contacted by PID 6216.</td></tr><tr><td>Persistence</td><td><code>Scheduled Task: Updater</code></td><td>Unicode strings</td><td>Runs daily at 09:00.</td></tr><tr><td>Registry path</td><td><code>HKCU:\Software\Microsoft\Windows\CurrentVersion\debug</code></td><td>Persistence command</td><td>Stores encoded payload read by PowerShell.</td></tr></tbody></table>
+      <div class="pivot warning"><strong>Not all suspicious strings became IOCs.</strong> I saw other suspicious-looking domains in raw strings, but I did not include them here because they were not correlated with process, file or network evidence from this compromise.</div>
 
       <h2 id="answer-logic">How the Answers Were Derived</h2>
-      <p>This section is more detailed than a normal answer dump. I wrote it to show exactly how each answer came from a piece of evidence.</p>
-      <div class="answer-block"><h3>1. Sender and victim email</h3><p>I started with the email preview. The <code>From</code> field gave the sender and the <code>To</code> field gave the victim. Because the subject was a job application and the recipient was HR, I treated the email as targeted spear phishing.</p><pre><code>Sender: westaylor23@outlook.com
-Victim: maxine.beck@quicklogisticsorg.onmicrosoft.com</code></pre></div>
-      <div class="answer-block"><h3>2. Malicious attachment and MD5</h3><p>The attachment name came from the email and local file. I then used <code>file</code> to confirm it was an OLE Word document and <code>md5sum</code> to get the requested hash.</p><pre><code>file Resume_WesleyTaylor.doc
-md5sum Resume_WesleyTaylor.doc</code></pre><pre><code>Attachment: Resume_WesleyTaylor.doc
-MD5: 52c4384a0b9e248b95804352ebec6c5b</code></pre></div>
-      <div class="answer-block"><h3>3. Stage 2 URL, stage 2 path, and executor</h3><p><code>olevba</code> showed that <code>AutoOpen()</code> downloaded <code>update.png</code>, saved it into <code>C:\ProgramData\update.js</code>, then executed it with <code>wscript.exe</code>. The important point is that the remote extension looked like an image, but the saved file was JavaScript.</p><pre><code>olevba Resume_WesleyTaylor.doc</code></pre><pre><code>Stage 2 URL: https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.png
-Stage 2 path: C:\ProgramData\update.js
-Executor: wscript.exe</code></pre></div>
-      <div class="answer-block"><h3>4. PID and parent PID of stage 2 execution</h3><p>I used <code>windows.pstree</code> to follow the parent-child chain. <code>wscript.exe</code> had PID <code>4260</code>, and its parent was <code>WINWORD.EXE</code> PID <code>1124</code>. This proves the script execution came from the Word document.</p><pre><code>vol -f WKSTN-2961.raw windows.pstree</code></pre><pre><code>WINWORD.EXE PID 1124
-└── wscript.exe PID 4260</code></pre></div>
-      <div class="answer-block"><h3>5. Full path of the malicious email attachment</h3><p>The file name alone was not enough because the victim opened it from Outlook. <code>windows.cmdline</code> revealed the real runtime path used by Word.</p><pre><code>vol -f WKSTN-2961.raw windows.cmdline &gt; cmdline.txt
-grep -i "Resume_WesleyTaylor" cmdline.txt</code></pre><pre><code>C:\Users\maxine.beck\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\WQHGCZFT\Resume_WesleyTaylor (002).doc</code></pre></div>
-      <div class="answer-block"><h3>6. Binary URL and malicious C2 process</h3><p>After <code>updater.exe</code> appeared in the process tree, I searched for file artifacts and strings. <code>filescan</code> showed <code>update[1].exe</code> and <code>updater.exe</code>. A strings search against the attacker domain recovered the binary URL.</p><pre><code>vol -f WKSTN-2961.raw windows.filescan &gt; filescan.txt
-grep -i "update" filescan.txt
-strings WKSTN-2961.raw | grep -i "boogeymanisback"</code></pre><pre><code>Binary URL: https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.exe
-C2 process path: C:\Windows\Tasks\updater.exe
-C2 process PID: 6216</code></pre></div>
-      <div class="answer-block"><h3>7. C2 IP and port</h3><p>I did not label the IP as C2 just because it looked suspicious. It became confirmed when <code>windows.netscan</code> showed <code>updater.exe</code> PID <code>6216</code> connecting to it.</p><pre><code>vol -f WKSTN-2961.raw windows.netscan &gt; netscan.txt
-grep "6216" netscan.txt</code></pre><pre><code>128.199.95.189:8080</code></pre></div>
-      <div class="answer-block"><h3>8. Persistence command</h3><p><code>windows.cmdline</code> did not recover the full command, so I switched to ASCII and Unicode strings. Unicode strings provided the clean scheduled task command.</p><pre><code>strings -a -n 5 WKSTN-2961.raw &gt; ascii_strings.txt
-strings -a -el -n 5 WKSTN-2961.raw &gt; unicode_strings.txt
-grep -ni "schtasks" unicode_strings.txt</code></pre><pre class="code-tight"><code>schtasks /Create /F /SC DAILY /ST 09:00 /TN Updater /TR "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonI -W hidden -c \"IEX ([Text.Encoding]::UNICODE.GetString([Convert]::FromBase64String((gp HKCU:\Software\Microsoft\Windows\CurrentVersion debug).debug)))\""</code></pre><p>This showed scheduled task persistence with hidden PowerShell and a registry-stored encoded payload.</p></div>
+      <div class="answer-block"><h3>Email answers</h3><p>The sender and victim came from the phishing email header/preview. The attachment name came from the email and the local artifact.</p><pre><code>Sender: westaylor23@outlook.com
+Victim: maxine.beck@quicklogisticsorg.onmicrosoft.com
+Attachment: resume_WesleyTaylor.doc</code></pre></div>
+      <div class="answer-block"><h3>Document and macro answers</h3><p>The MD5 came from <code>md5sum</code>. The stage 2 URL, local path and executor came from <code>olevba</code>.</p><pre><code>md5sum Resume_WesleyTaylor.doc
+olevba Resume_WesleyTaylor.doc</code></pre></div>
+      <div class="answer-block"><h3>Memory answers</h3><p><code>windows.pstree</code> gave the process chain and PID/PPID. <code>windows.cmdline</code> gave the exact runtime paths.</p><pre><code>vol -f WKSTN-2961.raw windows.pstree
+vol -f WKSTN-2961.raw windows.cmdline</code></pre></div>
+      <div class="answer-block"><h3>Binary and C2 answers</h3><p><code>filescan</code> and <code>strings</code> exposed the executable download. <code>netscan</code> tied <code>updater.exe</code> PID 6216 to <code>128.199.95.189:8080</code>.</p><pre><code>vol -f WKSTN-2961.raw windows.filescan
+strings WKSTN-2961.raw | grep -i "boogeymanisback"
+vol -f WKSTN-2961.raw windows.netscan</code></pre></div>
+      <div class="answer-block"><h3>Persistence answer</h3><p>The scheduled task command was recovered from Unicode strings because the original <code>schtasks.exe</code> process likely exited before the memory capture.</p><pre><code>strings -a -el -n 5 WKSTN-2961.raw &gt; unicode_strings.txt
+grep -ni "schtasks" unicode_strings.txt</code></pre></div>
 
       <h2 id="answers">Final Answers</h2>
-      <table class="answer-table"><thead><tr><th>Question</th><th>Answer</th></tr></thead><tbody><tr><td>Sender email</td><td><code>westaylor23@outlook.com</code></td></tr><tr><td>Victim email</td><td><code>maxine.beck@quicklogisticsorg.onmicrosoft.com</code></td></tr><tr><td>Malicious attachment</td><td><code>resume_WesleyTaylor.doc</code> / <code>Resume_WesleyTaylor.doc</code></td></tr><tr><td>MD5 hash</td><td><code>52c4384a0b9e248b95804352ebec6c5b</code></td></tr><tr><td>Stage 2 URL from macro</td><td><code>https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.png</code></td></tr><tr><td>Process that executed stage 2</td><td><code>wscript.exe</code></td></tr><tr><td>Stage 2 payload path</td><td><code>C:\ProgramData\update.js</code></td></tr><tr><td>PID of stage 2 execution</td><td><code>4260</code></td></tr><tr><td>Parent PID</td><td><code>1124</code></td></tr><tr><td>URL used to download malicious binary</td><td><code>https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.exe</code></td></tr><tr><td>PID of malicious C2 process</td><td><code>6216</code></td></tr><tr><td>Full path of malicious C2 process</td><td><code>C:\Windows\Tasks\updater.exe</code></td></tr><tr><td>C2 IP:port</td><td><code>128.199.95.189:8080</code></td></tr><tr><td>Full path of malicious email attachment</td><td><code>C:\Users\maxine.beck\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\WQHGCZFT\Resume_WesleyTaylor (002).doc</code></td></tr><tr><td>Persistence command</td><td><pre class="code-tight"><code>schtasks /Create /F /SC DAILY /ST 09:00 /TN Updater /TR "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonI -W hidden -c \"IEX ([Text.Encoding]::UNICODE.GetString([Convert]::FromBase64String((gp HKCU:\Software\Microsoft\Windows\CurrentVersion debug).debug)))\""</code></pre></td></tr></tbody></table>
-      <h2>What I Learned</h2><ul class="safe-list"><li>Build the chain first, then answer the questions.</li><li>Macro output explains intent; memory output proves execution.</li><li>Parent-child process relationships are one of the fastest ways to validate malicious document execution.</li><li>Raw strings are useful but noisy. I should only trust strings that correlate with process, file or network evidence.</li><li>Scheduled task persistence can be paired with registry-stored encoded payloads to reduce obvious files on disk.</li></ul>
+      <div class="answer-list">
+        <div class="answer-item"><div class="q">Sender email</div><div class="a">westaylor23@outlook.com</div></div>
+        <div class="answer-item"><div class="q">Victim email</div><div class="a">maxine.beck@quicklogisticsorg.onmicrosoft.com</div></div>
+        <div class="answer-item"><div class="q">Malicious attachment</div><div class="a">resume_WesleyTaylor.doc / Resume_WesleyTaylor.doc</div></div>
+        <div class="answer-item"><div class="q">MD5</div><div class="a">52c4384a0b9e248b95804352ebec6c5b</div></div>
+        <div class="answer-item"><div class="q">Stage 2 URL from macro</div><div class="a">https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.png</div></div>
+        <div class="answer-item"><div class="q">Process executed stage 2</div><div class="a">wscript.exe</div></div>
+        <div class="answer-item"><div class="q">Stage 2 payload path</div><div class="a">C:\ProgramData\update.js</div></div>
+        <div class="answer-item"><div class="q">PID of stage 2 execution</div><div class="a">4260</div></div>
+        <div class="answer-item"><div class="q">Parent PID</div><div class="a">1124</div></div>
+        <div class="answer-item"><div class="q">URL used to download malicious binary</div><div class="a">https://files.boogeymanisback.lol/aa2a9c53cbb80416d3b47d85538d9971/update.exe</div></div>
+        <div class="answer-item"><div class="q">PID of malicious C2 process</div><div class="a">6216</div></div>
+        <div class="answer-item"><div class="q">Full path of malicious C2 process</div><div class="a">C:\Windows\Tasks\updater.exe</div></div>
+        <div class="answer-item"><div class="q">C2 IP:port</div><div class="a">128.199.95.189:8080</div></div>
+        <div class="answer-item"><div class="q">Full path of malicious email attachment</div><div class="a">C:\Users\maxine.beck\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\WQHGCZFT\Resume_WesleyTaylor (002).doc</div></div>
+        <div class="answer-item"><div class="q">Persistence command</div><div class="a">schtasks /Create /F /SC DAILY /ST 09:00 /TN Updater /TR "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonI -W hidden -c \"IEX ([Text.Encoding]::UNICODE.GetString([Convert]::FromBase64String((gp HKCU:\Software\Microsoft\Windows\CurrentVersion debug).debug)))\""</div></div>
+      </div>
+      <h2>What I Learned</h2><ul class="safe-list"><li>Build the attack chain first, then answer the questions.</li><li>Macro output explains intent; memory output proves execution.</li><li>Parent-child process relationships are strong evidence for malicious document execution.</li><li>Raw strings are useful but noisy. Only promote strings to confirmed IOCs when they correlate with files, processes or network evidence.</li><li>Scheduled task persistence can hide the real payload in the registry and execute it through hidden PowerShell.</li></ul>
     </article>
   </div></main><script src="/assets/js/main.js"></script>
 </body>
