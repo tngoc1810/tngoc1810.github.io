@@ -51,7 +51,7 @@ Attachment: Invoice.zip</code></pre>
 file Invoice_20230103.lnk
 lnkparse Invoice_20230103.lnk</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 04</span><span>LNK metadata / command-line field</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-04-lnk-metadata.png" onerror="this.closest('figure').remove()" alt="LNK metadata showing command information"></figure>
-      <figure class="evidence-shot"><figcaption><span>Evidence 05</span><span>Encoded PowerShell inside shortcut</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-05-encoded-powershell.png" onerror="this.closest('figure').remove()" alt="Encoded PowerShell recovered from LNK"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 05</span><span>Encoded PowerShell inside shortcut</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-05-lnkparse-encoded-powershell.png" alt="Encoded PowerShell recovered from LNK"></figure>
       <p>A shortcut is dangerous here because it can look like an invoice but actually run a command. The parsed shortcut revealed encoded PowerShell. That changed my next step: decode the command and read what it really does.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 06</span><span>Decoded initial PowerShell payload</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-06-cyberchef-decoded-lnk-payload.png" alt="CyberChef decoding the LNK payload"></figure>
       <p>The decoded PowerShell showed a remote download-and-execute pattern. From this point onward, I knew the endpoint logs should contain PowerShell activity and the PCAP should contain traffic to attacker-controlled infrastructure.</p>
@@ -61,7 +61,7 @@ lnkparse Invoice_20230103.lnk</code></pre>
       <pre><code>cat powershell.json | jq '.'
 cat powershell.json | jq -r '.. | strings?' | grep -iE "bpakcaging|Invoke|WebRequest|Download|nslookup|Seatbelt|sq3|kdbx"</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 07</span><span>PowerShell C2 script</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-07-powershell-c2-script.png" alt="PowerShell script showing C2 domain and Invoke-WebRequest"></figure>
-      <figure class="evidence-shot"><figcaption><span>Evidence 08</span><span>Payload/C2 configuration details</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-08-powershell-c2-config.png" onerror="this.closest('figure').remove()" alt="PowerShell C2 configuration details"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 08</span><span>sq3.exe tool download</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-08-download-sq3-tool.png" alt="PowerShell log showing sq3.exe download"></figure>
       <pre><code>files.bpakcaging.xyz       → file / payload hosting
 cdn.bpakcaging.xyz:8080   → HTTP C2 endpoint</code></pre>
       <p>This gave me two directions: check payload hosting in HTTP traffic, and keep reading PowerShell logs for post-compromise activity.</p>
@@ -75,16 +75,14 @@ cdn.bpakcaging.xyz:8080   → HTTP C2 endpoint</code></pre>
       <h2 id="sticky">5. Sticky Notes: Finding Where the Password Came From</h2>
       <p>Later, I saw <code>sq3.exe</code> being used against the Microsoft Sticky Notes database. This was important because users sometimes store passwords or sensitive notes there.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 10</span><span>sq3.exe querying Sticky Notes</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-10-sq3-sticky-notes-query.png" alt="PowerShell log showing sq3.exe querying Sticky Notes"></figure>
-      <figure class="evidence-shot"><figcaption><span>Evidence 11</span><span>Recovered Sticky Notes content / password</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-11-sticky-notes-password.png" onerror="this.closest('figure').remove()" alt="Recovered Sticky Notes password evidence"></figure>
       <pre><code>C:\Users\j.westcott\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite</code></pre>
-      <p>The recovered password was later used to open the exfiltrated KeePass database:</p>
-      <pre><code>%p9^3!lL^Mz47E2GaT^y</code></pre>
+      <p>This explained where the KeePass master password could be recovered later. The decoded Sticky Notes content is shown near the reconstruction phase.</p>
 
       <h2 id="keepass">6. KeePass Targeting and DNS Exfiltration Preparation</h2>
       <p>The next important file was <code>protected_data.kdbx</code>. The commands showed the attacker reading the file as bytes, converting it to hex, splitting the hex into chunks and using DNS queries for exfiltration.</p>
+      <figure class="evidence-shot"><figcaption><span>Evidence 11</span><span>KeePass database read as bytes</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-11-kdbx-readallbytes.png" alt="PowerShell log reading KeePass database as bytes"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 12</span><span>Hex encoding before exfiltration</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-12-hex-encoding.png" alt="PowerShell log showing hex conversion"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 13</span><span>DNS exfiltration with nslookup</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-13-dns-exfil-nslookup.png" alt="PowerShell log showing nslookup exfiltration"></figure>
-      <figure class="evidence-shot"><figcaption><span>Evidence 14</span><span>KeePass reconstruction / extracted database check</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-14-keepass-reconstruction.png" onerror="this.closest('figure').remove()" alt="KeePass reconstruction evidence"></figure>
       <pre><code>Get-Content protected_data.kdbx -Encoding Byte
 Convert bytes to hex
 Split hex into chunks
@@ -99,20 +97,22 @@ http
 dns
 http.request.method == POST
 tcp.stream eq X</code></pre>
+      <figure class="evidence-shot"><figcaption><span>Evidence 14</span><span>HTTP file server filter</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-14-http-fileserver-filter.png" alt="Wireshark HTTP file server filter"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 15</span><span>Python SimpleHTTP server</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-15-python-simplehttp-header.png" alt="Wireshark HTTP response showing Python SimpleHTTP server"></figure>
       <pre><code>Server: SimpleHTTP/0.6 Python/3.10.7</code></pre>
       <p>This answered the payload hosting software: Python SimpleHTTP server.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 16</span><span>C2 output via POST</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-16-c2-http-post-output.png" alt="Wireshark stream showing HTTP POST output to C2"></figure>
       <p>The C2 output used HTTP <code>POST</code>. This made sense because the infected host needed to return command output to the attacker.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 17</span><span>DNS exfiltration traffic</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-17-dns-exfiltration-traffic.png" alt="Wireshark DNS exfiltration traffic"></figure>
-      <figure class="evidence-shot"><figcaption><span>Evidence 18</span><span>DNS query chunk details</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-18-dns-query-chunks.png" onerror="this.closest('figure').remove()" alt="DNS query chunks used for exfiltration"></figure>
       <p>The DNS traffic contained long encoded-looking labels, matching the PowerShell evidence that chunked the KeePass file into DNS queries.</p>
 
       <h2 id="reconstruction">8. Reconstructing and Verifying the Stolen Data</h2>
       <p>After confirming DNS exfiltration, the remaining task was to turn the chunks back into the stolen file. The high-level process was to extract the encoded DNS labels, order them, join the hex data, convert it back to bytes and verify the result as a KeePass database.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 19</span><span>Extracted exfiltrated chunks</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-19-extracted-dns-chunks.png" onerror="this.closest('figure').remove()" alt="Extracted DNS chunks"></figure>
-      <figure class="evidence-shot"><figcaption><span>Evidence 20</span><span>Recovered protected_data.kdbx</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-20-recovered-kdbx.png" onerror="this.closest('figure').remove()" alt="Recovered KeePass database file"></figure>
-      <figure class="evidence-shot"><figcaption><span>Evidence 21</span><span>KeePass entry containing credit card number</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-21-keepass-credit-card.png" onerror="this.closest('figure').remove()" alt="KeePass entry showing credit card number"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 18</span><span>Decoded Sticky Notes master password</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-18-decoded-sticky-notes-master-password.png" alt="Decoded Sticky Notes master password"></figure>
+      <pre><code>%p9^3!lL^Mz47E2GaT^y</code></pre>
+      <figure class="evidence-shot"><figcaption><span>Evidence 19</span><span>Rebuilt KeePass database from DNS</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-19-rebuild-kdbx-from-dns.png" alt="Rebuild KeePass database from DNS exfiltration"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 20</span><span>KeePass master key prompt</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-20-keepass-master-key-prompt.png" alt="KeePass master key prompt"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 21</span><span>KeePass entry containing credit card number</span></figcaption><img src="/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-21-keepass-credit-card-entry.png" alt="KeePass entry showing credit card number"></figure>
       <p>After opening the reconstructed database with the Sticky Notes password, the stored credit card number was:</p>
       <pre><code>4024007128269551</code></pre>
 
