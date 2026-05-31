@@ -40,17 +40,17 @@
 
       <h2 id="mapping">Host/IP Mapping</h2>
       <p>The first step was to map the internal hosts. Searching for <code>FORELA-WKSTN001</code> in the capture showed NetBIOS/NBSTAT activity associated with <span class="ioc">172.17.79.129</span>. This became the target workstation in the malicious logon flow.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 01 — NBNS/NBSTAT mapping for FORELA-WKSTN001</span><span>PCAP</span></figcaption><img src="/assets/images/writeups/htb/reaper/01-pcap-forela-wkstn001-nbns-mapping.png" alt="Wireshark NBNS evidence mapping FORELA-WKSTN001 to 172.17.79.129"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 01 — NBNS/NBSTAT mapping for FORELA-WKSTN001</span><span>PCAP</span></figcaption><img src="/assets/media/writeups/htb-reaper/01-pcap-forela-wkstn001-nbns-mapping.png" alt="Wireshark NBNS evidence mapping FORELA-WKSTN001 to 172.17.79.129"></figure>
       <p>From the SMB/NTLM conversations, <span class="ioc">172.17.79.136</span> acted as the victim workstation sending NTLM authentication for <code>FORELA\arthur.kyle</code> toward <span class="ioc">172.17.79.135</span>. That made <span class="ioc">172.17.79.135</span> the unknown device used by the attacker to intercept or relay credentials.</p>
 
       <h2 id="victim">Victim Share Navigation</h2>
       <p>The victim workstation tried to access a network share named <code>\\DC01\Trip</code>. In SMB, this appears as a <strong>Tree Connect Request</strong>. The server later returned <code>STATUS_BAD_NETWORK_NAME</code>, but the key point is that the user navigated to that share path.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 02 — Victim attempted to access \\DC01\Trip</span><span>SMB2 Tree Connect</span></figcaption><img src="/assets/images/writeups/htb/reaper/05-pcap-victim-fileshare-dc01-trip.png" alt="Wireshark SMB2 Tree Connect Request for \\DC01\Trip"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 02 — Victim attempted to access \\DC01\Trip</span><span>SMB2 Tree Connect</span></figcaption><img src="/assets/media/writeups/htb-reaper/05-pcap-victim-fileshare-dc01-trip.png" alt="Wireshark SMB2 Tree Connect Request for \\DC01\Trip"></figure>
       <div class="mini-note warning"><strong>Why this matters:</strong> <code>\\DC01\Trip</code> is a UNC path. It means “open the share named <code>Trip</code> on host <code>DC01</code>.” In this case, the attempted navigation triggered SMB authentication activity that the attacker could abuse.</div>
 
       <h2 id="stolen-hash">Stolen NTLM Authentication</h2>
       <p>The capture shows <code>172.17.79.136</code> connecting to <code>172.17.79.135:445</code> and completing an NTLMSSP authentication exchange. The <code>NTLMSSP_AUTH</code> packet identifies the account as <code>FORELA\arthur.kyle</code>.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 03 — NTLMSSP_AUTH for FORELA\arthur.kyle</span><span>Victim → Unknown Device</span></figcaption><img src="/assets/images/writeups/htb/reaper/02-pcap-ntlm-auth-arthur-kyle-victim-to-attacker.png" alt="Wireshark NTLMSSP_AUTH showing FORELA arthur.kyle"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 03 — NTLMSSP_AUTH for FORELA\arthur.kyle</span><span>Victim → Unknown Device</span></figcaption><img src="/assets/media/writeups/htb-reaper/02-pcap-ntlm-auth-arthur-kyle-victim-to-attacker.png" alt="Wireshark NTLMSSP_AUTH showing FORELA arthur.kyle"></figure>
       <p>This explains the “hash stolen” question in the lab. The attacker did not need the plaintext password. The useful artifact was the NTLM authentication material, which could be intercepted or relayed.</p>
 
       <h2 id="malicious-logon">Malicious Logon</h2>
@@ -64,20 +64,20 @@ WorkstationName: FORELA-WKSTN002
 IpAddress: 172.17.79.135
 IpPort: 40252
 TargetLogonId: 0x64a799</code></pre>
-      <figure class="evidence-shot"><figcaption><span>Evidence 04 — Event ID 4624 suspicious NTLM network logon</span><span>Security.evtx</span></figcaption><img src="/assets/images/writeups/htb/reaper/03-security-4624-malicious-ntlm-logon.png" alt="Event Viewer 4624 showing arthur.kyle NTLM logon from 172.17.79.135 port 40252"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 04 — Event ID 4624 suspicious NTLM network logon</span><span>Security.evtx</span></figcaption><img src="/assets/media/writeups/htb-reaper/03-security-4624-malicious-ntlm-logon.png" alt="Event Viewer 4624 showing arthur.kyle NTLM logon from 172.17.79.135 port 40252"></figure>
       <p>This is the core mismatch: the event claims the workstation name is <code>FORELA-WKSTN002</code>, but the source IP is <code>172.17.79.135</code>, which is the unknown attacker device, not the legitimate IP of <code>FORELA-WKSTN002</code>.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 05 — PCAP flow matching source port 40252</span><span>Unknown Device → Target</span></figcaption><img src="/assets/images/writeups/htb/reaper/04-pcap-relay-source-port-40252-to-target.png" alt="Wireshark SMB flow from 172.17.79.135 source port 40252 to 172.17.79.129 port 445"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 05 — PCAP flow matching source port 40252</span><span>Unknown Device → Target</span></figcaption><img src="/assets/media/writeups/htb-reaper/04-pcap-relay-source-port-40252-to-target.png" alt="Wireshark SMB flow from 172.17.79.135 source port 40252 to 172.17.79.129 port 445"></figure>
       <p>The PCAP validates the Windows event: <code>172.17.79.135:40252</code> connected to <code>172.17.79.129:445</code> and used NTLM authentication for <code>FORELA\arthur.kyle</code>.</p>
 
       <h2 id="logon-id">Logon ID Correlation with Event ID 5140</h2>
       <p>After identifying the suspicious logon, I pivoted to Event ID <code>5140</code>, which records network share access. The key field is <code>SubjectLogonId</code>. It matched the malicious <code>4624</code> Logon ID:</p>
       <pre><code>4624 TargetLogonId  = 0x64a799
 5140 SubjectLogonId = 0x64a799</code></pre>
-      <figure class="evidence-shot"><figcaption><span>Evidence 06 — Event ID 5140 share access under the same Logon ID</span><span>Security.evtx</span></figcaption><img src="/assets/images/writeups/htb/reaper/06-security-5140-ipc-share-access.png" alt="Event Viewer 5140 showing SubjectLogonId 0x64a799 and ShareName \\*\IPC$"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 06 — Event ID 5140 share access under the same Logon ID</span><span>Security.evtx</span></figcaption><img src="/assets/media/writeups/htb-reaper/06-security-5140-ipc-share-access.png" alt="Event Viewer 5140 showing SubjectLogonId 0x64a799 and ShareName \\*\IPC$"></figure>
       <p>The share accessed as part of the malicious authenticated session was <code>\\*\IPC$</code>. This is why using the PCAP path <code>\\172.17.79.129\IPC$</code> was not the exact answer for the task; the lab asked for the Windows event field from <code>5140</code>.</p>
 
       <h2 id="timeline">Timeline</h2>
-      <figure class="evidence-shot"><figcaption><span>Evidence 07 — UTC time from Event ID 4624 XML</span><span>Security.evtx XML View</span></figcaption><img src="/assets/images/writeups/htb/reaper/07-security-4624-xml-utc-time.png" alt="Event XML TimeCreated SystemTime 2024-07-31T04:55:16Z"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 07 — UTC time from Event ID 4624 XML</span><span>Security.evtx XML View</span></figcaption><img src="/assets/media/writeups/htb-reaper/07-security-4624-xml-utc-time.png" alt="Event XML TimeCreated SystemTime 2024-07-31T04:55:16Z"></figure>
       <table class="timeline-table"><thead><tr><th>UTC Time</th><th>Event</th><th>Evidence</th></tr></thead><tbody><tr><td>2024-07-31 04:55:13</td><td>Unknown device <code>172.17.79.135</code> starts SMB/NTLM activity toward <code>172.17.79.129</code>.</td><td>PCAP source port <code>40252</code></td></tr><tr><td>2024-07-31 04:55:16</td><td>Target records successful NTLM network logon for <code>FORELA\arthur.kyle</code>.</td><td>Event ID <code>4624</code></td></tr><tr><td>2024-07-31 04:55:16</td><td>Same malicious session accesses <code>\\*\IPC$</code>.</td><td>Event ID <code>5140</code> with <code>SubjectLogonId 0x64a799</code></td></tr><tr><td>2024-07-31 04:55:28</td><td>Victim workstation navigates to <code>\\DC01\Trip</code>.</td><td>SMB2 Tree Connect Request</td></tr><tr><td>2024-07-31 04:55:32</td><td>Additional NTLM authentication from <code>172.17.79.136</code> to the unknown device shows <code>FORELA\arthur.kyle</code>.</td><td>NTLMSSP_AUTH</td></tr></tbody></table>
       <div class="flow-box">Likely attack flow:
 
