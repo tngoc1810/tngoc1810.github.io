@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>HTB Sherlock: Reaper — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    @media (min-width:1101px){.reaper-page .article-layout{display:grid!important;grid-template-columns:300px minmax(0,1fr)!important;gap:34px!important;align-items:start!important;width:min(1280px,calc(100% - 48px))!important;max-width:1280px!important;margin:0 auto!important}.reaper-page .toc{position:sticky!important;top:96px!important;width:300px!important;height:calc(100vh - 118px)!important;max-height:calc(100vh - 118px)!important;margin:0!important;padding:24px 22px!important;overflow-y:auto!important;border:1px solid rgba(45,212,191,.22)!important;border-radius:34px!important;background:linear-gradient(180deg,rgba(5,30,38,.92),rgba(5,16,36,.86))!important}.reaper-page .article-card{width:100%!important;max-width:none!important;margin:0!important;padding:34px!important;border-radius:34px!important}}
+    @media (max-width:1100px){.reaper-page .article-layout{display:block!important;width:min(100%,calc(100% - 28px))!important;margin:0 auto!important}.reaper-page .toc{position:static!important;width:100%!important;margin:0 0 24px 0!important;padding:20px 18px!important;border:1px solid rgba(45,212,191,.18)!important;border-radius:28px!important;background:linear-gradient(180deg,rgba(5,30,38,.90),rgba(5,16,36,.84))!important}.reaper-page .article-card{padding:24px!important}}
+    .reaper-page .toc-title{margin:0 0 16px 0;padding-bottom:14px;border-bottom:1px solid rgba(45,212,191,.18);color:rgba(190,245,230,.88);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase}.reaper-page .toc a{display:block;margin:4px 0;padding:10px 12px;border-radius:15px;color:#bfffee;font-size:15px;font-weight:700;line-height:1.45}.reaper-page .toc a.sub{padding-left:24px;color:rgba(190,230,220,.82);font-size:14px}.reaper-page .toc a:hover,.reaper-page .toc a.active{background:rgba(45,212,191,.10);color:#7CFFDF}.reaper-page p,.reaper-page li{line-height:1.78}.evidence-shot{margin:22px 0 30px;overflow:hidden;border:1px solid rgba(45,212,191,.18);border-radius:24px;background:rgba(2,8,18,.82);box-shadow:0 18px 40px rgba(0,0,0,.24)}.evidence-shot figcaption{display:flex;justify-content:space-between;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(45,212,191,.15);color:rgba(220,255,246,.88);font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:800}.evidence-shot img{display:block;width:100%;height:auto;background:#020813}.answer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:20px 0}.answer-card{padding:16px;border:1px solid rgba(45,212,191,.18);border-radius:22px;background:rgba(8,34,44,.46);min-width:0}.answer-card .q{color:rgba(205,240,232,.76);font-size:13px;font-weight:800;margin-bottom:8px}.answer-card code{display:block;color:#7CFFDF;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}.timeline-table{width:100%;border-collapse:collapse;margin:18px 0 28px;overflow:hidden;border-radius:20px;border:1px solid rgba(45,212,191,.18);table-layout:fixed}.timeline-table th,.timeline-table td{padding:13px 14px;border-bottom:1px solid rgba(45,212,191,.10);vertical-align:top;overflow-wrap:anywhere;word-break:break-word}.timeline-table th{color:#7CFFDF;text-align:left;font-family:"JetBrains Mono",monospace;font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:rgba(45,212,191,.08)}.mini-note,.mindset{padding:15px 17px;border:1px solid rgba(45,212,191,.18);border-radius:20px;background:linear-gradient(135deg,rgba(45,212,191,.075),rgba(86,199,255,.045));color:rgba(220,245,238,.88);margin:16px 0}.mindset strong{display:block;color:#9fffe8;margin-bottom:6px}.warning{border-left:4px solid #fbbf24;background:rgba(251,191,36,.07)}.pill-row{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.pill{border:1px solid rgba(45,212,191,.24);background:rgba(45,212,191,.08);color:#bfffee;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900;font-family:"JetBrains Mono",monospace}.ioc{color:#7CFFDF;font-weight:900}pre,code{overflow-wrap:anywhere;word-break:break-word}.flow-box{padding:18px 20px;border:1px solid rgba(45,212,191,.20);border-radius:22px;background:rgba(2,12,24,.66);font-family:"JetBrains Mono",monospace;color:#d9fff6;white-space:pre-wrap;overflow-wrap:anywhere}.reaper-page h3{margin-top:26px}
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <main class="page reaper-page"><div class="wrap article-layout">
+    <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#mindset">Senior SOC Mindset</a><a href="#evidence">Evidence Sources</a><a href="#mapping">Host/IP Mapping</a><a href="#victim">Victim Share Navigation</a><a href="#stolen-hash">Stolen NTLM Authentication</a><a href="#malicious-logon">Malicious Logon</a><a href="#logon-id">Logon ID Correlation</a><a href="#timeline">Timeline</a><a href="#answers">Answers</a><a href="#recommendations">Recommendations</a><a href="#lessons">Lessons Learned</a></aside>
+    <article class="article-card glass">
+      <div class="eyebrow">Hack The Box Sherlock · SOC / Windows Authentication</div>
+      <h1 class="page-title">HTB Sherlock: Reaper</h1>
+      <p class="lead">A senior-style SOC investigation of a suspicious Windows logon alert where the source workstation name did not match the source IP address. I correlated <code>Security.evtx</code> with <code>ntlmrelay.pcapng</code> to prove NTLM relay behavior, identify the victim user, map hosts to IPs and connect Event ID <code>4624</code> with Event ID <code>5140</code> using the malicious Logon ID.</p>
+      <div class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">Reaper</div></div><div class="item"><div class="label">Platform</div><div class="value">Hack The Box</div></div><div class="item"><div class="label">Difficulty</div><div class="value">Very Easy</div></div><div class="item"><div class="label">Type</div><div class="value accent">Sherlock</div></div><div class="item"><div class="label">Skills Learned</div><div class="value">EVTX, PCAP, NTLM Relay</div></div><div class="item"><div class="label">Tags</div><div class="value">SOC, Windows Auth, SMB</div></div></div>
+      <div class="callout"><strong>Investigation goal:</strong> Validate a SIEM alert for a suspicious successful logon where the workstation name and source IP address were inconsistent, then report the real source, victim account, file share access and malicious session details.</div>
+
+      <h2 id="overview">Scenario Overview</h2>
+      <p>The lab provides two evidence sources: a Windows Security event log and a packet capture from the same incident window. The SIEM alert is not simply “a user logged in.” The important detail is that the <strong>IP address</strong> and <strong>source workstation name</strong> did not match.</p>
+      <p>That mismatch is a strong sign of authentication abuse. In an NTLM relay scenario, the target host may log the workstation name embedded in NTLM authentication metadata, while the actual TCP connection comes from the attacker-controlled relay device.</p>
+
+      <h2 id="mindset">Senior SOC Mindset</h2>
+      <div class="mindset"><strong>First thought:</strong> Do not trust a single field in Event ID 4624. <code>WorkstationName</code> can describe the claimed workstation in the authentication metadata, while <code>IpAddress</code> shows the host that actually connected to the target. If these do not map to the same system, I need network evidence.</div>
+      <p>I approached the case as a correlation problem:</p>
+      <ol><li>Map hostnames to IP addresses from PCAP evidence.</li><li>Find the NTLM authentication flow and identify the user whose authentication was captured or relayed.</li><li>Locate the successful NTLM network logon in <code>Security.evtx</code>.</li><li>Use the source port and Logon ID to connect the Windows log to the PCAP session.</li><li>Use Event ID <code>5140</code> to confirm what share was accessed under the malicious session.</li></ol>
+
+      <h2 id="evidence">Evidence Sources</h2>
+      <table class="timeline-table"><thead><tr><th>Artifact</th><th>Why it matters</th></tr></thead><tbody><tr><td><code>Security.evtx</code></td><td>Contains Windows Security events such as successful network logon <code>4624</code> and share access <code>5140</code>.</td></tr><tr><td><code>ntlmrelay.pcapng</code></td><td>Contains SMB/NTLM traffic needed to validate which IPs communicated and where the NTLM authentication moved.</td></tr></tbody></table>
+      <div class="pill-row"><span class="pill">Event ID 4624</span><span class="pill">Event ID 5140</span><span class="pill">SMB2</span><span class="pill">NTLMSSP</span><span class="pill">NBNS</span></div>
+
+      <h2 id="mapping">Host/IP Mapping</h2>
+      <p>The first step was to map the internal hosts. Searching for <code>FORELA-WKSTN001</code> in the capture showed NetBIOS/NBSTAT activity associated with <span class="ioc">172.17.79.129</span>. This became the target workstation in the malicious logon flow.</p>
+      <figure class="evidence-shot"><figcaption><span>Evidence 01 — NBNS/NBSTAT mapping for FORELA-WKSTN001</span><span>PCAP</span></figcaption><img src="/assets/images/writeups/htb/reaper/01-pcap-forela-wkstn001-nbns-mapping.png" alt="Wireshark NBNS evidence mapping FORELA-WKSTN001 to 172.17.79.129"></figure>
+      <p>From the SMB/NTLM conversations, <span class="ioc">172.17.79.136</span> acted as the victim workstation sending NTLM authentication for <code>FORELA\arthur.kyle</code> toward <span class="ioc">172.17.79.135</span>. That made <span class="ioc">172.17.79.135</span> the unknown device used by the attacker to intercept or relay credentials.</p>
+
+      <h2 id="victim">Victim Share Navigation</h2>
+      <p>The victim workstation tried to access a network share named <code>\\DC01\Trip</code>. In SMB, this appears as a <strong>Tree Connect Request</strong>. The server later returned <code>STATUS_BAD_NETWORK_NAME</code>, but the key point is that the user navigated to that share path.</p>
+      <figure class="evidence-shot"><figcaption><span>Evidence 02 — Victim attempted to access \\DC01\Trip</span><span>SMB2 Tree Connect</span></figcaption><img src="/assets/images/writeups/htb/reaper/05-pcap-victim-fileshare-dc01-trip.png" alt="Wireshark SMB2 Tree Connect Request for \\DC01\Trip"></figure>
+      <div class="mini-note warning"><strong>Why this matters:</strong> <code>\\DC01\Trip</code> is a UNC path. It means “open the share named <code>Trip</code> on host <code>DC01</code>.” In this case, the attempted navigation triggered SMB authentication activity that the attacker could abuse.</div>
+
+      <h2 id="stolen-hash">Stolen NTLM Authentication</h2>
+      <p>The capture shows <code>172.17.79.136</code> connecting to <code>172.17.79.135:445</code> and completing an NTLMSSP authentication exchange. The <code>NTLMSSP_AUTH</code> packet identifies the account as <code>FORELA\arthur.kyle</code>.</p>
+      <figure class="evidence-shot"><figcaption><span>Evidence 03 — NTLMSSP_AUTH for FORELA\arthur.kyle</span><span>Victim → Unknown Device</span></figcaption><img src="/assets/images/writeups/htb/reaper/02-pcap-ntlm-auth-arthur-kyle-victim-to-attacker.png" alt="Wireshark NTLMSSP_AUTH showing FORELA arthur.kyle"></figure>
+      <p>This explains the “hash stolen” question in the lab. The attacker did not need the plaintext password. The useful artifact was the NTLM authentication material, which could be intercepted or relayed.</p>
+
+      <h2 id="malicious-logon">Malicious Logon</h2>
+      <p>The main Windows evidence is Event ID <code>4624</code>, a successful logon. The event shows a network logon using NTLM:</p>
+      <pre><code>TargetUserName: arthur.kyle
+TargetDomainName: FORELA
+LogonType: 3
+LogonProcessName: NtLmSsp
+AuthenticationPackageName: NTLM
+WorkstationName: FORELA-WKSTN002
+IpAddress: 172.17.79.135
+IpPort: 40252
+TargetLogonId: 0x64a799</code></pre>
+      <figure class="evidence-shot"><figcaption><span>Evidence 04 — Event ID 4624 suspicious NTLM network logon</span><span>Security.evtx</span></figcaption><img src="/assets/images/writeups/htb/reaper/03-security-4624-malicious-ntlm-logon.png" alt="Event Viewer 4624 showing arthur.kyle NTLM logon from 172.17.79.135 port 40252"></figure>
+      <p>This is the core mismatch: the event claims the workstation name is <code>FORELA-WKSTN002</code>, but the source IP is <code>172.17.79.135</code>, which is the unknown attacker device, not the legitimate IP of <code>FORELA-WKSTN002</code>.</p>
+      <figure class="evidence-shot"><figcaption><span>Evidence 05 — PCAP flow matching source port 40252</span><span>Unknown Device → Target</span></figcaption><img src="/assets/images/writeups/htb/reaper/04-pcap-relay-source-port-40252-to-target.png" alt="Wireshark SMB flow from 172.17.79.135 source port 40252 to 172.17.79.129 port 445"></figure>
+      <p>The PCAP validates the Windows event: <code>172.17.79.135:40252</code> connected to <code>172.17.79.129:445</code> and used NTLM authentication for <code>FORELA\arthur.kyle</code>.</p>
+
+      <h2 id="logon-id">Logon ID Correlation with Event ID 5140</h2>
+      <p>After identifying the suspicious logon, I pivoted to Event ID <code>5140</code>, which records network share access. The key field is <code>SubjectLogonId</code>. It matched the malicious <code>4624</code> Logon ID:</p>
+      <pre><code>4624 TargetLogonId  = 0x64a799
+5140 SubjectLogonId = 0x64a799</code></pre>
+      <figure class="evidence-shot"><figcaption><span>Evidence 06 — Event ID 5140 share access under the same Logon ID</span><span>Security.evtx</span></figcaption><img src="/assets/images/writeups/htb/reaper/06-security-5140-ipc-share-access.png" alt="Event Viewer 5140 showing SubjectLogonId 0x64a799 and ShareName \\*\IPC$"></figure>
+      <p>The share accessed as part of the malicious authenticated session was <code>\\*\IPC$</code>. This is why using the PCAP path <code>\\172.17.79.129\IPC$</code> was not the exact answer for the task; the lab asked for the Windows event field from <code>5140</code>.</p>
+
+      <h2 id="timeline">Timeline</h2>
+      <figure class="evidence-shot"><figcaption><span>Evidence 07 — UTC time from Event ID 4624 XML</span><span>Security.evtx XML View</span></figcaption><img src="/assets/images/writeups/htb/reaper/07-security-4624-xml-utc-time.png" alt="Event XML TimeCreated SystemTime 2024-07-31T04:55:16Z"></figure>
+      <table class="timeline-table"><thead><tr><th>UTC Time</th><th>Event</th><th>Evidence</th></tr></thead><tbody><tr><td>2024-07-31 04:55:13</td><td>Unknown device <code>172.17.79.135</code> starts SMB/NTLM activity toward <code>172.17.79.129</code>.</td><td>PCAP source port <code>40252</code></td></tr><tr><td>2024-07-31 04:55:16</td><td>Target records successful NTLM network logon for <code>FORELA\arthur.kyle</code>.</td><td>Event ID <code>4624</code></td></tr><tr><td>2024-07-31 04:55:16</td><td>Same malicious session accesses <code>\\*\IPC$</code>.</td><td>Event ID <code>5140</code> with <code>SubjectLogonId 0x64a799</code></td></tr><tr><td>2024-07-31 04:55:28</td><td>Victim workstation navigates to <code>\\DC01\Trip</code>.</td><td>SMB2 Tree Connect Request</td></tr><tr><td>2024-07-31 04:55:32</td><td>Additional NTLM authentication from <code>172.17.79.136</code> to the unknown device shows <code>FORELA\arthur.kyle</code>.</td><td>NTLMSSP_AUTH</td></tr></tbody></table>
+      <div class="flow-box">Likely attack flow:
+
+FORELA-WKSTN002 / 172.17.79.136
+  └─ User arthur.kyle navigates to \\DC01\Trip
+  └─ Sends NTLM authentication toward attacker-controlled SMB service
+
+Unknown Device / 172.17.79.135
+  └─ Intercepts or relays NTLM authentication
+  └─ Uses source port 40252 toward target SMB service
+
+FORELA-WKSTN001 / 172.17.79.129
+  └─ Records Event ID 4624 Logon Type 3
+  └─ Records Event ID 5140 share access to \\*\IPC$</div>
+
+      <h2 id="answers">Answers</h2>
+      <div class="answer-grid"><div class="answer-card"><div class="q">Task 1 — IP for FORELA-WKSTN001</div><code>172.17.79.129</code></div><div class="answer-card"><div class="q">Task 2 — IP for FORELA-WKSTN002</div><code>172.17.79.136</code></div><div class="answer-card"><div class="q">Task 3 — User whose hash was stolen</div><code>arthur.kyle</code></div><div class="answer-card"><div class="q">Task 4 — Unknown Device IP</div><code>172.17.79.135</code></div><div class="answer-card"><div class="q">Task 5 — Fileshare navigated by victim</div><code>\\DC01\Trip</code></div><div class="answer-card"><div class="q">Task 6 — Source port</div><code>40252</code></div><div class="answer-card"><div class="q">Task 7 — Malicious Logon ID</div><code>0x64A799</code></div><div class="answer-card"><div class="q">Task 8 — Workstation name and source IP mismatch</div><code>FORELA-WKSTN002, 172.17.79.135</code></div><div class="answer-card"><div class="q">Task 9 — Malicious logon UTC time</div><code>2024-07-31 04:55:16</code></div><div class="answer-card"><div class="q">Task 10 — Share accessed by malicious tool</div><code>\\*\IPC$</code></div></div>
+
+      <h2 id="recommendations">Recommendations</h2>
+      <ul><li>Reset or rotate credentials for <code>FORELA\arthur.kyle</code> and invalidate active sessions where possible.</li><li>Investigate <code>172.17.79.135</code> as the attacker-controlled or unauthorized relay device.</li><li>Hunt for additional Event ID <code>4624</code> Logon Type <code>3</code> events where <code>WorkstationName</code> does not match the legitimate assigned IP address.</li><li>Correlate Event ID <code>4624</code> and <code>5140</code> by Logon ID to identify what resources were accessed after suspicious authentication.</li><li>Enforce SMB signing where practical and reduce NTLM exposure to limit NTLM relay risk.</li><li>Review name resolution paths such as NBNS/LLMNR and consider hardening or disabling legacy name resolution if not required.</li></ul>
+
+      <h2 id="lessons">Lessons Learned</h2>
+      <p>The most important lesson from Reaper is that a successful logon is not automatically legitimate. The analyst must validate whether the source workstation identity and the source IP address describe the same system.</p>
+      <p>This lab also reinforces a practical SOC habit: <strong>correlate host logs with network traffic</strong>. Event ID <code>4624</code> gave the suspicious session. The PCAP proved where the traffic came from. Event ID <code>5140</code> showed what share was accessed under the same Logon ID. Together, they formed a complete and defensible incident story.</p>
+    </article>
+  </div></main>
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
