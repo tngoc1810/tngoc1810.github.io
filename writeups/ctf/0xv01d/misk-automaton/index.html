@@ -6,243 +6,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Reverse engineering writeup for Misk Automaton from 0xV01D CTF.">
   <meta name="author" content="Nguyen Thai Ngoc">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style.css">
-
   <style>
-    .evidence{margin:18px 0 28px;border:1px solid var(--line);background:rgba(10,24,50,.48);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
-    .evidence img{width:100%;display:block;background:rgba(2,7,22,.75)}
-    .evidence figcaption{padding:12px 16px;color:var(--subtle);font-size:13px;border-top:1px solid var(--line);background:rgba(2,8,22,.58)}
-    .code-title{color:#9fe8ff;font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:900;margin:18px 0 8px}
-    .table-wrap{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:18px;background:rgba(10,24,50,.42)}
-    table{width:100%;border-collapse:collapse;min-width:560px} th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;color:var(--muted);font-size:14px} th{color:var(--text);background:rgba(86,199,255,.08);font-weight:900} tr:last-child td{border-bottom:0}
-    .flag-box{border:1px solid rgba(45,212,191,.28);background:rgba(45,212,191,.08);border-radius:20px;padding:18px;margin:20px 0}.flag-box code{color:#99f6e4;border-color:rgba(45,212,191,.22);background:rgba(45,212,191,.08);word-break:break-all}
-    .warn{border-left-color:var(--amber);background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.22)}.warn strong{color:#fde68a}.success{border-left-color:var(--green);background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.22)}.success strong{color:#99f6e4}
+    @media (min-width:1101px){.automaton-page .article-layout{display:grid!important;grid-template-columns:300px minmax(0,1fr)!important;gap:34px!important;align-items:start!important;width:min(1280px,calc(100% - 48px))!important;max-width:1280px!important;margin:0 auto!important}.automaton-page .toc{position:sticky!important;top:96px!important;width:300px!important;height:calc(100vh - 118px)!important;max-height:calc(100vh - 118px)!important;margin:0!important;padding:24px 22px!important;overflow-y:auto!important;border:1px solid rgba(125,200,255,.18)!important;border-radius:34px!important;background:linear-gradient(180deg,rgba(8,24,52,.92),rgba(5,16,36,.86))!important;box-shadow:0 16px 42px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.035)!important}.automaton-page .article-card{width:100%!important;max-width:none!important;margin:0!important;padding:34px!important;border-radius:34px!important}}
+    @media (max-width:1100px){.automaton-page .article-layout{display:block!important;width:min(100%,calc(100% - 28px))!important;margin:0 auto!important}.automaton-page .toc{position:static!important;width:100%!important;margin:0 0 24px 0!important;padding:20px 18px!important;border:1px solid rgba(125,200,255,.16)!important;border-radius:28px!important;background:linear-gradient(180deg,rgba(8,24,52,.90),rgba(5,16,36,.84))!important}.automaton-page .article-card{padding:24px!important}}
+    .automaton-page .toc-title{margin:0 0 16px 0;padding-bottom:14px;border-bottom:1px solid rgba(125,200,255,.14);color:rgba(180,210,235,.86);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase}.automaton-page .toc a{display:block;margin:4px 0;padding:10px 12px;border-radius:15px;color:#bfe8ff;font-size:15px;font-weight:700;line-height:1.45;text-decoration:none}.automaton-page .toc a.sub{padding-left:24px;color:rgba(170,195,220,.82);font-size:14px}.automaton-page .toc a:hover,.automaton-page .toc a.active{background:rgba(86,199,255,.10);color:#7feaff}.automaton-page p,.automaton-page li{line-height:1.78}.terminal{padding:16px;overflow-x:auto;color:#d8f7ff;font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.62;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:radial-gradient(circle at 20% 0%,rgba(0,216,255,.10),transparent 32%),linear-gradient(180deg,rgba(1,12,27,.98),rgba(1,7,16,.98));border:1px solid rgba(125,200,255,.14);border-radius:18px;margin:14px 0}.cmd{color:#6fffe8;font-weight:800}.hit{color:#ff7b98;font-weight:900}.addr{color:#7feaff;font-weight:900}.state{color:#ffd36e;font-weight:900}.ok{color:#7CFF9B;font-weight:900}.mindset,.note-box{padding:15px 17px;border:1px solid rgba(125,200,255,.15);border-radius:20px;background:rgba(86,199,255,.06);color:rgba(220,245,255,.86);margin:16px 0}.mindset strong,.note-box strong{display:block;color:#9ee8ff;margin-bottom:6px}.warn{border-color:rgba(250,204,21,.24);background:rgba(250,204,21,.08)}.warn strong{color:#fde68a}.danger{border-color:rgba(251,113,133,.25);background:rgba(251,113,133,.08)}.danger strong{color:#fb7185}.success{border-color:rgba(45,212,191,.28);background:rgba(45,212,191,.08)}.success strong{color:#99f6e4}.table-wrap{overflow-x:auto;margin:18px 0;border:1px solid rgba(125,200,255,.16);border-radius:18px;background:rgba(8,24,52,.46)}table{width:100%;border-collapse:collapse;min-width:680px}th,td{padding:13px 14px;border-bottom:1px solid rgba(125,200,255,.10);vertical-align:top;overflow-wrap:anywhere}th{color:#7feaff;text-align:left;font-family:"JetBrains Mono",monospace;font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:rgba(86,199,255,.08)}tr:last-child td{border-bottom:0}.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:18px 0}.flow-card{padding:16px;border:1px solid rgba(125,200,255,.16);border-radius:22px;background:rgba(8,24,52,.48);min-width:0}.flow-card .num{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:11px;background:rgba(34,211,238,.12);color:#7feaff;font-family:"JetBrains Mono",monospace;font-weight:900;margin-bottom:10px}.flow-card h3{margin:0 0 8px;color:#dff8ff}.flow-card p{margin:0;color:rgba(226,232,240,.78)}.flag-box{border:1px solid rgba(45,212,191,.28);background:rgba(45,212,191,.08);border-radius:22px;padding:20px;margin:20px 0}.flag-box code{display:block;color:#99f6e4;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.22);border-radius:14px;padding:12px;word-break:break-all;overflow-wrap:anywhere}.pill-row{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}.pill{border:1px solid rgba(125,200,255,.22);background:rgba(86,199,255,.08);color:#bfe8ff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900;font-family:"JetBrains Mono",monospace}pre,code{overflow-wrap:anywhere;word-break:break-word}
   </style>
 </head>
-
 <body>
-  <header class="topbar">
-    <div class="wrap topbar-inner">
-      <a class="brand" href="/">ThaiNgoc :~$</a>
-      <nav class="nav">
-        <a href="/">Home</a>
-        <a class="active" href="/writeups/">Writeups</a>
-        <a href="/projects/">Projects</a>
-        <a href="/achievements/">Achievements</a>
-        <a href="/contact/">Contact</a>
-      </nav>
-    </div>
-  </header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <main class="page automaton-page"><div class="wrap article-layout">
+    <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#triage">Initial Triage</a><a href="#strings">Fake Flag</a><a href="#rdata">.rdata Analysis</a><a href="#checker">Checker Function</a><a href="#automaton">Automaton Logic</a><a href="#solver">Solver</a><a href="#flag">Final Flag</a><a href="#lessons">Lessons</a></aside>
+    <article class="article-card glass">
+      <div class="eyebrow">0xV01D CTF · Reverse Engineering</div>
+      <h1 class="page-title">Misk Automaton</h1>
+      <p class="lead">Reverse engineering a Windows PE64 checker that hides the real validation logic behind a fake flag, target bytes, eight transition tables and a small state machine.</p>
+      <section class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">Misk Automaton</div></div><div class="item"><div class="label">Platform</div><div class="value">0xV01D CTF</div></div><div class="item"><div class="label">Category</div><div class="value accent">Reverse Engineering</div></div><div class="item"><div class="label">Difficulty</div><div class="value">Hard · 500 pts</div></div><div class="item"><div class="label">Binary</div><div class="value">misk_automaton.exe</div></div><div class="item"><div class="label">Core idea</div><div class="value">Stateful automaton checker</div></div></section>
+      <div class="note-box warn"><strong>Analyst note</strong>The binary contains a visible flag-like string. I treated it as bait because the nearby string says the visible state names are bait, and the fake flag is only reachable through an impossible argument-count branch.</div>
 
-  <main class="page">
-    <div class="wrap article-layout">
-      <aside class="toc">
-        <div class="toc-title">Contents</div>
-        <a href="#overview">Overview</a>
-        <a href="#initial">Initial Triage</a>
-        <a class="sub" href="#file-type">File Type</a>
-        <a class="sub" href="#strings">Fake Flag in Strings</a>
-        <a href="#rdata">.rdata Analysis</a>
-        <a href="#checker">Checker Function</a>
-        <a class="sub" href="#fake-branch">Fake Flag Branch</a>
-        <a class="sub" href="#target-tables">Target & Tables</a>
-        <a href="#automaton">Automaton Logic</a>
-        <a class="sub" href="#transition">5-Round Transition</a>
-        <a class="sub" href="#compare">Target Comparison</a>
-        <a href="#solver">Solver</a>
-        <a href="#flag">Flag</a>
-        <a href="#lessons">Lessons Learned</a>
-      </aside>
+      <h2 id="overview">Overview</h2>
+      <p>The challenge archive contained one main artifact: <code>misk_automaton.exe</code>. The binary looked small, but it had enough structure to hide a stateful checker. The goal was to recover the real input accepted by the validation function, not to trust the first flag-looking string.</p>
+      <div class="flow"><div class="flow-card"><div class="num">1</div><h3>Triage</h3><p>Identify file type, architecture, sections and obvious strings.</p></div><div class="flow-card"><div class="num">2</div><h3>Reject bait</h3><p>Confirm the visible flag is not part of the real validation path.</p></div><div class="flow-card"><div class="num">3</div><h3>Recover data</h3><p>Extract target bytes and transition table pointers from <code>.rdata</code>.</p></div><div class="flow-card"><div class="num">4</div><h3>Model checker</h3><p>Translate the assembly into a Python solver and recover the flag.</p></div></div>
 
-      <article class="article-card glass">
-        <div class="eyebrow">0xV01D CTF · Reverse Engineering</div>
-        <h1 class="page-title">Misk Automaton</h1>
-        <p class="lead">Reverse engineering a Windows PE64 checker that hides the real validation logic behind a fake flag, target bytes, eight transition tables and a small automaton state machine.</p>
+      <h2 id="triage">Initial Triage</h2>
+      <div class="terminal"><span class="cmd">$ unzip 9znj0v.zip</span>
+Archive:  9znj0v.zip
+  inflating: misk_automaton.exe
 
-        <section class="info-card">
-          <div class="item"><div class="label">Challenge</div><div class="value">Misk Automaton</div></div>
-          <div class="item"><div class="label">Platform</div><div class="value">0xV01D CTF</div></div>
-          <div class="item"><div class="label">Category</div><div class="value accent">Reverse Engineering</div></div>
-          <div class="item"><div class="label">Difficulty</div><div class="value">Hard · 500 pts</div></div>
-          <div class="item"><div class="label">Date</div><div class="value">20/05/2026</div></div>
-          <div class="item"><div class="label">Author</div><div class="value">Nguyen Thai Ngoc</div></div>
-        </section>
-        <div class="callout warn"><strong>Analyst Note</strong>The binary contains a visible flag-like string, but the challenge name and the note inside <code>strings</code> strongly suggest it is bait. I avoided submitting it and continued reversing the checker.</div>
+<span class="cmd">$ file misk_automaton.exe</span>
+misk_automaton.exe: PE32+ executable for MS Windows 5.02 (console), x86-64 (stripped to external PDB), 11 sections</div>
+      <p>The file type matters because this is a Windows x64 binary. While reading assembly, I kept the Windows x64 calling convention in mind: <code>rcx</code>, <code>rdx</code>, <code>r8</code> and <code>r9</code> are the first arguments.</p>
+      <div class="mindset"><strong>Reverse mindset:</strong> a small checker is often data-driven. Instead of only reading branches, I looked for target arrays, lookup tables and references from the checker into <code>.rdata</code>.</div>
 
-        <h2 id="overview">Overview</h2>
-        <p>The challenge provides a ZIP archive named <code>9znj0v.zip</code>. After extracting it, the main artifact is <code>misk_automaton.exe</code>, a Windows executable. Since this is a 500-point reverse engineering challenge, the expected path is not to trust obvious strings but to recover the actual validation algorithm.</p>
-        <div class="code-title">Extracting the challenge archive</div><pre><code>unzip 9znj0v.zip</code></pre>
-        <div class="code-title">Output</div><pre><code>Archive:  9znj0v.zip
-  inflating: misk_automaton.exe</code></pre>
-        <div class="code-title">Listing the extracted file</div><pre><code>ls -la</code></pre>
-        <pre><code>-rwxr-xr-x 1 user user 24064 May 19 17:53 misk_automaton.exe</code></pre>
+      <h2 id="strings">Fake Flag in Strings</h2>
+      <p>The first trap appeared immediately in the strings output.</p>
+      <div class="terminal"><span class="cmd">$ strings -a misk_automaton.exe | grep -E '0xV01D|bait|operator|Correct|Wrong|usage'</span>
+operator note: the visible state names are bait
+<span class="hit">0xV01D{eight_states_are_not_enough}</span></div>
+      <p>The string <code>0xV01D{eight_states_are_not_enough}</code> looks like a flag, but it is placed next to a warning that the visible state names are bait. I needed to check where this string was referenced before trusting it.</p>
+      <div class="note-box danger"><strong>Why I rejected it:</strong> the fake flag branch is reached only when <code>argc == 31337</code>. Under normal execution, the real checker requires <code>argc == 2</code> and an input length of <code>0x2a</code> bytes.</div>
 
-        <h2 id="initial">Initial Triage</h2>
-        <h3 id="file-type">File Type</h3>
-        <p>First, I checked the binary type. This confirms that the artifact is a Windows 64-bit PE executable and that the binary is stripped to an external PDB, so the reverse process cannot rely on friendly symbol names.</p>
-        <div class="code-title">Command</div><pre><code>file misk_automaton.exe</code></pre>
-        <div class="code-title">Output</div><pre><code>misk_automaton.exe: PE32+ executable for MS Windows 5.02 (console), x86-64 (stripped to external PDB), 11 sections</code></pre>
-        <p>Because this is Windows x64, the calling convention matters when reading assembly: <code>rcx</code> is the first argument, <code>rdx</code> is the second argument, <code>r8</code> is the third argument, and <code>r9</code> is the fourth argument.</p>
+      <h2 id="rdata">.rdata Analysis</h2>
+      <p>In checker binaries, <code>.rdata</code> often contains the real validation material. Dumping the section revealed state-name bait, a 42-byte target array and eight pointers that looked like transition tables.</p>
+      <div class="terminal"><span class="cmd">$ objdump -h misk_automaton.exe</span>
+Idx Name          Size      VMA               File off
+0   .text         00002378  0000000140001000  00000400
+1   .data         00000120  0000000140004000  00002800
+2   .rdata        000017d0  0000000140005000  00002a00
 
-        <h3 id="strings">Fake Flag in Strings</h3>
-        <p>I then ran <code>strings</code> to locate obvious messages, success strings, failure strings or embedded flags.</p>
-        <div class="code-title">Command</div><pre><code>strings -a misk_automaton.exe | grep -E '0xV01D|bait|operator|Correct|Wrong|usage'</code></pre>
-        <div class="code-title">Output</div><pre><code>operator note: the visible state names are bait
-0xV01D{eight_states_are_not_enough}</code></pre>
-        <p>The string <code>0xV01D{eight_states_are_not_enough}</code> looks like a flag, but the nearby phrase <code>operator note: the visible state names are bait</code> makes it highly suspicious.</p>
-
-        <h2 id="rdata">.rdata Analysis</h2>
-        <p>Next, I inspected the binary sections. In checker-style reverse challenges, <code>.rdata</code> often contains target bytes, lookup tables, fake flags and messages.</p>
-        <div class="code-title">Command</div><pre><code>objdump -h misk_automaton.exe</code></pre>
-        <pre><code>misk_automaton.exe:     file format pei-x86-64
-
-Sections:
-Idx Name          Size      VMA               LMA               File off
-  0 .text         00002378  0000000140001000  0000000140001000  00000400
-  1 .data         00000120  0000000140004000  0000000140004000  00002800
-  2 .rdata        000017d0  0000000140005000  0000000140005000  00002a00</code></pre>
-        <div class="code-title">Dumping .rdata</div><pre><code>objdump -s -j .rdata misk_automaton.exe | head -n 35</code></pre>
-        <pre><code>140005060 69646c65 00737461 6c6c6564 00617761  idle.stalled.awa
-140005070 6b650000 00000000 00000000 00000000  ke..............
+<span class="cmd">$ objdump -s -j .rdata misk_automaton.exe | head -n 35</span>
+140005060 69646c65 00737461 6c6c6564 00617761  idle.stalled.awa
 140005080 b575c490 fc585248 c3b2bf90 71376aa0  .u...XRH....q7j.
-140005090 ee870aaa b00363ce d48379cd 5fd077a7  ......c...y._.w.
-1400050a0 173e83e0 ed2736b2 1ea70000 00000000  .&gt;...'6.........
-1400050c0 00580040 01000000 00570040 01000000  .X.@.....W.@....
-1400050d0 00560040 01000000 00550040 01000000  .V.@.....U.@....
-1400050e0 00540040 01000000 00530040 01000000  .T.@.....S.@....
-1400050f0 00520040 01000000 00510040 01000000  .R.@.....Q.@....</code></pre>
-        <div class="table-wrap"><table><thead><tr><th>Address</th><th>Meaning</th><th>Reasoning</th></tr></thead><tbody><tr><td><code>0x140005060</code></td><td>Visible state names</td><td><code>idle</code>, <code>stalled</code>, <code>awake</code> look like bait strings.</td></tr><tr><td><code>0x140005080</code></td><td>Target bytes</td><td>Random-looking bytes of length 42 used for validation.</td></tr><tr><td><code>0x1400050c0</code></td><td>Table pointer array</td><td>Eight little-endian 64-bit pointers to 256-byte transition tables.</td></tr></tbody></table></div>
+1400050c0 00580040 01000000 00570040 01000000  .X.@.....W.@....</div>
+      <div class="table-wrap"><table><thead><tr><th>Address</th><th>Meaning</th><th>Reasoning</th></tr></thead><tbody><tr><td><code>0x140005060</code></td><td>Visible state names</td><td><code>idle</code>, <code>stalled</code>, <code>awake</code> match the bait warning.</td></tr><tr><td><code>0x140005080</code></td><td>Target bytes</td><td>42 random-looking bytes compared against transformed input.</td></tr><tr><td><code>0x1400050c0</code></td><td>Table pointer array</td><td>Eight little-endian 64-bit pointers to 256-byte tables.</td></tr></tbody></table></div>
 
-        <h2 id="checker">Checker Function</h2>
-        <p>I generated a disassembly and located a suspicious call to <code>0x140003220</code>. This function handles argument checks, fake flag logic and the real automaton validation.</p>
-        <div class="code-title">Command</div><pre><code>objdump -d -M intel misk_automaton.exe &gt; disasm.txt
-grep -n "140003220" -A90 -B5 disasm.txt</code></pre>
-        <pre><code>140003228: 89 cb                 mov    ebx,ecx
-14000322a: 48 89 d6              mov    rsi,rdx
+      <h2 id="checker">Checker Function</h2>
+      <p>The checker around <code>0x140003220</code> handled argument checks, fake-flag logic and real validation. The key length check was <code>0x2a</code>, meaning the correct input must be 42 characters.</p>
+      <div class="terminal"><span class="cmd">$ objdump -d -M intel misk_automaton.exe > disasm.txt</span>
 140003232: 81 fb 69 7a 00 00     cmp    ebx,0x7a69
 140003238: 0f 84 c1 00 00 00     je     0x1400032ff
 14000323e: 83 fb 02              cmp    ebx,0x2
-140003241: 0f 85 d0 00 00 00     jne    0x140003317
 140003247: 48 8b 5e 08           mov    rbx,QWORD PTR [rsi+0x8]
-14000324e: e8 2d fe ff ff        call   0x140003080
-140003253: 48 83 f8 2a           cmp    rax,0x2a
-140003257: 0f 85 ba 00 00 00     jne    0x140003317</code></pre>
-        <p>The program must be executed as <code>misk_automaton.exe &lt;flag&gt;</code>, and the input must be exactly 42 characters.</p>
+140003253: 48 83 f8 2a           cmp    rax,0x2a</div>
+      <p>The checker initializes two states and points into the target and table pointer array:</p>
+      <div class="terminal">i = 0
+state1 = <span class="state">0x41</span>
+state2 = <span class="state">3</span>
+table_ptrs = <span class="addr">0x1400050c0</span>
+target = <span class="addr">0x140005080</span></div>
 
-        <h3 id="fake-branch">Fake Flag Branch</h3>
-        <p>The fake flag string is printed only when <code>argc == 31337</code>. This confirms that the flag found by <code>strings</code> is not the real answer.</p>
-        <pre><code>1400032ff: 48 8d 0d 3a 26 00 00  lea    rcx,[rip+0x263a]        # 0x140005940
-140003306: e8 b5 fd ff ff        call   0x1400030c0
-14000330b: 48 8d 0d ee 25 00 00  lea    rcx,[rip+0x25ee]        # 0x140005900
-140003312: e8 a9 fd ff ff        call   0x1400030c0</code></pre>
-        <div class="callout warn"><strong>Conclusion</strong>The string <code>0xV01D{eight_states_are_not_enough}</code> is bait. The real validation path requires <code>argc == 2</code> and a 42-character input.</div>
-
-        <h3 id="target-tables">Target Bytes and Automaton Tables</h3>
-        <p>After the length check, the function initializes state and loads two important pointers.</p>
-        <pre><code>14000325d: 45 31 d2              xor    r10d,r10d
-140003260: 41 b9 41 00 00 00     mov    r9d,0x41
-140003266: ba 03 00 00 00        mov    edx,0x3
-14000326b: 4c 8d 1d 4e 1e 00 00  lea    r11,[rip+0x1e4e]        # 0x1400050c0
-140003272: 48 8d 35 07 1e 00 00  lea    rsi,[rip+0x1e07]        # 0x140005080</code></pre>
-        <pre><code>i = 0
-state1 = 0x41
-state2 = 3
-table_ptrs = 0x1400050c0
-target = 0x140005080</code></pre>
-
-        <h2 id="automaton">Automaton Logic</h2>
-        <p>The main loop processes one input byte at a time. It first mixes the byte with the current index and <code>state1</code>.</p>
-        <pre><code>x = ((i * 9 + state1) &amp; 0xff) ^ input[i]</code></pre>
-
-        <h3 id="transition">5-Round Transition</h3>
-        <p>Then the checker runs five transition rounds. The selected table depends on <code>state2</code> and the round index <code>j</code>.</p>
-        <pre><code>for (j = 0; j &lt; 5; j++) {
-    table_index = (state2 + j) &amp; 7;
+      <h2 id="automaton">Automaton Logic</h2>
+      <p>The program processes one input byte at a time. First it mixes the byte with the index and <code>state1</code>:</p>
+      <div class="terminal">x = ((i * 9 + state1) & 0xff) ^ input[i]</div>
+      <p>Then it runs five transition rounds. The transition table depends on <code>state2</code> and the round index.</p>
+      <div class="terminal">for (j = 0; j < 5; j++) {
+    table_index = (state2 + j) & 7;
     x = table[table_index][x];
 
-    state1 = (state2 * 19 + x + j + state1) &amp; 0xff;
-    state2 = (state2 * 5 + x + i + j) &amp; 7;
-}</code></pre>
-
-        <h3 id="compare">Target Comparison</h3>
-        <p>After the transition rounds, the checker compares <code>x ^ state1</code> with the corresponding target byte.</p>
-        <pre><code>if ((x ^ state1) != target[i]) {
+    state1 = (state2 * 19 + x + j + state1) & 0xff;
+    state2 = (state2 * 5 + x + i + j) & 7;
+}</div>
+      <p>After the five rounds, the output byte is compared to the target:</p>
+      <div class="terminal">if ((x ^ state1) != target[i]) {
     wrong();
-}</code></pre>
-        <div class="callout"><strong>Key Insight</strong>The checker is stateful, but each position still compares against <code>target[i]</code>. If the current states are known, I can brute force the next character and carry the new state forward.</div>
+}</div>
+      <div class="mindset"><strong>Key insight:</strong> the checker is stateful, but the state is fully deterministic. If I know <code>i</code>, <code>state1</code> and <code>state2</code>, I can brute force the next character and carry the new state forward.</div>
 
-        <h2 id="solver">Solver</h2>
-        <p>The solver extracts the target bytes and the eight transition tables from the PE file, then uses DFS/backtracking over a limited flag charset.</p>
-        <pre><code>from pathlib import Path
-import struct
-from functools import lru_cache
-
-path = "misk_automaton.exe"
-data = Path(path).read_bytes()
-
-BASE = 0x140000000
-
-SECTIONS = [
-    (".text",  0x1000, 0x2378, 0x0400),
-    (".data",  0x4000, 0x0120, 0x2800),
-    (".rdata", 0x5000, 0x17d0, 0x2a00),
-]
-
-def va_to_off(va):
-    rva = va - BASE
-    for name, sec_rva, sec_size, sec_off in SECTIONS:
-        if sec_rva &lt;= rva &lt; sec_rva + sec_size:
-            return sec_off + (rva - sec_rva)
-    raise ValueError(hex(va))
-
-TARGET_VA = 0x140005080
-PTRS_VA = 0x1400050c0
-
-target = data[va_to_off(TARGET_VA):va_to_off(TARGET_VA) + 0x2a]
-
-ptrs = []
-for i in range(8):
-    ptr = struct.unpack_from("&lt;Q", data, va_to_off(PTRS_VA) + i * 8)[0]
-    ptrs.append(ptr)
-
-tables = []
-for ptr in ptrs:
-    off = va_to_off(ptr)
-    tables.append(data[off:off + 256])
-
-def step(i, ch, state1, state2):
-    x = ((i * 9 + state1) &amp; 0xff) ^ ch
-    for j in range(5):
-        table_index = (state2 + j) &amp; 7
-        x = tables[table_index][x]
-        state1 = (state2 * 19 + x + j + state1) &amp; 0xff
-        state2 = (state2 * 5 + x + i + j) &amp; 7
-    return x ^ state1, state1, state2
-
-charset = "0xV01D{}abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
-charset = list(dict.fromkeys(map(ord, charset)))
-
-@lru_cache(None)
-def dfs(i, state1, state2):
-    if i == len(target):
-        return b""
-    for ch in charset:
-        out, new_state1, new_state2 = step(i, ch, state1, state2)
-        if out == target[i]:
-            tail = dfs(i + 1, new_state1, new_state2)
-            if tail is not None:
-                return bytes([ch]) + tail
-    return None
-
-flag = dfs(0, 0x41, 3)
-print("[+] flag:", flag.decode())</code></pre>
-
-        <h3>Solver Output</h3>
-        <pre><code>[+] target length: 42
+      <h2 id="solver">Solver</h2>
+      <p>The solver extracted the target bytes and eight transition tables from the PE file, then used DFS over a limited flag charset. The important part was converting virtual addresses to file offsets correctly.</p>
+      <div class="terminal"><span class="cmd">$ python3 solve.py</span>
+[+] target length: 42
 [+] target: b575c490fc585248c3b2bf9071376aa0ee870aaab00363ced48379cd5fd077a7173e83e0ed2736b21ea7
 [+] table pointers:
     0x140005800
@@ -254,21 +110,20 @@ print("[+] flag:", flag.decode())</code></pre>
     0x140005200
     0x140005100
 [+] extracted 8 tables
-[+] flag: 0xV01D{the_automaton_reads_between_states}</code></pre>
+[+] flag: <span class="ok">0xV01D{the_automaton_reads_between_states}</span></div>
+      <div class="note-box"><strong>Solver idea:</strong> try each candidate character, run the same transition logic as the binary, compare against <code>target[i]</code>, then recurse only when the byte matches. This avoids brute forcing the whole 42-character string at once.</div>
 
-        <h2 id="flag">Flag</h2>
-        <p>The recovered flag is 42 characters long, matching the binary condition <code>strlen(input) == 0x2a</code>.</p>
-        <div class="flag-box"><code>0xV01D{the_automaton_reads_between_states}</code></div>
+      <h2 id="flag">Final Flag</h2>
+      <p>The recovered flag is 42 characters long, matching the binary condition <code>strlen(input) == 0x2a</code>.</p>
+      <div class="flag-box"><code>0xV01D{the_automaton_reads_between_states}</code></div>
 
-        <h2 id="lessons">Lessons Learned</h2>
-        <div class="callout success"><strong>What I learned</strong><ul><li>Never trust an obvious flag from <code>strings</code> in a hard reverse challenge.</li><li>Checking where a suspicious string is referenced is more reliable than guessing.</li><li>PE virtual addresses must be converted to file offsets before extracting data in Python.</li><li>A stateful checker can still be brute forced position-by-position if the state transition is fully modeled.</li></ul></div>
-        <p>This challenge hides the real validation behind an automaton made of two states, eight transition tables, 42 target bytes and five transition rounds per character. After translating the assembly into pseudocode and simulating the logic, the true flag becomes recoverable.</p>
-
-        <div class="footer-nav"><a href="/writeups/ctf/0xv01d-ctf-writeups/">← Back to 0xV01D Writeups</a><a href="/writeups/">All Writeups →</a></div>
-      </article>
-    </div>
-  </main>
-
+      <h2 id="lessons">Lessons Learned</h2>
+      <ul><li>Never trust an obvious flag from <code>strings</code> in a hard reverse challenge.</li><li>Check where suspicious strings are referenced before submitting them.</li><li>PE virtual addresses must be converted to file offsets before extracting binary data in Python.</li><li>Lookup-table checkers can often be solved by modeling the exact state transition.</li><li>A stateful checker can still be solved character-by-character if the state update is deterministic.</li></ul>
+      <div class="callout success"><strong>Final conclusion:</strong> the real checker uses two evolving states, eight transition tables, a 42-byte target and five transition rounds per character. Once the transition is modeled accurately, the true flag is recovered.</div>
+      <div class="pill-row"><span class="pill">PE64</span><span class="pill">.rdata</span><span class="pill">Automaton</span><span class="pill">Transition Tables</span><span class="pill">DFS Solver</span></div>
+      <div class="footer-nav"><a href="/writeups/ctf/0xv01d-ctf-writeups/">← Back to 0xV01D Writeups</a><a href="/writeups/">All Writeups →</a></div>
+    </article>
+  </div></main>
   <script src="/assets/js/main.js"></script>
 </body>
 </html>
