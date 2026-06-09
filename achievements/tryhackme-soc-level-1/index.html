@@ -4,7 +4,15 @@
   <title>TryHackMe SOC Level 1 - Nguyen Thai Ngoc</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .certificate-image-box{margin:24px 0;border:1px solid rgba(124,240,255,.18);border-radius:24px;overflow:hidden;background:rgba(5,14,30,.72);box-shadow:0 12px 34px rgba(0,0,0,.24)}
+    .certificate-image-box img{width:100%;display:block;background:#06172d}
+    .cert-actions{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -19,33 +27,88 @@
       </nav>
     </div>
   </header>
+
   <main class="page">
     <div class="wrap article-layout">
+      <aside class="toc">
+        <div class="toc-title">On this page</div>
+        <a href="#overview">Overview</a>
+        <a href="#details">Certificate Details</a>
+        <a href="#certificate">Certificate</a>
+        <a href="#skills">Skills Covered</a>
+        <a href="#reflection">Learning Reflection</a>
+      </aside>
+
       <article class="article-card glass">
         <div class="eyebrow">Achievement - TryHackMe</div>
         <h1 class="page-title">SOC Level 1 Learning Path</h1>
-        <p class="lead">Certificate of Completion from TryHackMe for completing the SOC Level 1 Learning Path.</p>
-        <div class="info-card">
+        <p class="lead">
+          Certificate of Completion from TryHackMe for completing the SOC Level 1 Learning Path.
+          This is a practical milestone in my blue team and SOC analyst learning journey.
+        </p>
+
+        <div class="info-card" id="details">
           <div class="item"><div class="label">Certificate</div><div class="value">SOC Level 1 Learning Path</div></div>
           <div class="item"><div class="label">Issuer</div><div class="value">TryHackMe</div></div>
+          <div class="item"><div class="label">Type</div><div class="value accent">Certificate of Completion</div></div>
           <div class="item"><div class="label">Date Completed</div><div class="value">2026-06-09</div></div>
           <div class="item"><div class="label">Course Duration</div><div class="value">65 hours 29 minutes</div></div>
           <div class="item"><div class="label">Certificate ID</div><div class="value">THM-WQV7DUFW08</div></div>
-          <div class="item"><div class="label">Status</div><div class="value accent">Completed</div></div>
         </div>
-        <div class="callout"><strong>Achievement Summary</strong> Completed the TryHackMe SOC Level 1 Learning Path as part of my blue team learning progress.</div>
-        <h2>Skills Covered</h2>
+
+        <div class="callout">
+          <strong>Achievement Summary</strong>
+          Completed the TryHackMe SOC Level 1 Learning Path and strengthened my foundation in SOC investigation, alert review and defensive security practice.
+        </div>
+
+        <h2 id="overview">Overview</h2>
+        <p>
+          This learning path supports my current direction toward SOC Analyst and Threat Hunter roles.
+          It helped me practice the process of reading security events, checking evidence, connecting related activity and writing clear notes.
+        </p>
+
+        <h2 id="certificate">Certificate</h2>
+        <p>
+          The certificate image is shown below. Expected image path: <code>achievements/tryhackme-soc-level-1/certificate.png</code>.
+        </p>
+
+        <div class="cert-actions">
+          <a class="btn primary" href="./certificate.png" target="_blank" rel="noopener noreferrer">Open Certificate Image</a>
+          <a class="btn" href="/achievements/">Back to Achievements</a>
+        </div>
+
+        <div class="certificate-image-box">
+          <img src="./certificate.png" alt="TryHackMe SOC Level 1 Learning Path Certificate - Nguyen Thai Ngoc">
+        </div>
+
+        <h2 id="skills">Skills Covered</h2>
         <table class="mini-table">
           <thead><tr><th>Area</th><th>Relevance</th></tr></thead>
           <tbody>
-            <tr><td>SOC Fundamentals</td><td>Understanding basic SOC workflow and analyst mindset.</td></tr>
-            <tr><td>Log Investigation</td><td>Practicing how to review events and connect evidence.</td></tr>
-            <tr><td>Incident Notes</td><td>Writing clear findings, timeline and report notes.</td></tr>
+            <tr><td>SOC Fundamentals</td><td>Understanding basic SOC workflow, alert review and analyst mindset.</td></tr>
+            <tr><td>Log Investigation</td><td>Practicing how to review events and connect evidence across an investigation.</td></tr>
+            <tr><td>Incident Notes</td><td>Writing clear findings, timelines and report notes.</td></tr>
+            <tr><td>Blue Team Practice</td><td>Building defensive thinking through hands-on rooms and practical tasks.</td></tr>
           </tbody>
         </table>
-        <div class="footer-nav"><a href="/achievements/">Back to Achievements</a><a href="/writeups/">Writeups</a></div>
+
+        <h2 id="reflection">Learning Reflection</h2>
+        <div class="callout">
+          <strong>What I gained</strong>
+          This path helped me become more comfortable with a SOC-style workflow: read the alert, validate the evidence, pivot through logs and explain the result clearly.
+        </div>
+
+        <p>
+          I will keep applying this knowledge in TryHackMe rooms, Blue Team Labs, CyberDefenders labs and portfolio writeups.
+        </p>
+
+        <div class="footer-nav">
+          <a href="/achievements/">Back to Achievements</a>
+          <a href="/writeups/">Writeups</a>
+        </div>
       </article>
     </div>
   </main>
+  <script src="/assets/js/main.js"></script>
 </body>
 </html>
