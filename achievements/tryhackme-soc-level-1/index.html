@@ -9,9 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style.css">
   <style>
-    .certificate-image-box{margin:24px 0;border:1px solid rgba(124,240,255,.18);border-radius:24px;overflow:hidden;background:rgba(5,14,30,.72);box-shadow:0 12px 34px rgba(0,0,0,.24)}
-    .certificate-image-box img{width:100%;display:block;background:#06172d}
+    .cert-viewer{margin:24px 0;border:1px solid rgba(124,240,255,.18);border-radius:24px;overflow:hidden;background:rgba(5,14,30,.72);box-shadow:0 12px 34px rgba(0,0,0,.24)}
+    .cert-viewer iframe{width:100%;height:680px;border:0;display:block;background:#06172d}
     .cert-actions{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
+    @media(max-width:760px){.cert-viewer iframe{height:460px}}
   </style>
 </head>
 <body>
@@ -68,17 +69,14 @@
         </p>
 
         <h2 id="certificate">Certificate</h2>
-        <p>
-          The certificate image is shown below. Expected image path: <code>achievements/tryhackme-soc-level-1/certificate.png</code>.
-        </p>
 
         <div class="cert-actions">
-          <a class="btn primary" href="./certificate.png" target="_blank" rel="noopener noreferrer">Open Certificate Image</a>
+          <a class="btn primary" href="./tryhackme-soc-level-1-learning-path-nguyen-thai-ngoc.pdf" target="_blank" rel="noopener noreferrer">Open Certificate PDF</a>
           <a class="btn" href="/achievements/">Back to Achievements</a>
         </div>
 
-        <div class="certificate-image-box">
-          <img src="./certificate.png" alt="TryHackMe SOC Level 1 Learning Path Certificate - Nguyen Thai Ngoc">
+        <div class="cert-viewer">
+          <iframe src="./tryhackme-soc-level-1-learning-path-nguyen-thai-ngoc.pdf" title="TryHackMe SOC Level 1 Learning Path Certificate - Nguyen Thai Ngoc"></iframe>
         </div>
 
         <h2 id="skills">Skills Covered</h2>
