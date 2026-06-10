@@ -4,74 +4,46 @@ This repository contains my personal cybersecurity portfolio website.
 
 Main website: `https://tngoc1810.github.io`
 
-## Purpose
+## About
 
-This portfolio is used to document my cybersecurity learning journey and practical work, especially:
+I am an Information Security student focused on SOC analysis, Blue Team practice, DFIR, network forensics, malware traffic analysis, and practical investigation workflows.
 
-- SOC investigations
-- Blue Team labs
-- DFIR writeups
+This portfolio documents my learning progress, hands-on labs, CTF writeups, certificates, and security projects.
+
+## Focus Areas
+
+- SOC alert triage
+- Log analysis
+- Windows Event Logs and Sysmon
 - Network forensics
 - Malware traffic analysis
-- CTF writeups
-- Certificates and achievements
-- Future detection engineering and SOC projects
+- Phishing investigation
+- Web attack investigation
+- MITRE ATT&CK mapping
+- Incident reporting
+- Detection engineering basics
 
-## Main Website Sections
+## Website Sections
 
-| Section | Path | Purpose |
-|---|---|---|
-| Home | `index.html` | Main landing page and featured highlights |
-| Writeups | `writeups/index.html` | Library of SOC, CTF, DFIR and Blue Team writeups |
-| Projects | `projects/index.html` | Practical security projects and planned project areas |
-| Achievements | `achievements/index.html` | Certificates, CTF milestones and learning progress |
-| Contact | `contact/index.html` | Email, LinkedIn and contact information |
-| Assets | `assets/` | CSS, JavaScript, images, media and portfolio files |
-
-## Repository Management Files
-
-These files are for maintaining the portfolio and do not change the website design:
-
-| File / Folder | Purpose |
+| Section | Description |
 |---|---|
-| `_docs/CONTENT_INDEX.md` | Quick index of current portfolio content |
-| `_docs/ADDING_NEW_WRITEUP.md` | Step-by-step checklist for adding new writeups |
-| `_docs/REPO_STRUCTURE.md` | Explanation of the repository structure |
-| `_templates/WRITEUP_TEMPLATE.md` | Template for future writeups |
-| `_templates/INCIDENT_REPORT_TEMPLATE.md` | Template for SOC-style incident reports |
+| Home | Main landing page and featured highlights |
+| Writeups | SOC, CTF, DFIR and Blue Team writeups |
+| Projects | Practical security projects and future project work |
+| Achievements | Certificates, CTF milestones and learning progress |
+| Contact | Email and professional links |
 
-## Rules for Future Updates
+## Featured Work
 
-To keep the repo clean:
+- TryHackMe Boogeyman 3 — SOC investigation with Elastic/Kibana, Sysmon, PowerShell activity, lateral movement and impact analysis.
+- TryHackMe Tempest — Windows incident reconstruction using Sysmon, Windows Event Logs and PCAP evidence.
+- CyberDefenders HawkEye — Network forensics investigation covering SMTP logs and credential exfiltration.
+- CyberDefenders Web Investigation — Web attack investigation covering SQL injection, credential compromise and malicious upload activity.
+- HackTheBox Sherlock Brutus — Linux authentication investigation using `auth.log` and `wtmp` evidence.
 
-1. Do not move existing pages unless all links are updated.
-2. Keep writeups under `writeups/`.
-3. Keep certificates and achievement pages under `achievements/`.
-4. Keep screenshots and media under `assets/`.
-5. Add each new writeup to `writeups/index.html`.
-6. Add important work to the homepage only after it is polished.
-7. Use clear folder names with lowercase words and hyphens.
+## Links
 
-Recommended folder naming:
-
-```txt
-writeups/platform-or-category/writeup-name/index.html
-```
-
-Examples:
-
-```txt
-writeups/tryhackme/boogeyman-3/index.html
-writeups/htb/brutus/index.html
-writeups/soc/compromised-wordpress-log-analysis/index.html
-```
-
-## Current Priority
-
-The portfolio already has strong writeups. The next improvements should focus on:
-
-1. A Wazuh SOC Home Lab project.
-2. Sigma / SPL / YARA detection rules.
-3. SOC incident report PDFs.
-4. Better project documentation.
-5. A downloadable SOC Intern CV.
+- Portfolio: `https://tngoc1810.github.io`
+- GitHub: `https://github.com/tngoc1810`
+- LinkedIn: `https://www.linkedin.com/in/ngoc-thai-8343023b4/`
+- CyberDefenders: `https://cyberdefenders.org/p/tngoc/`
