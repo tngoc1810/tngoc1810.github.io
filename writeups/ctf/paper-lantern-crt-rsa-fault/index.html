@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style.css">
   <style>
-    .writeup-article{max-width:1050px;margin:0 auto}.meta-row{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0 1.4rem}.pill{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);padding:.35rem .65rem;border-radius:999px;font-size:.86rem;color:var(--muted)}.toc{margin:1.25rem 0;padding:1rem 1.2rem}.toc a{display:block;margin:.35rem 0}.note{border-left:4px solid var(--accent);padding:.9rem 1rem;margin:1rem 0;background:rgba(255,255,255,.045);border-radius:12px}.journal-table{width:100%;border-collapse:collapse;margin:1rem 0 1.4rem;overflow:hidden;border-radius:14px}.journal-table th,.journal-table td{border:1px solid rgba(255,255,255,.1);padding:.9rem;vertical-align:top}.journal-table th{background:rgba(255,255,255,.07)}pre{white-space:pre-wrap;word-break:break-word;border:1px solid rgba(255,255,255,.12);background:rgba(2,6,23,.72);padding:1rem;border-radius:14px;overflow:auto}code{font-family:'JetBrains Mono',monospace}.danger{color:#fca5a5}.ok{color:#86efac}.muted{color:var(--muted)}
+    .writeup-article{max-width:1080px;margin:0 auto}.meta-row{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0 1.4rem}.pill{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);padding:.35rem .65rem;border-radius:999px;font-size:.86rem;color:var(--muted)}.toc{margin:1.25rem 0;padding:1rem 1.2rem}.toc a{display:block;margin:.35rem 0}.note{border-left:4px solid var(--accent);padding:.9rem 1rem;margin:1rem 0;background:rgba(255,255,255,.045);border-radius:12px}.warning{border-left:4px solid #f97316;background:rgba(249,115,22,.08)}.success{border-left:4px solid #22c55e;background:rgba(34,197,94,.08)}.journal-table{width:100%;border-collapse:collapse;margin:1rem 0 1.4rem;overflow:hidden;border-radius:14px}.journal-table th,.journal-table td{border:1px solid rgba(255,255,255,.1);padding:.9rem;vertical-align:top}.journal-table th{background:rgba(255,255,255,.07)}pre{white-space:pre-wrap;word-break:break-word;border:1px solid rgba(255,255,255,.12);background:rgba(2,6,23,.72);padding:1rem;border-radius:14px;overflow:auto}code{font-family:'JetBrains Mono',monospace}.danger{color:#fca5a5}.ok{color:#86efac}.muted{color:var(--muted)}.phase{margin-top:1.8rem}.flow{line-height:1.75}.small-code{font-size:.88rem}.kbd{border:1px solid rgba(255,255,255,.16);border-bottom-width:3px;padding:.08rem .35rem;border-radius:.4rem;background:rgba(255,255,255,.06)}
   </style>
 </head>
 <body>
@@ -19,6 +19,7 @@
       <nav class="nav">
         <a href="/">Home</a>
         <a class="active" href="/writeups/">Writeups</a>
+        <a href="/projects/">Projects</a>
         <a href="/achievements/">Achievements</a>
         <a href="/contact/">Contact</a>
       </nav>
@@ -32,331 +33,444 @@
           <div class="eyebrow">CTF Writeup • Pwn / Crypto Fault</div>
           <h1>Paper Lantern — CRT-RSA Fault Attack</h1>
           <p class="lead">
-            A beginner-friendly technical thought journal for a pwn challenge where memory/state corruption is used to break CRT-RSA signing, recover the private key, forge an unsafe capsule signature, and print the flag.
+            A beginner-friendly technical thought journal for a pwn challenge where the exploit path is not classic ROP, but protocol analysis, comment parser state corruption, CRT-RSA faulting, RSA private key recovery, and signature forgery.
           </p>
           <div class="meta-row">
             <span class="pill">Category: Pwn / Crypto</span>
             <span class="pill">Bug: Comment braid overflow</span>
             <span class="pill">Crypto: CRT-RSA FDH</span>
-            <span class="pill">Result: Private key recovery</span>
+            <span class="pill">Primitive: gcd fault factorization</span>
+            <span class="pill">Goal: Run unsafe opcode 0x7f</span>
           </div>
         </div>
       </section>
 
       <section class="card glass toc">
         <h2>Table of Contents</h2>
-        <a href="#summary">1. Summary</a>
-        <a href="#initial-recon">2. Initial Recon</a>
-        <a href="#protocol">3. Understanding the Capsule Protocol</a>
-        <a href="#unsafe-opcode">4. Discovering the Unsafe Opcode Barrier</a>
-        <a href="#comment-bug">5. Finding the Comment Braid Bug</a>
-        <a href="#crt-fault">6. Turning Memory Corruption into a CRT-RSA Fault</a>
-        <a href="#factor">7. Factoring n with gcd</a>
-        <a href="#forge">8. Forging the Flag Capsule Signature</a>
-        <a href="#flag">9. Final Output</a>
-        <a href="#lessons">10. Lessons Learned</a>
+        <a href="#story">1. Story and Mental Model</a>
+        <a href="#recon">2. Recon: Looking at the Files</a>
+        <a href="#protocol">3. Learning the Capsule Protocol</a>
+        <a href="#safe-test">4. First Manual Test: Safe Capsule</a>
+        <a href="#unsafe-test">5. Testing the Unsafe Opcode</a>
+        <a href="#crypto-shift">6. The Key Mental Shift: From Pwn to Signature Forgery</a>
+        <a href="#comment">7. Finding the Comment Braid Bug</a>
+        <a href="#fault">8. Producing a Faulty CRT-RSA Signature</a>
+        <a href="#factor">9. Factoring n with gcd</a>
+        <a href="#forge">10. Forging the Flag Capsule Signature</a>
+        <a href="#final-run">11. Final Run and Flag</a>
+        <a href="#deep-dive">12. Deep Dive for Beginners</a>
+        <a href="#mindset">13. Hacker's Mindset</a>
+        <a href="#timeline">14. Full Timeline</a>
       </section>
 
-      <section id="summary" class="card glass">
-        <h2>1. Summary</h2>
+      <section id="story" class="card glass">
+        <h2>1. Story and Mental Model</h2>
         <p>
-          At first glance, this looked like a normal pwn challenge. However, the real exploitation path was not a classic stack overflow or ROP chain. The binary used a custom capsule protocol, and every capsule had to be signed before it could run.
+          When I first saw this challenge, I expected a normal pwn task: maybe a stack overflow, a format string, a ROP chain, or a heap bug. But the challenge files immediately changed the direction of my thinking. There was a binary named <code>paper_lantern</code>, a Python helper named <code>capsule.py</code>, and a JSON file named <code>public_params.json</code>.
         </p>
         <p>
-          The target flag logic was hidden behind an unsafe opcode, <code>0x7f</code>. The server refused to sign capsules containing this opcode. Therefore, the real goal became: recover the RSA private key, forge a valid signature for the unsafe capsule, and run it.
+          That combination was suspicious. A normal pwn challenge rarely gives public RSA parameters. The presence of <code>SIGN</code>, <code>RUN</code>, and <code>crt-rsa-fdh</code> suggested that the binary was not just executing my input. It was enforcing an authorization rule: a capsule must be signed before it can run.
         </p>
         <div class="note">
-          <strong>Core idea:</strong> comment parser bug → corrupt CRT signing state → obtain one correct and one faulty RSA signature → factor <code>n</code> using <code>gcd</code> → recover private key → forge signature for opcode <code>0x7f</code> → flag.
+          <strong>Beginner mental model:</strong> the server is like a guard. A capsule is like a package. The guard only opens packages that have a valid stamp. The unsafe package contains the flag opcode, but the guard refuses to stamp it. So the exploit goal becomes: make a valid stamp ourselves.
         </div>
+        <pre><code>Safe capsule      → server signs it → server runs it
+Unsafe capsule    → server refuses to sign it
+Exploit strategy  → recover signing key → forge signature → run unsafe capsule</code></pre>
       </section>
 
-      <section id="initial-recon" class="card glass">
-        <h2>2. Initial Recon</h2>
+      <section id="recon" class="card glass phase">
+        <h2>2. Recon: Looking at the Files</h2>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Expert Analysis</th></tr></thead>
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
           <tbody>
             <tr>
-              <td>I started with a zip file. I did not know whether this was a normal binary exploitation task, a protocol task, or a crypto-assisted pwn challenge.</td>
+              <td>I started from the zip file and did not know whether this was a normal binary exploit or a custom protocol challenge.</td>
               <td><pre><code>unzip "dist(5).zip" -d paper
 cd paper/dist
 ls -la</code></pre></td>
-              <td>The directory contained <code>paper_lantern</code>, <code>capsule.py</code>, and <code>public_params.json</code>. The Python helper and JSON parameters hinted that the challenge used a custom protocol and cryptographic verification.</td>
+              <td><pre><code>capsule.py
+paper_lantern
+public_params.json</code></pre><p>The Python helper means I should not talk to the service with raw text only. The JSON file means crypto parameters matter.</p></td>
             </tr>
             <tr>
-              <td>I checked the binary type because this was still marked as pwn.</td>
+              <td>I checked the binary type because the category was pwn.</td>
               <td><pre><code>file paper_lantern</code></pre></td>
-              <td>The file was an ELF 64-bit binary. But instead of immediately jumping into ROP, I focused on the helper script because custom protocols often hide the real attack surface.</td>
+              <td><pre><code>paper_lantern: ELF 64-bit LSB executable, x86-64, ...</code></pre><p>It is still a binary challenge, but the helper script suggests the main attack surface is the protocol and internal state, not only saved RIP.</p></td>
             </tr>
             <tr>
-              <td>The JSON file looked suspicious. Why would a pwn challenge give me public parameters?</td>
+              <td>The public parameters looked strange for pwn. I wanted to know exactly what the server exposes.</td>
               <td><pre><code>cat public_params.json</code></pre></td>
-              <td>The important fields were <code>scheme = crt-rsa-fdh</code>, <code>e = 65537</code>, <code>signature_size = 64</code>, and <code>replay_buf = 72</code>. This strongly suggested that RSA signatures and a 72-byte replay/comment buffer were part of the vulnerability.</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <p>Important observed data:</p>
-        <pre><code>{
+              <td><pre><code>{
   "scheme": "crt-rsa-fdh",
   "e": 65537,
   "signature_size": 64,
-  "replay_buf": 72
-}</code></pre>
-        <p>
-          The word <code>crt</code> was the biggest hint. CRT-RSA is faster than normal RSA, but if the signing process is faulted in only one branch, a single faulty signature can reveal a factor of the RSA modulus.
-        </p>
+  "replay_buf": 72,
+  "n": "..."
+}</code></pre><p>The key hints are <code>crt-rsa-fdh</code> and <code>replay_buf = 72</code>. CRT-RSA is vulnerable to fault attacks if one CRT branch is corrupted. A fixed replay buffer size hints at a parser boundary.</p></td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
-      <section id="protocol" class="card glass">
-        <h2>3. Understanding the Capsule Protocol</h2>
+      <section id="protocol" class="card glass phase">
+        <h2>3. Learning the Capsule Protocol</h2>
+        <p>
+          I then opened <code>capsule.py</code>. For a newbie, this file looks noisy because it defines many constants and helper functions. The correct approach is to identify the lifecycle of one request.
+        </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Expert Analysis</th></tr></thead>
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
           <tbody>
             <tr>
-              <td>I opened <code>capsule.py</code> and saw many constants. At first, it looked like random protocol numbers.</td>
+              <td>I saw many frame constants. I needed to translate them into human language.</td>
               <td><pre><code>sed -n '1,220p' capsule.py</code></pre></td>
-              <td>The constants described a frame protocol: <code>HELLO</code>, <code>NEWCAP</code>, <code>APPEND</code>, <code>SIGN</code>, <code>COMMENT</code>, and <code>RUN</code>.</td>
-            </tr>
-            <tr>
-              <td>I wanted to know the normal path before attacking anything.</td>
-              <td><pre><code>FT_NEWCAP  = 0x20
+              <td><pre><code>FT_HELLO   = 0x10
+FT_NEWCAP  = 0x20
 FT_APPEND  = 0x21
 FT_SIGN    = 0x22
 FT_COMMENT = 0x23
-FT_RUN     = 0x24</code></pre></td>
-              <td>The server requires a capsule to be created, filled with records, signed, and then executed. This is an authorization model: no valid signature, no execution.</td>
+FT_RUN     = 0x24</code></pre><p>The protocol is: handshake, create a capsule, append records, optionally add comment metadata, ask for a signature, then run with that signature.</p></td>
             </tr>
             <tr>
-              <td>I saw normal records like text and halt, plus a raw record helper.</td>
-              <td><pre><code>payload = rec_text(b"A") + rec_halt()</code></pre></td>
-              <td>This was a safe capsule. It allowed me to test whether I understood the protocol and whether the server would return a valid signature.</td>
+              <td>I looked at the record helpers to understand what a capsule contains.</td>
+              <td><pre><code>grep -n "REC_\|def rec_" capsule.py</code></pre></td>
+              <td><pre><code>REC_TEXT = 0x01
+REC_ECHO = 0x02
+REC_HALT = 0x03
+def rec_raw(kind, payload=b"")</code></pre><p>The <code>rec_raw</code> helper is important because it lets me construct arbitrary opcodes, including hidden or unsafe ones.</p></td>
             </tr>
           </tbody>
         </table>
-
-        <p>Normal test output:</p>
-        <pre><code>[*] getting normal signature
-[+] good signature = &lt;64-byte hex signature&gt;</code></pre>
-        <p>
-          This output confirmed that the server signs safe capsules. The signature later became the <strong>good signature</strong> used in the CRT fault attack.
-        </p>
+        <pre><code>Capsule lifecycle:
+HELLO → NEWCAP → APPEND records → SIGN → RUN(signature)</code></pre>
       </section>
 
-      <section id="unsafe-opcode" class="card glass">
-        <h2>4. Discovering the Unsafe Opcode Barrier</h2>
+      <section id="safe-test" class="card glass phase">
+        <h2>4. First Manual Test: Safe Capsule</h2>
+        <p>
+          Before exploiting anything, I needed to prove that I understood the normal flow. The safest capsule is a harmless one: store a short text or simply halt.
+        </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Expert Analysis</th></tr></thead>
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
           <tbody>
             <tr>
-              <td>I noticed <code>rec_raw(kind)</code>, so I suspected there might be hidden opcodes.</td>
-              <td><pre><code>payload = rec_raw(0x7f) + rec_halt()</code></pre></td>
-              <td>Opcode <code>0x7f</code> was the unsafe opcode that eventually prints the flag. The goal was to run this capsule.</td>
-            </tr>
-            <tr>
-              <td>I tried to ask the server to sign the unsafe capsule directly.</td>
-              <td><pre><code>c.send(FT_APPEND, rec_raw(0x7f) + rec_halt())
+              <td>I wrote a tiny test to ask the server to sign a safe capsule.</td>
+              <td><pre><code>payload = rec_text(b"A") + rec_halt()
+c.send(FT_NEWCAP)
+c.send(FT_APPEND, payload)
 c.send(FT_SIGN)</code></pre></td>
-              <td>The server rejected the signing request because the capsule contained an unsafe opcode. This was the main access-control barrier.</td>
+              <td><pre><code>[*] getting normal signature
+[+] good signature = &lt;64-byte hex signature&gt;</code></pre><p>This confirmed that safe capsules are accepted. This signature becomes the <strong>good signature</strong> for the later CRT fault comparison.</p></td>
             </tr>
             <tr>
-              <td>I wanted to confirm that the binary explicitly knew about unsafe opcodes.</td>
-              <td><pre><code>strings paper_lantern | grep -i unsafe</code></pre></td>
-              <td>The string <code>unsafe opcode</code> confirmed that the server had a signing-time filter. The exploit needed to bypass signing, not merely craft a clever opcode.</td>
+              <td>I also tested a visible text output to make sure RUN works.</td>
+              <td><pre><code>payload = rec_text(b"hello") + rec_echo() + rec_halt()
+# sign it, then run it with the returned signature</code></pre></td>
+              <td><pre><code>[run] ... hello</code></pre><p>The server's authorization model is clear: signed safe capsule runs successfully.</p></td>
             </tr>
           </tbody>
         </table>
+      </section>
 
-        <div class="note">
-          <strong>Key mental shift:</strong> I stopped trying to make the server sign opcode <code>0x7f</code>. Instead, I aimed to recover the private key and sign it myself.
+      <section id="unsafe-test" class="card glass phase">
+        <h2>5. Testing the Unsafe Opcode</h2>
+        <p>
+          The exploit target is opcode <code>0x7f</code>. This is the dangerous record that eventually prints the flag. The server, however, refuses to sign it.
+        </p>
+        <table class="journal-table">
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>I tried to build the suspicious capsule manually.</td>
+              <td><pre><code>payload = rec_raw(0x7f) + rec_halt()</code></pre></td>
+              <td><p>This is the target payload. If it runs, the challenge prints the flag. But first it needs a valid signature.</p></td>
+            </tr>
+            <tr>
+              <td>I tried the obvious path: ask the server to sign the unsafe capsule.</td>
+              <td><pre><code>c.send(FT_NEWCAP)
+c.send(FT_APPEND, rec_raw(0x7f) + rec_halt())
+c.send(FT_SIGN)</code></pre></td>
+              <td><pre><code>[sign] error / unsafe opcode</code></pre><p>The server blocks the signing request. The check is at signing time, not only at run time.</p></td>
+            </tr>
+            <tr>
+              <td>I confirmed the binary knows about this rule.</td>
+              <td><pre><code>strings paper_lantern | grep -i unsafe</code></pre></td>
+              <td><pre><code>unsafe opcode</code></pre><p>This is the main barrier: the server will not directly sign the capsule I want.</p></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="crypto-shift" class="card glass phase">
+        <h2>6. The Key Mental Shift: From Pwn to Signature Forgery</h2>
+        <p>
+          At this point, my thinking changed. The direct route was blocked: I could not make the server sign opcode <code>0x7f</code>. But if I could recover the RSA private key, I would not need the server to sign it.
+        </p>
+        <pre><code>Problem:
+  unsafe capsule needs valid signature
+  server refuses to sign unsafe capsule
+
+New goal:
+  recover RSA private key
+  forge valid signature locally
+  run unsafe capsule with forged signature</code></pre>
+        <div class="note warning">
+          <strong>Important:</strong> this is why the challenge is both pwn and crypto. The pwn bug corrupts internal signing state, and the crypto math turns that corruption into a private key recovery.
         </div>
       </section>
 
-      <section id="comment-bug" class="card glass">
-        <h2>5. Finding the Comment Braid Bug</h2>
+      <section id="comment" class="card glass phase">
+        <h2>7. Finding the Comment Braid Bug</h2>
         <p>
-          Since the main capsule records were checked, I turned to the secondary surface: <code>FT_COMMENT</code>. Comment parsers are often treated as metadata, but they can still corrupt internal state.
+          Since the main capsule records were filtered, I looked at the secondary input surface: <code>FT_COMMENT</code>. Comments often look harmless, but here they have their own mini-language: literal writes, xor operations, and braid fills.
         </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Expert Analysis</th></tr></thead>
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
           <tbody>
             <tr>
-              <td>I saw <code>replay_buf = 72</code> and did not know why that exact number mattered.</td>
+              <td>I noticed the exact value <code>replay_buf = 72</code>. Exact buffer sizes in CTFs are often hints.</td>
               <td><pre><code>cat public_params.json</code></pre></td>
-              <td>A fixed buffer size in challenge metadata is usually intentional. It hints that the parser has a bounded memory area.</td>
+              <td><p>The comment decoder likely writes into a 72-byte replay/seam buffer. If a write can cross this boundary, nearby state may be corrupted.</p></td>
             </tr>
             <tr>
-              <td>I inspected comment helper functions.</td>
+              <td>I looked at the helper functions that generate comment bytecode.</td>
+              <td><pre><code>grep -n "comment_" capsule.py</code></pre></td>
+              <td><pre><code>comment_literal(...)
+comment_xor(...)
+comment_braid_fill(...)
+comment_patch(...)</code></pre><p>The comment parser is more complex than normal record parsing. Complex parsers are good attack surfaces.</p></td>
+            </tr>
+            <tr>
+              <td>I tested the key boundary calculation.</td>
               <td><pre><code>comment_literal(b"\x00" * 60)
 comment_braid_fill(18, 0)</code></pre></td>
-              <td>The math is the bug: <code>60 + 18 = 78</code>, but the replay buffer is only 72 bytes. This creates a 6-byte overwrite past the replay seam.</td>
-            </tr>
-            <tr>
-              <td>I checked strings related to braid/replay to validate the hypothesis.</td>
-              <td><pre><code>strings paper_lantern | grep -i braid
-strings paper_lantern | grep -i replay</code></pre></td>
-              <td>Strings such as <code>bad replay braid</code>, <code>braid exceeds seam</code>, and <code>replay sealed</code> showed that comment replay logic was complex and security-relevant.</td>
+              <td><pre><code>60 + 18 = 78
+replay_buf = 72
+overflow = 6 bytes</code></pre><p>This is the logic bug: a braid fill can continue past the intended seam and touch bytes after the replay buffer.</p></td>
             </tr>
           </tbody>
         </table>
-
-        <h3>Deep Dive: What is <code>comment_braid_fill</code>?</h3>
-        <p>
-          For beginners, imagine the replay buffer as 72 boxes numbered 0 to 71. A literal comment fills some boxes normally. Then <code>braid_fill</code> continues writing a span of bytes. If we already filled 60 boxes and ask braid to fill 18 more, it writes boxes 60 to 77. Boxes 72 to 77 are outside the buffer.
-        </p>
+        <h3>Beginner explanation</h3>
         <pre><code>valid replay buffer: [0 ... 71]
 write 60 bytes:       [0 ... 59]
 braid 18 bytes:       [60 ... 77]
 overflow bytes:       [72 ... 77]</code></pre>
         <p>
-          This is not a classic return-address overwrite. Instead, the overflow changes hidden state near the replay buffer. That hidden state controls whether CRT signing becomes faulty.
+          This is not a classic overflow to overwrite a return address. Instead, it is a state corruption bug. The overwritten bytes influence how CRT-RSA signing behaves.
         </p>
       </section>
 
-      <section id="crt-fault" class="card glass">
-        <h2>6. Turning Memory Corruption into a CRT-RSA Fault</h2>
+      <section id="fault" class="card glass phase">
+        <h2>8. Producing a Faulty CRT-RSA Signature</h2>
         <p>
-          The exploit uses the overflow to make the server produce a faulty RSA signature for the same safe capsule. One correct signature plus one faulty signature is enough to factor <code>n</code> if the fault affects only one CRT branch.
+          CRT-RSA signs a message by computing two smaller signatures modulo <code>p</code> and modulo <code>q</code>, then recombining them. If one branch is corrupted, the final signature is wrong in a very useful way.
         </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Expert Analysis</th></tr></thead>
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
           <tbody>
             <tr>
-              <td>I had a safe capsule signature. Now I needed a faulty signature for the same capsule.</td>
-              <td><pre><code>comment = make_fault_comment(0x84)
+              <td>I already had a normal signature for a safe capsule. Now I needed a faulty signature for the same kind of safe capsule.</td>
+              <td><pre><code>comment = make_fault_comment(gate2)
 fault_sig = get_safe_signature(comment)</code></pre></td>
-              <td>The comment does not change the capsule message. It changes the signing state, causing CRT-RSA to compute an incorrect signature.</td>
+              <td><p>The capsule itself remains safe. The comment corrupts signing state so the returned signature becomes faulty.</p></td>
             </tr>
             <tr>
-              <td>I did not know the exact gate byte at first.</td>
+              <td>I did not know the exact gate byte that enables the useful fault.</td>
               <td><pre><code>for gate2 in range(256):
-    comment = make_fault_comment(gate2)
-    candidate = get_safe_signature(comment)</code></pre></td>
-              <td>Bruteforcing one byte is cheap. Each attempt is checked mathematically using <code>gcd</code>. If a real factor appears, the gate value was correct.</td>
+    candidate = get_safe_signature(make_fault_comment(gate2))
+    g = gcd(abs(good - candidate), n)
+    if 1 &lt; g &lt; n:
+        print("found")</code></pre></td>
+              <td><p>A single byte has only 256 possibilities. The <code>gcd</code> check acts as an oracle: it tells me when the fault was useful.</p></td>
             </tr>
             <tr>
-              <td>The exploit printed that the fault was triggered.</td>
-              <td><pre><code>[+] CRT fault triggered with gate2 = 0x84</code></pre></td>
-              <td>This means the server returned a structured faulty signature. The word structured matters: it is not random corruption; it leaks information about one prime factor.</td>
+              <td>The successful run printed the fault gate.</td>
+              <td><pre><code>python3 solve_paper_lantern.py 178.105.199.41 20000</code></pre></td>
+              <td><pre><code>[*] target 178.105.199.41:20000
+[+] CRT fault triggered with gate2=0x84</code></pre><p>This means the comment payload successfully corrupted the CRT signing path.</p></td>
             </tr>
           </tbody>
         </table>
-
-        <h3>Deep Dive: Why CRT-RSA faults are dangerous</h3>
-        <p>
-          RSA modulus is <code>n = p * q</code>. CRT-RSA signs separately modulo <code>p</code> and modulo <code>q</code>, then combines the two results. If one side is wrong and the other side is right, the difference between the good and faulty signatures becomes divisible by one of the primes.
-        </p>
-        <pre><code>good_sig  = correct CRT result
-fault_sig = one CRT branch is wrong
-
-factor = gcd(abs(good_sig - fault_sig), n)</code></pre>
       </section>
 
-      <section id="factor" class="card glass">
-        <h2>7. Factoring <code>n</code> with <code>gcd</code></h2>
+      <section id="factor" class="card glass phase">
+        <h2>9. Factoring n with gcd</h2>
+        <p>
+          Once I had a correct signature and a faulty signature for the same message family, the RSA modulus could be factored with a greatest common divisor calculation.
+        </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Expert Analysis</th></tr></thead>
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
           <tbody>
             <tr>
               <td>I converted both signatures from bytes to integers.</td>
               <td><pre><code>good_int = int.from_bytes(good_sig, "big")
 fault_int = int.from_bytes(fault_sig, "big")</code></pre></td>
-              <td>RSA arithmetic happens over integers modulo <code>n</code>. Bytes must be converted into integers before applying number theory.</td>
+              <td><p>RSA signatures are numbers modulo <code>n</code>. To do math on them, I need integer form.</p></td>
             </tr>
             <tr>
-              <td>I applied the magic-looking <code>gcd</code> formula.</td>
+              <td>I used the core CRT fault equation.</td>
               <td><pre><code>p = math.gcd(abs(good_int - fault_int), n)
 q = n // p</code></pre></td>
-              <td>If <code>1 &lt; p &lt; n</code>, then <code>p</code> is a non-trivial factor of <code>n</code>. This breaks the RSA key.</td>
+              <td><p>If one CRT branch is wrong and the other is correct, the difference between the good and faulty signatures shares a factor with <code>n</code>.</p></td>
+            </tr>
+            <tr>
+              <td>The output showed real factors.</td>
+              <td><pre><code>[+] factored n
+p = 0x9da033fd0799399257825aff0f7ca4b7866a4db13e250be52e50d7fc3d3eb295
+q = 0xb6f7221baafa0048953633e0193e92928aab4bf4dba728b6f713e55135c0b6b5</code></pre></td>
+              <td><p>This is the cryptographic break. Once <code>n = p*q</code> is known, the RSA private exponent can be computed.</p></td>
             </tr>
           </tbody>
         </table>
+        <h3>Why gcd works</h3>
+        <pre><code>n = p * q
 
-        <p>Observed terminal output:</p>
-        <pre><code>[+] factored n
-    p = 9da033fd0799399257825aff0f7ca4b7866a4db13e250be52e50d7fc3d3eb295
-    q = b6f7221baafa0048953633e0193e92928aab4bf4dba728b6f713e55135c0b6b5</code></pre>
+good_sig  is correct modulo p and q
+fault_sig is correct modulo one branch, wrong modulo the other
 
-        <p>
-          This was the turning point. Before this, I only had the public key. After this, I could compute the private exponent and sign anything the server would verify.
-        </p>
+Therefore:
+  good_sig - fault_sig is divisible by p or q
+
+So:
+  gcd(good_sig - fault_sig, n) = p or q</code></pre>
       </section>
 
-      <section id="forge" class="card glass">
-        <h2>8. Forging the Flag Capsule Signature</h2>
+      <section id="forge" class="card glass phase">
+        <h2>10. Forging the Flag Capsule Signature</h2>
+        <p>
+          After factoring <code>n</code>, I computed the private exponent <code>d</code>. This gave me the ability to sign the unsafe capsule locally.
+        </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Expert Analysis</th></tr></thead>
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
           <tbody>
             <tr>
-              <td>I had <code>p</code> and <code>q</code>. I needed the RSA private exponent <code>d</code>.</td>
+              <td>I had <code>p</code> and <code>q</code>, but needed the actual RSA signing exponent.</td>
               <td><pre><code>phi = (p - 1) * (q - 1)
 d = pow(e, -1, phi)</code></pre></td>
-              <td>This is standard RSA private key recovery. Since <code>e = 65537</code> and <code>phi</code> is known, <code>d</code> can be computed with modular inverse.</td>
+              <td><p>This is standard RSA private key recovery. <code>d</code> is the private exponent.</p></td>
             </tr>
             <tr>
-              <td>I needed to sign the exact message that the server verifies for the unsafe capsule.</td>
+              <td>I needed to sign exactly what the server verifies, not just raw bytes.</td>
               <td><pre><code>m = fdh_message(b"FH", n)</code></pre></td>
-              <td>The server uses FDH, so it does not sign raw record bytes directly. The unsafe capsule is serialized as <code>b"FH"</code>: flag opcode plus halt.</td>
+              <td><p>The server uses FDH: Full Domain Hash. The unsafe capsule serializes to <code>b"FH"</code>, where <code>F</code> represents the flag opcode and <code>H</code> represents halt.</p></td>
             </tr>
             <tr>
               <td>I created the forged RSA signature.</td>
               <td><pre><code>forged_int = pow(m, d, n)
 forged_sig = forged_int.to_bytes(64, "big")</code></pre></td>
-              <td>This is the same mathematical operation the server would perform if it agreed to sign the unsafe capsule.</td>
-            </tr>
-            <tr>
-              <td>I sent the unsafe capsule with my forged signature.</td>
-              <td><pre><code>payload = rec_raw(0x7f) + rec_halt()
-c.send(FT_APPEND, payload)
-c.send(FT_RUN, forged_sig)</code></pre></td>
-              <td>The server verifies the signature using the public key. Since the forged signature is mathematically valid, it executes opcode <code>0x7f</code>.</td>
+              <td><p>This signature should verify under the public key, even though the server never agreed to sign the unsafe capsule.</p></td>
             </tr>
           </tbody>
         </table>
       </section>
 
-      <section id="flag" class="card glass">
-        <h2>9. Final Output</h2>
-        <p>Final exploit run:</p>
-        <pre><code>tngoc@LAPTOP-JIU1IFLL:/mnt/c/Users/admin/Downloads/dist/dist$ python3 solve_paper_lantern.py 178.105.199.41 20000
-[*] target 178.105.199.41:20000
+      <section id="final-run" class="card glass phase">
+        <h2>11. Final Run and Flag</h2>
+        <p>
+          The final step was to create a new capsule containing the unsafe opcode and run it with the forged signature.
+        </p>
+        <table class="journal-table">
+          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>I prepared the actual flag capsule.</td>
+              <td><pre><code>payload = rec_raw(0x7f) + rec_halt()
+c.send(FT_APPEND, payload)</code></pre></td>
+              <td><p>This is the same capsule the server refused to sign earlier. The difference is that I now have my own valid signature.</p></td>
+            </tr>
+            <tr>
+              <td>I ran it using the forged signature.</td>
+              <td><pre><code>c.send(FT_RUN, forged_sig)</code></pre></td>
+              <td><p>The server verifies the signature with the public key. Since the signature is mathematically valid, the capsule runs.</p></td>
+            </tr>
+            <tr>
+              <td>The terminal finally printed the flag.</td>
+              <td><pre><code>python3 solve_paper_lantern.py 178.105.199.41 20000</code></pre></td>
+              <td><pre><code>[*] target 178.105.199.41:20000
 [+] factored n
     p = 9da033fd0799399257825aff0f7ca4b7866a4db13e250be52e50d7fc3d3eb295
     q = b6f7221baafa0048953633e0193e92928aab4bf4dba728b6f713e55135c0b6b5
 [+] forged signature for unsafe opcode; running flag capsule...
-slopped{faulted_crt_seams_burn_open}</code></pre>
-
-        <p>
-          The flag name itself confirms the root cause: <code>faulted_crt</code> points to CRT-RSA faulting, and <code>seams</code> points to the replay/comment seam buffer that was overwritten.
-        </p>
+slopped{faulted_crt_seams_burn_open}</code></pre><p>The flag text itself confirms the root cause: <code>faulted_crt</code> and <code>seams</code>.</p></td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
-      <section id="lessons" class="card glass">
-        <h2>10. Lessons Learned</h2>
-        <h3>What made this pwn challenge different?</h3>
+      <section id="deep-dive" class="card glass phase">
+        <h2>12. Deep Dive for Beginners</h2>
+        <h3>What is CRT-RSA?</h3>
         <p>
-          This was not a typical control-flow hijack. There was no need to overwrite RIP or build a ROP chain. The exploit corrupted internal signing state and used mathematics to turn that corruption into a private key recovery.
+          Normal RSA signing computes <code>m^d mod n</code>. CRT-RSA speeds this up by computing the signature separately modulo <code>p</code> and modulo <code>q</code>, then combining the results. This is faster, but it introduces a dangerous failure mode: if one branch is faulted, the faulty signature can reveal a factor of <code>n</code>.
         </p>
-        <pre><code>comment parser bug
-→ replay seam overflow
-→ CRT-RSA signing fault
-→ good/fault signature pair
-→ gcd leaks p or q
-→ RSA private key recovered
-→ forge unsafe opcode signature
-→ flag</code></pre>
+        <pre><code>normal idea:
+  signature = m^d mod n
 
-        <h3>Beginner takeaway</h3>
+CRT idea:
+  sp = m^dp mod p
+  sq = m^dq mod q
+  signature = combine(sp, sq)</code></pre>
+
+        <h3>What is FDH?</h3>
         <p>
-          When a pwn challenge includes cryptographic signing, do not only look for shellcode or ROP. Ask whether the program signs, verifies, serializes, hashes, or stores metadata incorrectly. Sometimes the best exploit is not to control the instruction pointer, but to corrupt the trust boundary.
+          FDH means Full Domain Hash. The server does not sign raw capsule bytes directly. It hashes the serialized capsule into a number modulo <code>n</code>, then signs that number. In this challenge, the unsafe capsule is represented as <code>b"FH"</code> before hashing.
         </p>
 
-        <h3>Recognition pattern for future CTFs</h3>
-        <ul>
-          <li>If you see <code>crt-rsa</code>, think about CRT fault attacks.</li>
-          <li>If you can obtain a correct and faulty signature for the same message, try <code>gcd(good - fault, n)</code>.</li>
-          <li>If a parser has a fixed buffer size and mini-operations like copy, repeat, xor, or fill, check for boundary mistakes.</li>
-          <li>If the server refuses to sign a dangerous payload, consider recovering or forging the signing key instead of bypassing the filter directly.</li>
-        </ul>
+        <h3>What is state corruption?</h3>
+        <p>
+          In classic pwn, an overflow often aims to control the instruction pointer. In this challenge, the overflow is more subtle. The comment braid overflow changes hidden state near the replay buffer. That hidden state affects CRT-RSA signing, which is enough to break the authentication model.
+        </p>
+        <div class="note success">
+          <strong>Key lesson:</strong> pwn is not always about getting a shell. Sometimes the best exploit is to corrupt one security-critical variable and let the program's own crypto leak the key.
+        </div>
+      </section>
+
+      <section id="mindset" class="card glass phase">
+        <h2>13. Hacker's Mindset</h2>
+        <h3>Why did I focus on <code>FT_COMMENT</code>?</h3>
+        <p>
+          The main record path was protected by an unsafe opcode check. When the obvious path is blocked, I look for secondary inputs: comments, metadata, replay buffers, debug fields, compression, or parsers. These are often less protected but still influence internal state.
+        </p>
+        <h3>Why use <code>60 + 18</code>?</h3>
+        <p>
+          The JSON told me the replay buffer was 72 bytes. I needed a write slightly larger than 72, but not so large that the program would crash immediately. <code>60 + 18 = 78</code> crosses the boundary by 6 bytes, which is perfect for nearby state corruption.
+        </p>
+        <h3>Why brute-force <code>gate2</code>?</h3>
+        <p>
+          A one-byte gate has only 256 values. Instead of guessing the right value manually, I let the math decide. For each candidate faulty signature, I computed <code>gcd(abs(good - candidate), n)</code>. If the result is between 1 and <code>n</code>, it is a real factor.
+        </p>
+        <pre><code>for gate2 in range(256):
+    candidate = sign_with_fault(gate2)
+    g = gcd(abs(good - candidate), n)
+    if 1 &lt; g &lt; n:
+        print("CRT fault found")</code></pre>
+      </section>
+
+      <section id="timeline" class="card glass phase">
+        <h2>14. Full Timeline</h2>
+        <pre><code>1. Unzip the challenge and inspect the files.
+2. Notice paper_lantern, capsule.py, and public_params.json.
+3. Read public_params.json and identify crt-rsa-fdh, e=65537, signature_size=64, replay_buf=72.
+4. Read capsule.py and understand the protocol: NEWCAP → APPEND → SIGN → RUN.
+5. Create a safe capsule and confirm the server signs it.
+6. Try opcode 0x7f and observe that the server refuses to sign it.
+7. Realize the goal is not to bypass the unsafe check directly, but to forge the signature.
+8. Investigate FT_COMMENT because it is a secondary parser with replay/braid logic.
+9. Use comment_literal(60 bytes) + comment_braid_fill(18 bytes) to cross the 72-byte replay seam.
+10. Adjust nearby state using comment_xor and brute-force the gate byte.
+11. Obtain a faulty CRT-RSA signature for a safe capsule.
+12. Compute gcd(good_signature - faulty_signature, n) to recover p or q.
+13. Compute q = n / p and derive d = inverse(e, phi).
+14. Hash the unsafe capsule using FDH as b"FH".
+15. Forge a valid RSA signature with the recovered private exponent.
+16. Send rec_raw(0x7f) + rec_halt with the forged signature.
+17. The server verifies the signature and executes the unsafe opcode.
+18. The flag is printed.</code></pre>
+        <h3>Final flag</h3>
+        <pre><code>slopped{faulted_crt_seams_burn_open}</code></pre>
+        <p>
+          The flag name is a final confirmation of the exploit path: <code>faulted_crt</code> points to CRT-RSA faulting, and <code>seams</code> points to the replay/comment seam that was corrupted.
+        </p>
       </section>
     </div>
   </main>
