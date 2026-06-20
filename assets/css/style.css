@@ -134,7 +134,8 @@ img { max-width: 100%; display: block; }
   box-shadow: var(--shadow);
 }
 .glass,.article-card,.profile-card { border-radius: var(--radius); overflow: hidden; }
-.glass,.article-card,.profile-card,.card,.toc { backdrop-filter: blur(14px) saturate(135%); -webkit-backdrop-filter: blur(14px) saturate(135%); }
+.glass,.article-card,.profile-card,.toc { backdrop-filter: blur(14px) saturate(135%); -webkit-backdrop-filter: blur(14px) saturate(135%); }
+/* Removed backdrop-filter from .card to drastically improve scrolling FPS */
 .hero-copy { padding: clamp(28px, 4vw, 46px); overflow: visible; }
 .eyebrow {
   display: inline-flex;
@@ -226,9 +227,10 @@ img { max-width: 100%; display: block; }
     linear-gradient(180deg, rgba(15, 29, 50, .80), rgba(9, 19, 34, .70)),
     radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 38%);
   box-shadow: var(--shadow-soft);
-  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
-  transform-style: preserve-3d;
+  transition: transform .3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color .3s ease, box-shadow .3s ease, background .3s ease;
+  will-change: transform, box-shadow;
 }
+.card:hover { transform-style: preserve-3d; }
 .card::before {
   content: "";
   position: absolute;
@@ -419,6 +421,9 @@ pre code { background: transparent; border: 0; color: #e2e8f0; padding: 0; }
   .search-box { max-width: none; min-width: 100%; }
   .soc-status { display: none; }
 }
+
+/* Scroll Performance Optimization */
+body.is-scrolling { pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .001ms !important; }

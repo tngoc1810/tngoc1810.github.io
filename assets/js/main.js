@@ -121,9 +121,13 @@ function initHomeBackground(isWriteupsPage = false) {
   const frameInterval = 1000 / fps;
 
   function setScrolling() {
+    if (!isScrolling) document.body.classList.add("is-scrolling");
     isScrolling = true;
     clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => { isScrolling = false; }, 160);
+    scrollTimer = setTimeout(() => { 
+      isScrolling = false; 
+      document.body.classList.remove("is-scrolling");
+    }, 120);
   }
 
   function createScene() {
@@ -358,7 +362,8 @@ function initHomeBackground(isWriteupsPage = false) {
   }
 
   function loop(time) {
-    if (document.hidden) {
+    // Pause rendering entirely while scrolling or hidden to save CPU/GPU and ensure buttery smooth scroll
+    if (document.hidden || isScrolling) {
       requestAnimationFrame(loop);
       return;
     }
