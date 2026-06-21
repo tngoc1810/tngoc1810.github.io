@@ -1,11 +1,101 @@
 document.addEventListener("DOMContentLoaded", () => {
+  initBootScreen();
   initCyberBackground();
   setupFilters();
   initTocActiveHighlight();
   initScrollReveal();
   initCardTilt();
   initSocStatusBar();
+  initTerminal();
 });
+
+function initBootScreen() {
+  const bootScreen = document.getElementById("boot-screen");
+  if (!bootScreen) return;
+  
+  if (sessionStorage.getItem("booted") || location.pathname.includes("writeups")) {
+    bootScreen.style.display = "none";
+    return;
+  }
+
+  const bootText = document.getElementById("boot-text");
+  const lines = [
+    { text: "Initializing kernel...", delay: 200 },
+    { text: "[OK] Core modules loaded.", delay: 300, class: "info" },
+    { text: "Mounting file systems...", delay: 150 },
+    { text: "[OK] File systems mounted.", delay: 200, class: "info" },
+    { text: "Starting security daemon...", delay: 400 },
+    { text: "[WARN] Unauthorized access attempt detected. Blocking...", delay: 500, class: "warn" },
+    { text: "[OK] Network secured. Firewall active.", delay: 300, class: "info" },
+    { text: "Loading SOC Analyst Profile: Nguyen Thai Ngoc", delay: 600 },
+    { text: "Access Granted. Welcome.", delay: 400, class: "info" }
+  ];
+
+  let currentLine = 0;
+  
+  function renderLine() {
+    if (currentLine >= lines.length) {
+      setTimeout(() => {
+        bootScreen.classList.add("hidden");
+        sessionStorage.setItem("booted", "true");
+      }, 500);
+      return;
+    }
+    
+    const line = lines[currentLine];
+    const p = document.createElement("p");
+    if (line.class) p.className = line.class;
+    p.innerText = line.text;
+    bootText.appendChild(p);
+    
+    currentLine++;
+    setTimeout(renderLine, line.delay);
+  }
+  
+  setTimeout(renderLine, 300);
+}
+
+function initTerminal() {
+  const input = document.getElementById("term-input");
+  const body = document.getElementById("terminal-body");
+  if (!input || !body) return;
+
+  const commands = {
+    "help": "Available commands: \n- whoami: About me\n- skills: My tech stack\n- clear: Clear terminal",
+    "whoami": "guest@thaingoc\nRole: SOC Analyst & Threat Hunter in training\nLocation: Vietnam\nStatus: Always learning",
+    "skills": "Security: SOC Analysis, Forensics, Malware Analysis, Reverse Engineering\nTools: Wireshark, Splunk, Ghidra, Volatility\nLanguages: Python, C/C++, Bash",
+    "clear": ""
+  };
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const val = input.value.trim().toLowerCase();
+      input.value = "";
+      
+      if (!val) return;
+
+      const line = document.createElement("div");
+      line.className = "term-line";
+      line.innerHTML = `<span class="prompt">guest@thaingoc:~$</span> <span>${val}</span>`;
+      input.parentElement.before(line);
+
+      if (val === "clear") {
+        const lines = body.querySelectorAll(".term-line:not(:last-child), .term-output");
+        lines.forEach(l => l.remove());
+        return;
+      }
+
+      const out = document.createElement("div");
+      out.className = "term-output";
+      out.innerText = commands[val] || `bash: ${val}: command not found. Type 'help' for available commands.`;
+      input.parentElement.before(out);
+
+      body.scrollTop = body.scrollHeight;
+    }
+  });
+  
+  body.addEventListener("click", () => input.focus());
+}
 
 /* =========================================================
    BACKGROUND SYSTEM

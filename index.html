@@ -12,6 +12,10 @@
 </head>
 
 <body>
+  <!-- Boot Screen -->
+  <div id="boot-screen">
+    <div class="boot-text" id="boot-text"></div>
+  </div>
   <header class="topbar">
     <div class="wrap topbar-inner">
       <a class="brand" href="/">ThaiNgoc :~$</a>
@@ -39,6 +43,18 @@
             and practical investigation workflows.
           </p>
 
+          <div class="terminal-container">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+              <span class="term-title">guest@thaingoc: ~</span>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+              <div class="term-line"><span class="prompt">guest@thaingoc:~$</span> <span class="typing">./sysinfo.sh</span></div>
+              <div class="term-output">Initializing SOC Dashboard...<br>Status: Secure. All systems operational.</div>
+              <div class="term-line"><span class="prompt">guest@thaingoc:~$</span> <input type="text" id="term-input" autocomplete="off" spellcheck="false" autofocus></div>
+            </div>
+          </div>
+
           <div class="cta-row">
             <a class="btn primary" href="/writeups/">View Writeups</a>
             <a class="btn" href="/achievements/">Achievements</a>
@@ -61,7 +77,6 @@
           <div class="profile-links">
             <a class="icon-pill" href="https://cyberdefenders.org/p/tngoc/" target="_blank" rel="noopener noreferrer" aria-label="CyberDefenders profile">CD</a>
             <a class="icon-pill" href="https://www.linkedin.com/in/ngoc-thai-8343023b4/?skipRedirect=true" target="_blank">in</a>
-            <a class="icon-pill" href="https://blueteamlabs.online/home/user/87231b7a40c2e9754234f4" target="_blank" rel="noopener noreferrer" aria-label="Blue Team Labs profile">BTL</a>
           </div>
 
           <p class="small">
