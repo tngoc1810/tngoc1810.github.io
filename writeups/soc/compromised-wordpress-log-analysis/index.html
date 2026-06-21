@@ -8,53 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/style.css">
-  <style>
-html{scroll-behavior:smooth;scroll-padding-top:120px}
-.writeup-layout{display:grid!important;grid-template-columns:280px minmax(0,1fr)!important;gap:40px!important;align-items:start!important;width:min(1220px,calc(100% - 48px))!important;padding:20px 0 86px!important;margin:0 auto}
-.writeup-content{min-width:0!important;display:flex!important;flex-direction:column!important;gap:24px!important}
-.glass-card,.section-card{border:1px solid var(--border);background:rgba(17, 24, 39, 0.4);box-shadow:inset 0 1px 1px rgba(255,255,255,0.03), 0 4px 6px -1px rgba(0,0,0,0.1);border-radius:24px;position:relative}
-.section-card{padding:clamp(24px,4vw,48px);overflow:hidden}
-.writeup-layout .hero{display:block!important;margin-bottom:0!important;padding:clamp(32px,5vw,56px)!important;overflow:visible;background:transparent;border:none;box-shadow:none}
-.writeup-layout .hero h1{max-width:100%;font-size:clamp(3rem,7vw,6.2rem);line-height:1;letter-spacing:-.04em;margin-bottom:24px;background:linear-gradient(135deg,#fff 0%,#cbd5e1 40%,#818cf8 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 4px 24px rgba(129,140,248,0.15))}
-.title-line{display:block}
-.gradient-word{display:inline-block;background:linear-gradient(90deg,#38bdf8,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero-subtitle{max-width:880px;color:var(--muted);font-size:1.1rem;line-height:1.6;margin-bottom:20px}
-.section-card p,.section-card li{color:var(--muted);font-size:16px;line-height:1.85;margin:12px 0}
-.writeup-layout h2{font-family:"Space Grotesk",sans-serif;font-size:clamp(1.75rem,3vw,2.45rem);letter-spacing:-.04em;margin-bottom:14px;scroll-margin-top:120px;color:#f8fafc}
-.writeup-layout h2::after{content:"";display:block;width:72px;height:2px;margin-top:12px;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--purple))}
-.writeup-layout h3{color:#f8fafc;font-size:1.25rem;margin:28px 0 12px;font-weight:600}
-.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:32px}
-.meta-grid div{padding:16px;border:1px solid var(--border);border-radius:16px;background:rgba(255,255,255,0.02)}
-.meta-grid span{display:block;color:var(--subtle);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
-.meta-grid strong{color:#e2e8f0;font-weight:600}
-.writeup-layout .toc{position:sticky!important;top:120px!important;height:auto!important;max-height:calc(100vh - 140px)!important;overflow-y:auto!important;overflow-x:hidden!important;padding:24px!important;border-radius:24px!important;background:rgba(17, 24, 39, 0.4)!important;border:1px solid var(--border)!important;z-index:20!important}
-.toc-title{margin:0 0 16px;padding-bottom:14px;color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border)}
-.toc a{display:block;color:var(--subtle);text-decoration:none;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);line-height:1.5;transition:all 0.2s}
-.toc a:hover{color:#fff;transform:translateX(4px)}
-.evidence{margin:24px 0;border:1px solid var(--border);border-radius:20px;overflow:hidden;background:rgba(0,0,0,0.2);box-shadow:0 10px 30px rgba(0,0,0,0.3)}
-.evidence img{width:100%;display:block;background:#000}
-.evidence figcaption{color:var(--subtle);font-size:13px;line-height:1.6;padding:14px;border-top:1px solid var(--border)}
-.table-wrap{width:100%;overflow-x:auto;margin:24px 0;border:1px solid var(--border);border-radius:16px}
-table{width:100%;border-collapse:collapse;min-width:720px}
-th,td{padding:14px 16px;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:top;text-align:left;overflow-wrap:anywhere;word-break:break-word}
-th{color:#e2e8f0;background:rgba(255,255,255,0.03);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-tr:last-child td{border-bottom:0}
-.kill-chain{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:24px}
-.kill-step,.thought-card,.answer-card{padding:20px;border:1px solid var(--border);border-radius:20px;background:rgba(255,255,255,0.02);min-width:0}
-.kill-step span{display:block;margin-bottom:8px;color:var(--blue);font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
-.thought-card b,.answer-card b{color:var(--purple);display:block;margin-bottom:8px}
-.ioc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-.ioc-card{padding:20px;border:1px solid var(--border);border-radius:20px;background:rgba(255,255,255,0.02);min-width:0}
-.ioc-card h3{margin-bottom:12px;font-size:16px;color:#f8fafc}
-.callout{border:1px solid var(--border);background:rgba(56,189,248,0.05);border-left:4px solid var(--blue);border-radius:16px;padding:20px;margin:24px 0;color:#e2e8f0}
-.danger{border-left-color:var(--red);background:rgba(251,113,133,0.05)}
-.ok{border-left-color:var(--green);background:rgba(52,211,153,0.05)}
-code{font-family:"JetBrains Mono",monospace;color:#e2e8f0;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:4px 8px;border-radius:8px;font-size:0.9em;overflow-wrap:anywhere;word-break:break-word}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#030712;border:1px solid var(--border);border-radius:20px;padding:20px;color:#e2e8f0;box-shadow:inset 0 2px 4px rgba(0,0,0,0.5)}
-@media(max-width:1100px){.writeup-layout{display:block!important;width:min(100% - 40px,1220px)!important;padding-top:32px!important}.writeup-layout .toc{position:static!important;width:100%!important;max-height:none!important;margin-bottom:32px!important}}
-@media(max-width:760px){.writeup-layout .hero h1{font-size:clamp(2.7rem,14vw,4.5rem)}}
-</style>
-</head>
+  </head>
 <body>
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page wp-wordpress-page"><div class="wrap article-layout">

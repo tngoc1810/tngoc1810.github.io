@@ -61,9 +61,14 @@ function initTerminal() {
   if (!input || !body) return;
 
   const commands = {
-    "help": "Available commands: \n- whoami: About me\n- skills: My tech stack\n- clear: Clear terminal",
+    "help": "Available commands: \n- whoami: About me\n- skills: My tech stack\n- contact: How to reach me\n- certs: My certifications\n- sudo: Run command as root\n- clear: Clear terminal",
     "whoami": "guest@thaingoc\nRole: SOC Analyst & Threat Hunter in training\nLocation: Vietnam\nStatus: Always learning",
     "skills": "Security: SOC Analysis, Forensics, Malware Analysis, Reverse Engineering\nTools: Wireshark, Splunk, Ghidra, Volatility\nLanguages: Python, C/C++, Bash",
+    "contact": "Email: nguyenvanan01441@gmail.com\nLinkedIn: linkedin.com/in/ngoc-thai-8343023b4",
+    "certs": "- CyberDefenders Verified\n- TryHackMe / HackTheBox Labs\n- Active CTF Player",
+    "sudo": "guest is not in the sudoers file. This incident will be reported.",
+    "ls": "Documents  Downloads  writeups  secrets",
+    "cd": "bash: cd: permission denied",
     "clear": ""
   };
 
