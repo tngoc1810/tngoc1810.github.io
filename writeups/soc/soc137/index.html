@@ -68,10 +68,10 @@
         <h2 id="analysis">Threat Intelligence & Malware Analysis</h2>
         <p>To verify the malicious nature of the payload, the file and its associated hash were analyzed using OSINT platforms (VirusTotal and Joe Sandbox).</p>
         <p><strong>VirusTotal Analysis:</strong> The file hash was flagged as malicious by 40 out of 64 security vendors. The behavioral tags revealed that the document contains malicious macros, attempts to execute PowerShell, and employs evasion techniques.</p>
-        <img src="/assets/images/soc137/image1.png" alt="VirusTotal Analysis" />
+        <img src="/assets/media/writeups/soc/soc137/image1.png" alt="VirusTotal Analysis" />
 
         <p><strong>Joe Sandbox Detonation:</strong> Sandbox analysis confirmed the file as MALICIOUS with high confidence. The behavioral signatures indicate that upon opening the document and enabling content, the embedded VBA macro executes obfuscated command lines and spawns suspicious child processes (PowerShell). This is a classic behavior of a dropper attempting to establish a connection and download secondary payloads.</p>
-        <img src="/assets/images/soc137/image2.png" alt="Joe Sandbox Analysis" />
+        <img src="/assets/media/writeups/soc/soc137/image2.png" alt="Joe Sandbox Analysis" />
         
         <p><strong>Partial Conclusion:</strong> The payload is confirmed to be highly malicious (True Positive at the file level).</p>
 
@@ -79,13 +79,13 @@
         <p>We have proven that the weapon is real and highly dangerous. Now, the critical question remains: Did the host NicolasPRD successfully download and execute this malicious file?</p>
         <p>A comprehensive search in the Log Management system was conducted using the Source IP (<code>172.16.17.37</code>), Hostname, and the specific timeframe. The search yielded no results regarding successful connections or file transfers.</p>
         <p>The absence of network traffic logs (such as HTTP 200 OK) strongly corroborates the SIEM's "Blocked" action, proving the connection was terminated at the network perimeter before any data could be downloaded.</p>
-        <img src="/assets/images/soc137/image3.jpeg" alt="Log Management Analysis" />
+        <img src="/assets/media/writeups/soc/soc137/image3.jpeg" alt="Log Management Analysis" />
 
         <h2 id="endpoint">Endpoint Analysis & C2 Check</h2>
         <p>Further investigation on the Endpoint Detection and Response (EDR) platform for the host NicolasPRD revealed no traces of the malicious <code>.docm</code> file. There are no indicators of file creation, execution, or anomalous child processes. The endpoint remains clean and uncompromised.</p>
         
         <p><strong>C2 Communication Check:</strong> Even though the download was blocked and the EDR showed no signs of execution, I proactively searched the network logs for any suspicious outbound connections or beaconing activity from NicolasPRD to known Command and Control (C2) servers. The result was negative. The absence of any C2 traffic is the final proof that the endpoint is completely clean.</p>
-        <img src="/assets/images/soc137/image4.png" alt="Endpoint Analysis" />
+        <img src="/assets/media/writeups/soc/soc137/image4.png" alt="Endpoint Analysis" />
 
         <h2 id="verdict">Analyst Note & Verdict</h2>
         <p>Analyzed alert SOC137 (EventID: 76) regarding a malicious <code>.docm</code> download attempt by host NicolasPRD. OSINT analysis confirmed the file is a malicious macro-enabled dropper. However, log management and EDR analysis verified that the download was successfully Blocked at the network perimeter. No malicious files were downloaded, and no C2 connections were established. The endpoint remains uncompromised.</p>
@@ -102,7 +102,7 @@
         </ul>
 
         <div class="footer-nav">
-          <a href="/writeups/soc/soc-analyst-writeups/">← Back to SOC Writeups</a>
+          <a href="/writeups/soc/">← Back to SOC Writeups</a>
           <a href="/">Home ↑</a>
         </div>
       </article>
