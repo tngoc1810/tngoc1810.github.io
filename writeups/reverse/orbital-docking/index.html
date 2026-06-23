@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Orbital Docking Handshake - Writeup — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <main class="page">
+    <div class="wrap article-layout">
+      <aside class="toc">
+        <div class="toc-title">On this page</div>
+        <a href="#overview">Overview</a>
+        <a href="#analysis">Static Analysis</a>
+        <a href="#phrase">Docking Phrase</a>
+        <a href="#alignment">Alignment Window</a>
+        <a href="#flag">Flag Extraction</a>
+      </aside>
+      <article class="article-card glass">
+        <div class="eyebrow">CTF Writeup · Reverse Engineering</div>
+        <h1 class="page-title">Orbital Docking Handshake</h1>
+        <p class="lead">The docking console hides its handshake phrase in a runtime-built buffer behind one more computed alignment value. Use the lightest reversing path and recover both values.</p>
+        
+        <div class="info-card">
+          <div class="item"><div class="label">Category</div><div class="value accent">Reverse Engineering</div></div>
+          <div class="item"><div class="label">Difficulty</div><div class="value">Medium</div></div>
+          <div class="item"><div class="label">Architecture</div><div class="value">ARM 64-bit (macOS/iOS)</div></div>
+        </div>
+
+        <h2 id="overview">Overview</h2>
+        <p>Đây là định dạng executable của macOS/iOS kiến trúc ARM 64-bit, có cơ chế bảo vệ PIE nhưng không ảnh hưởng đến static analysis.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image1.png" alt="File details" />
+
+        <h2 id="analysis">Static Analysis</h2>
+        <p>Tiến hành decompile file bằng Ghidra, ta thấy chương trình đã gán <code>__stack_chk_guard</code>. Điều này tái khẳng định việc dùng phương pháp Buffer Overflow để đè biến là không khả thi.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image2.png" alt="Ghidra decompile" />
+
+        <p>Chương trình in ra dòng: <em>"Hint for analysts: the shortest path is still the cleanest one."</em></p>
+        <p>Hỏi user nhập Docking phrase, đọc tối đa <code>0x40 = 64</code> ký tự, lưu vào <code>acStack_58</code>. Nếu user không nhập gì thì báo lỗi thoát. Vậy <code>acStack_58</code> là buffer chứa phrase user nhập.</p>
+        <p>Tiếp theo hỏi user nhập alignment window, đọc tối đa <code>0x20 = 32</code> ký tự vào <code>acStack_85</code>. Vậy <code>acStack_85</code> là buffer chứa alignment user nhập.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image3.png" alt="User inputs" />
+
+        <h2 id="phrase">Phân tích Docking Phrase</h2>
+        <p>Tiếp theo tôi chú ý đến hàm <code>_build_expected_phrase()</code>. Ghidra không show tham số ở entry nhưng hàm thật sự nhận <code>param_1</code>. Khả năng <code>param_1</code> trỏ đến <code>auStack_65</code>, tức là buffer để hàm ghi kết quả vào.</p>
+        <p>Vòng lặp 12 lần, mỗi lần tăng 1, khả năng phrase dài 12 kí tự.</p>
+        <p>Đọc byte thứ i từ <code>obfuscated_phrase</code>, lưu vào <code>bVar1</code>. Sau đó gọi hàm <code>mask_for</code> truyền <code>local_20</code> vào lưu vào <code>bVar2</code>. Tiếp theo thấy XOR 2 byte lại và lưu vào buffer:</p>
+        <pre><code class="language-c">buffer[i] = obfuscated_phrase[i] ^ mask_for(i)</code></pre>
+        <p>Cuối cùng gán phần tử thứ 12 là 0 để kết thúc chuỗi.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image4.png" alt="build_expected_phrase function" />
+        <img src="/assets/media/writeups/reverse/orbital-docking/image5.png" alt="Obfuscated phrase array" />
+
+        <p>Kiểm tra hàm <code>mask_for(i)</code>: Nó trả về <code>i * 17 + 27</code>. Vậy là <code>buffer[i] = obfuscated_phrase[i] ^ (i * 17 + 27)</code>.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image6.png" alt="mask_for function" />
+
+        <p>12 bytes của <code>obfuscated_phrase</code> là: <code>7f, 43, 5e, 25, 37, 11, ef, f6, d0, cd, ab, b5</code><br>
+        Chuyển sang số thập phân: <code>127, 67, 94, 37, 55, 17, 239, 246, 208, 205, 171, 181</code></p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image7.png" alt="Obfuscated array data" />
+
+        <h3>Script tính Phrase:</h3>
+        <pre><code class="language-python">obfuscated_phrase = [127, 67, 94, 37, 55, 17, 239, 246, 208, 205, 171, 181]
+mask_for = [27, 44, 61, 78, 95, 112, 129, 146, 163, 180, 197, 214]
+decrypted_phrase = ""
+
+for i in range(len(obfuscated_phrase)):
+    decrypted_byte = obfuscated_phrase[i] ^ mask_for[i]
+    decrypted_phrase += chr(decrypted_byte)
+
+print(decrypted_phrase)</code></pre>
+        <p>Giờ ta đã biết phrase là: <strong>dockhandsync</strong></p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image8.png" alt="Script running phrase output" />
+
+        <h2 id="alignment">Phân tích Alignment Window</h2>
+        <p>Tiếp theo coi thử hàm <code>compute__grid_offset</code>. Nó duyệt hết chuỗi 12 kí tự của phrase. Biến <code>sum</code> cộng dồn với <code>phrase[i] * (i + 3)</code>.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image9.png" alt="compute_grid_offset function" />
+        <p>Kết quả return <code>(sum % 1000) + 200</code>.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image10.png" alt="Alignment math" />
+
+        <h3>Script tính Alignment:</h3>
+        <pre><code class="language-python">obfuscated_phrase = [127, 67, 94, 37, 55, 17, 239, 246, 208, 205, 171, 181]
+decrypted_phrase = ""
+total_sum = 0
+
+for i in range(len(obfuscated_phrase)):
+    mask = (i * 17 + 27) & 0xFF
+    char_val = obfuscated_phrase[i] ^ mask
+    decrypted_phrase += chr(char_val)
+    total_sum += char_val * (i + 3)
+
+alignment_window = (total_sum % 1000) + 200
+print(alignment_window)</code></pre>
+        <p>Giờ ta đã biết alignment window là: <strong>1108</strong></p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image11.png" alt="Alignment script running" />
+
+        <h2 id="flag">Khôi phục Flag</h2>
+        <p>Nhìn vòng lặp cuối cùng, ta biết flag dài 33 bytes. Tôi lấy 33 bytes của <code>encoded_flag</code>: <code>0xda, 0xa1, 0xb5, 0xad, 0xa4, 0xa8, 0x9b, 0xa0, 0xdf, 0x88, 0x96, 0xdf, 0x80, 0x30, 0x91, 0x55, 0x68, 0x3a, 0x7f, 0x7c, 0x1a, 0x58, 0x57, 0x75, 0x42, 0x70, 0x4c, 0x32, 0x79, 0x28, 0x6b, 0x2e, 0x1a</code>.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image12.png" alt="Encoded flag bytes" />
+
+        <p>Công thức logic trong vòng lặp giải mã flag là:</p>
+        <pre><code class="language-c">flag[i] = encoded_flag[i] ^ (i*5 + phrase[i%12] + alignment)</code></pre>
+
+        <h3>Script tính Flag:</h3>
+        <pre><code class="language-python">encoded_flag = [
+    0xda, 0xa1, 0xb5, 0xad, 0xa4, 0xa8, 0x9b, 0xa0,
+    0xdf, 0x88, 0x96, 0xdf, 0x80, 0x30, 0x91, 0x55,
+    0x68, 0x3a, 0x7f, 0x7c, 0x1a, 0x58, 0x57, 0x75,
+    0x42, 0x70, 0x4c, 0x32, 0x79, 0x28, 0x6b, 0x2e,
+    0x1a
+]
+phrase = "dockhandsync"
+alignment = 1108
+flag = ""
+
+for i in range(len(encoded_flag)):
+    phrase_char_val = ord(phrase[i % 12])
+    mask = (i * 5 + phrase_char_val + alignment) & 0xFF
+    decrypted_char = chr(encoded_flag[i] ^ mask)
+    flag += decrypted_char
+
+print(flag)</code></pre>
+
+        <p>Chạy script trên ta sẽ nhận được flag hợp lệ.</p>
+        <img src="/assets/media/writeups/reverse/orbital-docking/image13.png" alt="Flag output" />
+        <div class="note-box">
+            <strong>Flag:</strong> <code>bitctf{{0rb1t4l_d0ck1ng_r0ut1n3}}</code>
+        </div>
+
+        <div class="footer-nav">
+          <a href="/writeups/">← Back to Writeups</a>
+          <a href="/">Home ↑</a>
+        </div>
+      </article>
+    </div>
+  </main>
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
