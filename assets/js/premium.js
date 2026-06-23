@@ -1,6 +1,6 @@
 /* ================================================================
    PREMIUM UPGRADE JS — appended to main.js
-   New: cursor spotlight, reading progress bar, image lightbox,
+   New: reading progress bar, image lightbox,
         magnetic buttons, scroll-to-top button
    ================================================================ */
 
@@ -9,42 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initPremiumFeatures() {
-  initCursorSpotlight();
   initReadingProgress();
   initMagneticButtons();
   initImageLightbox();
   initScrollTopBtn();
   initShimmerCards();
-}
-
-function initCursorSpotlight() {
-  if (window.matchMedia("(hover: none)").matches) return; // Skip on touch devices
-
-  const spotlight = document.createElement("div");
-  spotlight.id = "cursor-spotlight";
-  document.body.appendChild(spotlight);
-
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
-  let spotX = mouseX;
-  let spotY = mouseY;
-  
-  // Throttle mousemove for better performance
-  let ticking = false;
-  window.addEventListener("mousemove", (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        // Smooth interpolation
-        spotX += (mouseX - spotX) * 0.15;
-        spotY += (mouseY - spotY) * 0.15;
-        spotlight.style.transform = `translate(calc(${spotX}px - 50%), calc(${spotY}px - 50%))`;
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
 }
 
 function initReadingProgress() {

@@ -116,11 +116,10 @@ function initCyberBackground() {
 
   if (isWriteupsPage) {
     initWriteupsReadingBackground();
-    return;
   }
 
   if (prefersReducedMotion || window.innerWidth <= 760) return;
-  initHomeBackground(false);
+  initHomeBackground(isWriteupsPage);
 }
 
 function initWriteupsReadingBackground() {
