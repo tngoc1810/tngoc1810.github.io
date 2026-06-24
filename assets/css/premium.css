@@ -418,3 +418,98 @@
   20% { left: 200%; }
   100% { left: 200%; }
 }
+
+
+/* ── Ultimate Readability Upgrade ────────────────────────────── */
+
+.article-card p, 
+.article-card li {
+  color: #e2e8f0; /* Brighter slate for much better contrast */
+  font-size: 17px;
+  line-height: 1.85;
+  letter-spacing: 0.015em;
+}
+
+.article-card > p, 
+.article-card > ul, 
+.article-card > ol, 
+.article-card > h2, 
+.article-card > h3, 
+.article-card > h4 {
+  max-width: 85ch; /* Prevent text from stretching too wide on large screens */
+}
+
+.article-card h2 {
+  font-size: 32px;
+  color: #ffffff;
+  margin-top: 56px;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+.article-card h3 {
+  font-size: 24px;
+  color: #f8fafc;
+  margin-top: 40px;
+  margin-bottom: 16px;
+}
+
+.article-card .lead {
+  font-size: 20px;
+  color: #bae6fd;
+  line-height: 1.7;
+  max-width: 75ch;
+  margin-bottom: 32px;
+}
+
+.article-card strong, .article-card b {
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 0 1px rgba(255,255,255,0.2);
+}
+
+.article-card code {
+  font-size: 14.5px;
+  color: #7dd3fc;
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(125,211,252,0.2);
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+
+.evidence-shot {
+  margin: 40px 0;
+  max-width: 100%;
+}
+
+.evidence-shot img {
+  border-radius: 16px;
+  border: 1px solid rgba(125,211,252,0.2);
+  box-shadow: 0 16px 40px -10px rgba(0,0,0,0.6);
+  width: 100%;
+}
+
+.evidence-shot figcaption {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #94a3b8;
+  font-style: italic;
+  text-align: center;
+}
+
+.note-box {
+  max-width: 85ch;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.callout {
+  max-width: 85ch;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* Ensure images don't overflow the card */
+.article-card img {
+  max-width: 100%;
+  height: auto;
+}
