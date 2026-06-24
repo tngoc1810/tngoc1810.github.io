@@ -13,91 +13,193 @@
 <body>
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page masterminds-page"><div class="wrap article-layout">
-    <aside class="toc"><div class="toc-title">On this page</div><a href="#">Overview</a></aside>
+    <aside class="toc">
+      <div class="toc-title">On this page</div>
+      <a href="#overview">Overview</a>
+      <a href="#infection1">Infection 1</a>
+      <a href="#infection2">Infection 2</a>
+      <a href="#infection3">Infection 3</a>
+      <a href="#takeaways">Lessons Learned</a>
+    </aside>
     <article class="article-card glass">
       <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / TryHackMe / Masterminds</div>
       <div class="eyebrow">TryHackMe · Threat Hunting</div>
       <h1 class="page-title">Masterminds: Threat Hunting & Network Traffic Analysis</h1>
+      <p class="lead">A detailed network traffic analysis investigating three compromised machines in the Finance department, uncovering phishing payloads, RedLine Stealer, Phorpiex botnet, and C2 evasion techniques using Brim.</p>
       
-      <h2>1.Scenario</h2>
-<p>Three machines in the Finance department at Pfeffer PLC were compromised. We suspect the initial source of the compromise happened through a phishing attempt and by an infected USB drive. The Incident Response team managed to pull the network traffic logs from the endpoints. Use Brim to investigate the network traffic for any indicators of an attack and determine who stands behind the attacks. </p>
-<h2>Investigations</h2>
-<p>File: infection1.pcap</p>
-<figure class="evidence-shot"><figcaption><span>Evidence 01</span><span>image1.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image1.png" alt="image1.png"></figure>
-<p>By filtering HTTP traffic, a serious anomaly was detected. The internal endpoint (192.168.75.249) initiated a plain text HTTP GET request to an untrusted external domain (hdmilg.xyz) to download a Windows executable file named catzx.exe. Immediately after downloading this malware, the infected server began sending signals to several other suspicious domains (e.g., cambiasuhistoria.growlab.es, gocphongthe.com), clearly indicating a malware strain establishing Command and Control (C2) communication channels </p>
-<figure class="evidence-shot"><figcaption><span>Evidence 02</span><span>image2.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image2.png" alt="image2.png"></figure>
-<h2>Anomaly Detected: A highly suspicious HTTP transaction was identified. The target server returned a 404 Not Found status code; however, the associated response body size was unusually massive, clocking in at 46,456 bytes.</h2>
-<h2>Analysis:Threat actors frequently utilize "Fake 404" responses to smuggle malicious payloads, configuration files, or secondary commands past traditional network defenses (like IDS or proxies) that might deprioritize inspecting traffic explicitly flagged as missing or erroneous.</h2>
-<h2>DNS Traffic Analysis</h2>
-<figure class="evidence-shot"><figcaption><span>Evidence 03</span><span>image3.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image3.png" alt="image3.png"></figure>
-<p>After identifying the initial payload delivery, the investigation shifted to DNS traffic analysis to map out the broader Command and Control (C2) infrastructure. </p>
-<p> The DNS resolution logs perfectly corroborated the anomalous HTTP traffic observed earlier. The infected endpoint systematically attempted to resolve a specific cluster of suspicious domains. Notably, CAB.MYKFN.COM and IE-BEST.NET recorded the highest query counts, strongly suggesting they act as primary C2 nodes for beaconing. </p>
-<figure class="evidence-shot"><figcaption><span>Evidence 04</span><span>image4.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image4.png" alt="image4.png"></figure>
-<p>During analysis of outgoing HTTP connections, an unusual communication pattern was observed directed toward bhaktivrind.com. The infected endpoint made a GET request to the URI /cgi-bin/JBbb8/, resulting in a 500 Internal Server Error with a response body of 0 bytes.</p>
-<p>While typically indicative of a standard server error, in the context of a malware infection, this behavior reveals crucial details about the attacker's infrastructure.</p>
-<h2>Hypothesis 1: Third-party infrastructure compromised: The bhaktivrind.com domain may be a legitimate website, but compromised, being used as a proxy server or disposable C2 node.</h2>
-<h2>Hypothesis 2: C2 access control mechanism: Closer examination of the logs reveals an empty user_agent field. Sophisticated C2 servers often implement strict filtering. If the request lacks the specific hardcoded User-Agent string or authorization token that the malware expects, the C2 server may intentionally disconnect and return a 500 error to avoid detection by automated testing systems and security researchers.</h2>
-<figure class="evidence-shot"><figcaption><span>Evidence 05</span><span>image5.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image5.png" alt="image5.png"></figure>
-<figure class="evidence-shot"><figcaption><span>Evidence 06</span><span>image6.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image6.png" alt="image6.png"></figure>
-<p>www.letscompareonline.com was flagged as malicious by 7/91 security vendors.</p>
-<p>cambiasuhistoria.growlab.es was flagged by 8/91 security vendors.</p>
-<p>Verdict: True Positive - Compromised </p>
-<p>Severity: High</p>
-<p> Analyst Comments: Investigation confirms the endpoint is fully compromised. The host downloaded a cleartext malicious executable (catzx.exe) from hdmilg.xyz. Post-infection telemetry shows active Command & Control (C2) beaconing to multiple domains (notably cab.mykfn.com). The threat actor is utilizing defense evasion techniques, specifically smuggling 46KB payloads disguised as HTTP 404 Not Found errors, and returning 500 Internal Server Error to evade analysis. Recommended Actions:</p>
-<p>Immediately isolate the host from the corporate network.</p>
-<p>Block all identified C2 domains and IPs at the perimeter firewall.</p>
-<p>Perform full system reimage.</p>
-<p>File: infection2.pcap</p>
-<figure class="evidence-shot"><figcaption><span>Evidence 07</span><span>image7.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image7.png" alt="image7.png"></figure>
-<p>For the second infected endpoint (192.168.75.146).The query results mapped out a clear, two-stage compromise process:</p>
-<p>Stage 1 - Payload Delivery: The endpoint executed an HTTP GET request to the external domain hypercustom.top (resolved to IP 45.95.203.28), targeting the URI /jollion/apines.exe. This confirms the successful download of a secondary malicious executable.</p>
-<p>Stage 2 - Anomalous C2 Activity: The endpoint subsequently initiated multiple HTTP POST requests to 5.181.156.252 over port 80. Crucially, the HTTP Host header contained a bare IP address rather than a resolved domain name. </p>
-<figure class="evidence-shot"><figcaption><span>Evidence 08</span><span>image8.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image8.png" alt="image8.png"></figure>
-<p>To validate the anomalous HTTP traffic and identify the specific malware strain or delivery mechanism, I pivoted to analyzing the Suricata Intrusion Detection System (IDS) </p>
-<p>The IDS alerts perfectly corroborated the prior HTTP logs, firing exactly at the timestamp of the payload delivery (45.95.203.28). Key triggered signatures included:</p>
-<p>Suspicious Firesale gTLD EXE DL with no Referer: This confirms the automated, script-driven nature of the apines.exe download.</p>
-<p>Suspicious User-Agent (AutoHotkey): Critical Finding. The HTTP request utilizing an AutoHotkey User-Agent indicates that the initial compromise vector (likely the suspected malicious USB drive mentioned in the initial incident briefing) contained an AutoHotkey script. Threat actors frequently weaponize AutoHotkey to compile loaders and droppers, effectively obfuscating their malicious intent to bypass standard endpoint AV detection.</p>
-<figure class="evidence-shot"><figcaption><span>Evidence 09</span><span>image9.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image9.png" alt="image9.png"></figure>
-<figure class="evidence-shot"><figcaption><span>Evidence 10</span><span>image10.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image10.png" alt="image10.png"></figure>
-<p>The OSINT query yielded a definitive match. The payload is heavily flagged and associated with RedLine Stealer (often distributed alongside Cryptbot).</p>
-<p>Impact Assessment: RedLine Stealer is a highly prolific Information Stealer designed to harvest saved browser credentials, session cookies, cryptocurrency wallets, and system inventory. This attribution perfectly contextualizes the anomalous HTTP POST requests observed targeting 5.181.156.252. </p>
-<p>Verdict: True Positive - Critical Breach </p>
-<p>Severity: Critical (Active Data Exfiltration)</p>
-<p> Analyst Comments: Critical incident involving RedLine Stealer. Evidence indicates the initial compromise occurred via a weaponized AutoHotkey script, which acted as a downloader to fetch apines.exe from hypercustom.top. The malware successfully executed and established a C2 exfiltration channel via direct HTTP POST requests to a hardcoded IP (5.181.156.252). Given the nature of RedLine Stealer, it is highly probable that corporate credentials, session tokens, and financial data have been exfiltrated. </p>
-<p>Recommended Actions:</p>
-<p>Urgent host isolation.</p>
-<p>Mandatory and immediate password rotation for the affected user across all corporate and financial platforms.</p>
-<p>Revoke all active session tokens for the compromised user.</p>
-<p>File: infection3.pcap</p>
-<figure class="evidence-shot"><figcaption><span>Evidence 11</span><span>image11.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image11.png" alt="image11.png"></figure>
-<p>Investigate the final compromised endpoint (192.168.75.232)</p>
-<p> The endpoint exhibited classic automated dropper behavior supported by a resilient delivery infrastructure:</p>
-<p>Sequential Payload Retrieval: The host systematically issued HTTP GET requests to download sequentially named executables (/s/1.exe through /s/5.exe).</p>
-<p>Fallback Infrastructure: To ensure successful delivery, the malware cycled through multiple suspicious Russian TLDs acting as mirror servers: xfhoahegue.ru, afhoahegue.ru, and efhoahegue.ru.</p>
-<p>The endpoint repeatedly requested the URI /s/VNEW=1 across these domains. This is highly indicative of a bot check-in mechanism communicating with the Command & Control server.</p>
-<figure class="evidence-shot"><figcaption><span>Evidence 12</span><span>image12.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image12.png" alt="image12.png"></figure>
-<p>Following the identification of the dropper's payload delivery mechanism, the investigation expanded to DNS traffic to uncover potential lateral movement or internal network mapping attempts by the compromised endpoint (192.168.75.232).</p>
-<p>While the log contained expected Windows broadcast noise (e.g., wpad.local, isatap.local), the endpoint generated a statistically significant volume of DNS queries for pseudo-randomly generated internal hostnames (e.g., hxbhaelzrcmf.local, vrahsvtwl.local, xcpthyukbep.local).</p>
-<p>All automated GET requests to the malicious .ru domains utilized the exact same, hardcoded User-Agent string:</p>
-<p>Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0) Gecko/20100101 Firefox/25.0</p>
-<p>The User-Agent explicitly claims the client is running macOS. However, the requested payloads are Windows executables (.exe), a behavior inconsistent with legitimate macOS user activity.</p>
-<figure class="evidence-shot"><figcaption><span>Evidence 13</span><span>image13.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image13.png" alt="image13.png"></figure>
-<figure class="evidence-shot"><figcaption><span>Evidence 14</span><span>image14.png</span></figcaption><img src="/assets/media/writeups/tryhackme/masterminds/image14.png" alt="image14.png"></figure>
-<p>The OSINT query successfully correlated the infrastructure to known malicious activity. Specifically, threat intelligence reports attribute the domain efhoahegue.ru as an active Command & Control (C2) node for the Phorpiex botnet (also known as Trik)</p>
-<p>Verdict: True Positive - Compromised</p>
-<p> Severity: High</p>
-<p> Analyst Comments: Endpoint is infected by the Phorpiex Botnet, functioning as a multi-stage dropper. The host systematically downloaded sequential payloads (1.exe through 5.exe) utilizing a resilient fallback infrastructure composed of multiple .ru domains. The malware utilized a spoofed, outdated macOS User-Agent to bypass basic filtering. Furthermore, DNS logs indicate the malware is actively conducting internal network reconnaissance (querying randomized .local domains), presenting a high risk of lateral movement. </p>
-<p>Recommended Actions:</p>
-<p>Isolate the host immediately to prevent lateral movement.</p>
-<p>Hunt for .local DNS queries across the broader network to identify if lateral movement was successful.</p>
-<p>Reimage the machine.</p>
-<p>Lessons Learned & Key Takeaways</p>
-<p>Completing the "Masterminds" investigation provided invaluable hands-on experience in Network Traffic Analysis (NTA) and Incident Response.</p>
-<p>Behavioral Anomaly Detection: This investigation highlighted that threat hunting is about spotting the unusual. I successfully identified multiple defense evasion techniques, including:</p>
-<p>Massive HTTP payloads (46KB) masquerading as benign 404 Not Found errors.</p>
-<p>Direct-to-IP Command & Control communications bypassing DNS resolution.</p>
-<p>Spoofed, outdated macOS User-Agents requesting Windows .exe executables.</p>
-<p>Telemetry Correlation: I practically applied the concept of event correlation by cross-referencing cleartext HTTP downloads with DNS beaconing frequencies and Suricata IDS alerts (event_type=="alert"). This holistic approach was essential in reconstructing the complete kill chain for three distinct malware families (including RedLine Stealer and the Phorpiex Botnet).</p>
+      <div class="info-card">
+        <div class="item"><div class="label">Room</div><div class="value">Masterminds</div></div>
+        <div class="item"><div class="label">Platform</div><div class="value">TryHackMe</div></div>
+        <div class="item"><div class="label">Focus</div><div class="value accent">Threat Hunting / NTA</div></div>
+        <div class="item"><div class="label">Artifacts</div><div class="value">PCAP files</div></div>
+        <div class="item"><div class="label">Tools</div><div class="value">Brim, Suricata, OSINT</div></div>
+      </div>
+
+      <div class="callout">
+        <strong>Goal:</strong> Investigate network traffic logs from three endpoints to identify indicators of compromise (IOCs), uncover the malware strains used, and determine the attacker's infrastructure.
+      </div>
+
+      <h2 id="overview">1. Scenario</h2>
+      <p>Three machines in the Finance department at Pfeffer PLC were compromised. We suspect the initial source of the compromise happened through a phishing attempt and by an infected USB drive. The Incident Response team managed to pull the network traffic logs from the endpoints. Use Brim to investigate the network traffic for any indicators of an attack and determine who stands behind the attacks.</p>
+
+      <h2 id="infection1">2. Investigations: infection1.pcap</h2>
+      <p>By filtering HTTP traffic, a serious anomaly was detected. The internal endpoint (192.168.75.249) initiated a plain text HTTP GET request to an untrusted external domain (<code>hdmilg.xyz</code>) to download a Windows executable file named <code>catzx.exe</code>. Immediately after downloading this malware, the infected server began sending signals to several other suspicious domains (e.g., <code>cambiasuhistoria.growlab.es</code>, <code>gocphongthe.com</code>), clearly indicating a malware strain establishing Command and Control (C2) communication channels.</p>
+      
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image1.png" alt="HTTP traffic anomaly">
+      </figure>
+
+      <p><strong>Anomaly Detected:</strong> A highly suspicious HTTP transaction was identified. The target server returned a 404 Not Found status code; however, the associated response body size was unusually massive, clocking in at 46,456 bytes.</p>
+      <p><strong>Analysis:</strong> Threat actors frequently utilize "Fake 404" responses to smuggle malicious payloads, configuration files, or secondary commands past traditional network defenses (like IDS or proxies) that might deprioritize inspecting traffic explicitly flagged as missing or erroneous.</p>
+
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image2.png" alt="Fake 404 response">
+      </figure>
+
+      <h3>DNS Traffic Analysis</h3>
+      <p>After identifying the initial payload delivery, the investigation shifted to DNS traffic analysis to map out the broader Command and Control (C2) infrastructure.</p>
+      
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image3.png" alt="DNS Resolution Logs">
+      </figure>
+
+      <p>The DNS resolution logs perfectly corroborated the anomalous HTTP traffic observed earlier. The infected endpoint systematically attempted to resolve a specific cluster of suspicious domains. Notably, <code>CAB.MYKFN.COM</code> and <code>IE-BEST.NET</code> recorded the highest query counts, strongly suggesting they act as primary C2 nodes for beaconing.</p>
+
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image4.png" alt="C2 nodes beaconing">
+      </figure>
+
+      <p>During analysis of outgoing HTTP connections, an unusual communication pattern was observed directed toward <code>bhaktivrind.com</code>. The infected endpoint made a GET request to the URI <code>/cgi-bin/JBbb8/</code>, resulting in a 500 Internal Server Error with a response body of 0 bytes.</p>
+      <p>While typically indicative of a standard server error, in the context of a malware infection, this behavior reveals crucial details about the attacker's infrastructure.</p>
+
+      <ul>
+        <li><strong>Hypothesis 1 (Third-party infrastructure compromised):</strong> The <code>bhaktivrind.com</code> domain may be a legitimate website, but compromised, being used as a proxy server or disposable C2 node.</li>
+        <li><strong>Hypothesis 2 (C2 access control mechanism):</strong> Closer examination of the logs reveals an empty user_agent field. Sophisticated C2 servers often implement strict filtering. If the request lacks the specific hardcoded User-Agent string or authorization token that the malware expects, the C2 server may intentionally disconnect and return a 500 error to avoid detection by automated testing systems and security researchers.</li>
+      </ul>
+
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image5.png" alt="500 Internal Server Error">
+      </figure>
+
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image6.png" alt="VirusTotal Analysis">
+      </figure>
+
+      <p><code>www.letscompareonline.com</code> was flagged as malicious by 7/91 security vendors.</p>
+      <p><code>cambiasuhistoria.growlab.es</code> was flagged by 8/91 security vendors.</p>
+
+      <div class="note-box">
+        <p><strong>Verdict:</strong> True Positive - Compromised<br><strong>Severity:</strong> High</p>
+        <p><strong>Analyst Comments:</strong> Investigation confirms the endpoint is fully compromised. The host downloaded a cleartext malicious executable (<code>catzx.exe</code>) from <code>hdmilg.xyz</code>. Post-infection telemetry shows active Command & Control (C2) beaconing to multiple domains (notably <code>cab.mykfn.com</code>). The threat actor is utilizing defense evasion techniques, specifically smuggling 46KB payloads disguised as HTTP 404 Not Found errors, and returning 500 Internal Server Error to evade analysis.</p>
+        <p><strong>Recommended Actions:</strong></p>
+        <ul class="step-list">
+          <li>Immediately isolate the host from the corporate network.</li>
+          <li>Block all identified C2 domains and IPs at the perimeter firewall.</li>
+          <li>Perform full system reimage.</li>
+        </ul>
+      </div>
+
+      <h2 id="infection2">3. Investigations: infection2.pcap</h2>
+      <p>For the second infected endpoint (192.168.75.146). The query results mapped out a clear, two-stage compromise process:</p>
+      
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image7.png" alt="Second endpoint compromise process">
+      </figure>
+
+      <ul>
+        <li><strong>Stage 1 - Payload Delivery:</strong> The endpoint executed an HTTP GET request to the external domain <code>hypercustom.top</code> (resolved to IP 45.95.203.28), targeting the URI <code>/jollion/apines.exe</code>. This confirms the successful download of a secondary malicious executable.</li>
+        <li><strong>Stage 2 - Anomalous C2 Activity:</strong> The endpoint subsequently initiated multiple HTTP POST requests to <code>5.181.156.252</code> over port 80. Crucially, the HTTP Host header contained a bare IP address rather than a resolved domain name.</li>
+      </ul>
+
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image8.png" alt="Direct IP HTTP POST">
+      </figure>
+
+      <p>To validate the anomalous HTTP traffic and identify the specific malware strain or delivery mechanism, I pivoted to analyzing the Suricata Intrusion Detection System (IDS).</p>
+      <p>The IDS alerts perfectly corroborated the prior HTTP logs, firing exactly at the timestamp of the payload delivery (45.95.203.28). Key triggered signatures included:</p>
+      <ul>
+        <li><strong>Suspicious Firesale gTLD EXE DL with no Referer:</strong> This confirms the automated, script-driven nature of the <code>apines.exe</code> download.</li>
+        <li><strong>Suspicious User-Agent (AutoHotkey):</strong> Critical Finding. The HTTP request utilizing an AutoHotkey User-Agent indicates that the initial compromise vector (likely the suspected malicious USB drive mentioned in the initial incident briefing) contained an AutoHotkey script. Threat actors frequently weaponize AutoHotkey to compile loaders and droppers, effectively obfuscating their malicious intent to bypass standard endpoint AV detection.</li>
+      </ul>
+
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image9.png" alt="Suricata Alerts">
+      </figure>
+      
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image10.png" alt="OSINT RedLine Stealer match">
+      </figure>
+
+      <p>The OSINT query yielded a definitive match. The payload is heavily flagged and associated with RedLine Stealer (often distributed alongside Cryptbot).</p>
+      <p><strong>Impact Assessment:</strong> RedLine Stealer is a highly prolific Information Stealer designed to harvest saved browser credentials, session cookies, cryptocurrency wallets, and system inventory. This attribution perfectly contextualizes the anomalous HTTP POST requests observed targeting 5.181.156.252.</p>
+
+      <div class="note-box">
+        <p><strong>Verdict:</strong> True Positive - Critical Breach<br><strong>Severity:</strong> Critical (Active Data Exfiltration)</p>
+        <p><strong>Analyst Comments:</strong> Critical incident involving RedLine Stealer. Evidence indicates the initial compromise occurred via a weaponized AutoHotkey script, which acted as a downloader to fetch <code>apines.exe</code> from <code>hypercustom.top</code>. The malware successfully executed and established a C2 exfiltration channel via direct HTTP POST requests to a hardcoded IP (5.181.156.252). Given the nature of RedLine Stealer, it is highly probable that corporate credentials, session tokens, and financial data have been exfiltrated.</p>
+        <p><strong>Recommended Actions:</strong></p>
+        <ul class="step-list">
+          <li>Urgent host isolation.</li>
+          <li>Mandatory and immediate password rotation for the affected user across all corporate and financial platforms.</li>
+          <li>Revoke all active session tokens for the compromised user.</li>
+        </ul>
+      </div>
+
+      <h2 id="infection3">4. Investigations: infection3.pcap</h2>
+      <p>Investigate the final compromised endpoint (192.168.75.232).</p>
+      
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image11.png" alt="Sequential Payload Retrieval">
+      </figure>
+
+      <p>The endpoint exhibited classic automated dropper behavior supported by a resilient delivery infrastructure:</p>
+      <ul>
+        <li><strong>Sequential Payload Retrieval:</strong> The host systematically issued HTTP GET requests to download sequentially named executables (<code>/s/1.exe</code> through <code>/s/5.exe</code>).</li>
+        <li><strong>Fallback Infrastructure:</strong> To ensure successful delivery, the malware cycled through multiple suspicious Russian TLDs acting as mirror servers: <code>xfhoahegue.ru</code>, <code>afhoahegue.ru</code>, and <code>efhoahegue.ru</code>.</li>
+      </ul>
+      <p>The endpoint repeatedly requested the URI <code>/s/VNEW=1</code> across these domains. This is highly indicative of a bot check-in mechanism communicating with the Command & Control server.</p>
+
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image12.png" alt="C2 bot check-in">
+      </figure>
+
+      <p>Following the identification of the dropper's payload delivery mechanism, the investigation expanded to DNS traffic to uncover potential lateral movement or internal network mapping attempts by the compromised endpoint.</p>
+      <p>While the log contained expected Windows broadcast noise (e.g., wpad.local, isatap.local), the endpoint generated a statistically significant volume of DNS queries for pseudo-randomly generated internal hostnames (e.g., <code>hxbhaelzrcmf.local</code>, <code>vrahsvtwl.local</code>, <code>xcpthyukbep.local</code>).</p>
+      <p>All automated GET requests to the malicious .ru domains utilized the exact same, hardcoded User-Agent string:</p>
+      <pre><code>Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0) Gecko/20100101 Firefox/25.0</code></pre>
+      <p>The User-Agent explicitly claims the client is running macOS. However, the requested payloads are Windows executables (.exe), a behavior inconsistent with legitimate macOS user activity.</p>
+
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image13.png" alt="User-Agent spoofing">
+      </figure>
+      <figure class="evidence-shot">
+        <img src="/assets/media/writeups/tryhackme/masterminds/image14.png" alt="Phorpiex Botnet OSINT">
+      </figure>
+
+      <p>The OSINT query successfully correlated the infrastructure to known malicious activity. Specifically, threat intelligence reports attribute the domain <code>efhoahegue.ru</code> as an active Command & Control (C2) node for the Phorpiex botnet (also known as Trik).</p>
+
+      <div class="note-box">
+        <p><strong>Verdict:</strong> True Positive - Compromised<br><strong>Severity:</strong> High</p>
+        <p><strong>Analyst Comments:</strong> Endpoint is infected by the Phorpiex Botnet, functioning as a multi-stage dropper. The host systematically downloaded sequential payloads (1.exe through 5.exe) utilizing a resilient fallback infrastructure composed of multiple .ru domains. The malware utilized a spoofed, outdated macOS User-Agent to bypass basic filtering. Furthermore, DNS logs indicate the malware is actively conducting internal network reconnaissance (querying randomized .local domains), presenting a high risk of lateral movement.</p>
+        <p><strong>Recommended Actions:</strong></p>
+        <ul class="step-list">
+          <li>Isolate the host immediately to prevent lateral movement.</li>
+          <li>Hunt for .local DNS queries across the broader network to identify if lateral movement was successful.</li>
+          <li>Reimage the machine.</li>
+        </ul>
+      </div>
+
+      <h2 id="takeaways">5. Lessons Learned & Key Takeaways</h2>
+      <p>Completing the "Masterminds" investigation provided invaluable hands-on experience in Network Traffic Analysis (NTA) and Incident Response.</p>
+      <ul>
+        <li><strong>Behavioral Anomaly Detection:</strong> This investigation highlighted that threat hunting is about spotting the unusual. I successfully identified multiple defense evasion techniques, including:
+          <ul>
+            <li>Massive HTTP payloads (46KB) masquerading as benign 404 Not Found errors.</li>
+            <li>Direct-to-IP Command & Control communications bypassing DNS resolution.</li>
+            <li>Spoofed, outdated macOS User-Agents requesting Windows .exe executables.</li>
+          </ul>
+        </li>
+        <li><strong>Telemetry Correlation:</strong> I practically applied the concept of event correlation by cross-referencing cleartext HTTP downloads with DNS beaconing frequencies and Suricata IDS alerts. This holistic approach was essential in reconstructing the complete kill chain for three distinct malware families (including RedLine Stealer and the Phorpiex Botnet).</li>
+      </ul>
       
     </article>
   </div></main>
