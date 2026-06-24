@@ -425,7 +425,7 @@
 .article-card p, 
 .article-card li {
   color: #e2e8f0; /* Brighter slate for much better contrast */
-  font-size: 17px;
+  font-size: 19px;
   line-height: 1.85;
   letter-spacing: 0.015em;
 }
@@ -436,11 +436,11 @@
 .article-card > h2, 
 .article-card > h3, 
 .article-card > h4 {
-  max-width: 85ch; /* Prevent text from stretching too wide on large screens */
+  /* max-width removed for wider reading area */ /* Prevent text from stretching too wide on large screens */
 }
 
 .article-card h2 {
-  font-size: 32px;
+  font-size: 38px;
   color: #ffffff;
   margin-top: 56px;
   margin-bottom: 20px;
@@ -448,7 +448,7 @@
 }
 
 .article-card h3 {
-  font-size: 24px;
+  font-size: 28px;
   color: #f8fafc;
   margin-top: 40px;
   margin-bottom: 16px;
@@ -498,13 +498,13 @@
 }
 
 .note-box {
-  max-width: 85ch;
+  /* max-width removed for wider reading area */
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
 .callout {
-  max-width: 85ch;
-  font-size: 17px;
+  /* max-width removed for wider reading area */
+  font-size: 19px;
   line-height: 1.7;
 }
 
