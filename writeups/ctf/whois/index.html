@@ -11,62 +11,60 @@
   <link rel="stylesheet" href="/assets/css/premium.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="wrap topbar-inner">
-      <a class="brand" href="/">ThaiNgoc :~$</a>
-      <nav class="nav">
-        <a href="/">Home</a>
-        <a class="active" href="/writeups/">Writeups</a>
-        <a href="/projects/">Projects</a>
-        <a href="/achievements/">Achievements</a>
-        <a href="/contact/">Contact</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="page">
-    <div class="wrap writeup-article">
-      <section class="hero">
-        <div class="hero-copy glass">
-          <div class="eyebrow">CTF Writeup • Web Exploitation</div>
-          <h1>WHO IS WHOIS</h1>
-          <p class="lead">
-            Flag: NHNC{wH0is_t0_R3d1s_s5Rf_Tq9x_Z7mP_a0bdff8f40744e2e8c2104a7ab74ffe6}
-          </p>
-          <div class="meta-row">
-            <span class="pill">Category: Web</span>
-            <span class="pill">Technique: SSRF to SSTI via Redis</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="card glass">
-<p>Flag: NHNC{wH0is_t0_R3d1s_s5Rf_Tq9x_Z7mP_a0bdff8f40744e2e8c2104a7ab74ffe6}</p>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <main class="page whois-page"><div class="wrap article-layout">
+    <aside class="toc">
+      <div class="toc-title">On this page</div>
+      <a href="#intro">Initial Testing</a>
+      <a href="#ssrf">Discovering SSRF</a>
+      <a href="#redis">Exploiting Redis</a>
+      <a href="#bypass">WAF Bypass (Smuggling)</a>
+      <a href="#exploit">Final Exploit</a>
+    </aside>
+    <article class="article-card glass">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / CTF / WHO IS WHOIS</div>
+      <div class="eyebrow">CTF Writeup · Web Exploitation</div>
+      <h1 class="page-title">WHO IS WHOIS</h1>
+      <p class="lead">Exploiting an SSRF vulnerability to smuggle an SSTI payload into a backend Redis instance via BITOP XOR, ultimately achieving RCE.</p>
+      
+      <div class="info-card">
+        <div class="item"><div class="label">Challenge</div><div class="value">WHOIS</div></div>
+        <div class="item"><div class="label">Category</div><div class="value">Web Exploitation</div></div>
+        <div class="item"><div class="label">Platform</div><div class="value">CTF</div></div>
+        <div class="item"><div class="label">Technique</div><div class="value accent">SSRF to SSTI</div></div>
+        <div class="item"><div class="label">Tags</div><div class="value">Redis, BITOP XOR</div></div>
+      </div>
+      
+      <div class="callout"><strong>Flag:</strong> NHNC{wH0is_t0_R3d1s_s5Rf_Tq9x_Z7mP_a0bdff8f40744e2e8c2104a7ab74ffe6}</div>
+      
+      <h2 id="intro">Initial Testing (Command Injection)</h2>
 <p>Mình nhập thử google.com.Web in ra thông tin đăng ký tên miền của Google.Backend chắc chắn đang gọi lệnh hệ thống whois. Thử ngay Command Injection</p>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image1.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 1</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image1.png" alt="Screenshot 1"></figure>
 <p>Vì ứng dụng rõ ràng đang gọi công cụ "whois" của hệ điều hành dưới nền (vd: os.system("whois " + input)), ý tưởng kinh điển nhất là Command Injection. Tôi thử nối thêm lệnh bằng dấu chấm phẩy: google.com; id và google.com \`whoami\`</p>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image2.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 2</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image2.png" alt="Screenshot 2"></figure>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image3.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 3</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image3.png" alt="Screenshot 3"></figure>
 <p>Vậy là có WAF chặn hết các kí tự nhạy cảm, vậy là hướng này có lẽ không khai thác được nên tôi tìm con đường khác</p>
+<h2 id="ssrf">Discovering SSRF</h2>
 <p>Khi bị chặn bởi WAF, tôi không đâm đầu vào nó nữa, tôi đi tìm đường khác.Tôi mở Terminal gõ man whois để đọc tài liệu gốc.</p>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image4.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 4</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image4.png" alt="Screenshot 4"></figure>
 <p>Bản chất lệnh whois không phải là một công cụ phân tích cục bộ. Khi tôi gõ whois google.com, công cụ này sẽ mở một kết nối TCP đến một máy chủ Whois quốc tế.Tôi sẽ lợi dụng -h và -p để chuyển hướng kết nối tcp đó.Nên tôi nghĩ đến sẽ khai thác theo hướng SSRF</p>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image5.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 5</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image5.png" alt="Screenshot 5"></figure>
 <p>Máy chủ này chắc chắn đang chạy một database tên là Redis ở dưới nền để làm bộ đệm.Tôi sẽ thử theo hướng cho máy chủ Web tự kết nối vào chính nó 127.0.0.1 ở cổng 6379. Cổng 6379 là cổng mặc định của Redis.Vì máy chủ web tin tưởng chính nó nên Redis sẽ không đòi hỏi mật khẩu.Nếu như test thành công thì tôi sẽ lợi dụng nó</p>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image6.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 6</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image6.png" alt="Screenshot 6"></figure>
 <p>SSRF đang hoạt động.</p>
 <p>Soi mã nguồn HTML và phát hiện form được gửi qua phương thức POST tới endpoint /api/whois.</p>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image7.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 7</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image7.png" alt="Screenshot 7"></figure>
+<h2 id="redis">Exploiting Redis (SSTI)</h2>
 <p>Tôi có thể điều khiển Redis, nhưng cần tìm cách đọc file từ Redis.</p>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image8.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 8</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image8.png" alt="Screenshot 8"></figure>
 <p>Web đang dùng Template Engine (Jinja2) để đọc các file .tpl và render ra HTML.</p>
 <p>Nếu mình đổi style thành ../db/dump (này tên file backup mặc định của Redis), web có thể đọc chính cái database Redis lên và render, tên file mặc định thường là dump.rdb</p>
 <p>Tôi sẽ lợi dụng SSRF để gửi mã độc SSTI vào Redis, sau đó ra lệnh cho Redis lưu file đó thành dump.tpl và đặt vào thư mục web, thì khi ta truy cập /render?tpl=../db/dump, mã độc sẽ được kích hoạt</p>
@@ -75,7 +73,8 @@
 <p>Mã độc SSTI để đọc flag: {{ config.__class__.__init__.__globals__['os'].popen('/flag').read() }}</p>
 <p>Test thử</p>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image9.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 9</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image9.png" alt="Screenshot 9"></figure>
+<h2 id="bypass">WAF Bypass (Smuggling via BITOP XOR)</h2>
 <p>WAF cấm tất cả các kí tự quan trọng để mình sử dụng lỗi SSTI</p>
 <p>Lúc này tôi nhớ đến một khái niệm gọi là Smuggling,kiểu như mình muốn mang chất nổ qua cổng an ninh nhưng máy quét sẽ quét được và cấm nó.Nhưng nếu mình tách nó ra thành các chất vô hại như muối,nước,.. rồi khi đi qua cổng mình mới chế tạo thuốc nổ thì mình sẽ vượt qua được cổng an ninh.</p>
 <p>Sau khi tìm kiếm Redis thì mình thấy có lệnh BITOP XOR.Nó sẽ lấy a xor với b và sinh ra c.Nhưng payload của tôi khá dài nên tôi phải viết script python để nó tự xor cái payload đó thành a với b.</p>
@@ -95,7 +94,8 @@ print("S1="+s1)
 print("S2="+s2)
 </code></pre>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image10.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 10</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image10.png" alt="Screenshot 10"></figure>
+<h2 id="exploit">Final Exploit</h2>
 <p>Giờ ta đã có a với b, xong rồi bây giờ bắt đầu lấy flag.Tôi sẽ gửi lệnh FLUSHDB để xóa sạch rác trong RAM Redis.Gửi S1 và S2 qua bộ lọc WAF vào Redis bằng lệnh SET k1 và SET k2. Vì S1 và S2 không chứa ký tự cấm, WAF sẽ không nhận ra.Sau đó tôi gọi lệnh BITOP XOR pwn k1 k2.Lúc này nó sẽ ghép lại thành payload.Sau đó tôi dùng lệnh SAVE để nén toàn bộ RAM thành file dump.tpl trên ổ cứng.Rồi tôi truy cập url /render?tpl=../db/dump sau đó Jinja2 sẽ đọc dump.tpl sau đó nó sẽ quét thấy lệnh os.popen('/flag') rồi sẽ in ra flag</p>
 
 <pre><code>import urllib.request, urllib.parse, time
@@ -120,18 +120,12 @@ req = urllib.request.Request(f"{BASE}/render?{params}")
 print(urllib.request.urlopen(req).read().decode(errors='replace'))
 </code></pre>
 
-<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image11.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<figure class="evidence-shot"><figcaption><span>Screenshot 11</span><span>Evidence</span></figcaption><img src="/assets/media/writeups/ctf/whois/image11.png" alt="Screenshot 11"></figure>
 
-      </section>
-    </div>
+    </article>
+  </div>
   </main>
-
-  <footer class="footer">
-    <div class="wrap text-center">
-      <p class="small text-muted">© 2026 Nguyen Thai Ngoc. Built for Security & Forensics Portfolios.</p>
-    </div>
-  </footer>
-
+  <footer class="footer"><div class="wrap text-center"><p class="small text-muted">© 2026 Nguyen Thai Ngoc. Built for Security & Forensics Portfolios.</p></div></footer>
   <script src="/assets/js/main.js"></script>
   <script src="/assets/js/premium.js"></script>
 </body>
