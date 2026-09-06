@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Nguyen Thai Ngoc — Security Portfolio</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">ThaiNgoc :~$</a>
+
+      <nav class="nav">
+        <a class="active" href="/">Home</a>
+        <a href="/writeups/">Writeups</a>
+        <a href="/achievements/">Achievements</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <section class="hero">
+        <div class="hero-copy glass">
+          <div class="eyebrow">SOC Analyst & Threat Hunter in training</div>
+
+          <h1>Nguyen Thai Ngoc<br>Security Portfolio</h1>
+
+          <p class="lead">
+            Second-year Information Security student at KMA, focused on SOC analysis,
+            blue team labs, reverse engineering, malware analysis,
+            and practical investigation workflows.
+          </p>
+
+          <div class="skill-cloud">
+            <span class="skill-pill"><span class="dot"></span> Network Forensics</span>
+            <span class="skill-pill"><span class="dot"></span> Malware Analysis</span>
+            <span class="skill-pill"><span class="dot"></span> Reverse Engineering</span>
+            <span class="skill-pill"><span class="dot"></span> Incident Response</span>
+          </div>
+
+          <div class="terminal-container">
+            <div class="terminal-header">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+              <span class="term-title">guest@thaingoc: ~</span>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+              <div class="term-line"><span class="prompt">guest@thaingoc:~$</span> <span class="typing">./sysinfo.sh</span></div>
+              <div class="term-output">Initializing SOC Dashboard...<br>Status: Secure. All systems operational.<br><br><span class="muted">Type <span class="prompt">help</span> to view available commands.</span></div>
+              <div class="term-line"><span class="prompt">guest@thaingoc:~$</span> <input type="text" id="term-input" autocomplete="off" spellcheck="false" autofocus></div>
+            </div>
+          </div>
+
+          <div class="cta-row">
+            <a class="btn primary" href="/writeups/">View Writeups</a>
+            <a class="btn" href="/achievements/">Achievements</a>
+            <a class="btn" href="/contact/">Contact</a>
+          </div>
+        </div>
+
+        <aside class="profile-card glass">
+          <div class="profile-mini">
+            <div class="avatar-wrapper">
+              <img class="avatar" src="/assets/media/avatar.png" alt="avatar">
+            </div>
+
+            <div>
+              <h2>Thai Ngoc</h2>
+              <p>Information Security Student • KMA</p>
+            </div>
+          </div>
+
+          <div class="profile-links">
+            <a class="icon-pill" href="https://cyberdefenders.org/p/tngoc/" target="_blank" rel="noopener noreferrer" aria-label="CyberDefenders profile">CD</a>
+            <a class="icon-pill" href="https://www.linkedin.com/in/ngoc-thai-8343023b4/?skipRedirect=true" target="_blank">in</a>
+          </div>
+
+          <p class="small">
+            SOC Analyst & Threat Hunter in training. I document labs,
+            malware notes and defensive investigations.
+          </p>
+
+          <div class="quote">
+            “Protect your data in peace, or pay for it in the storm.”
+          </div>
+        </aside>
+      </section>
+
+      
+      <div class="section-divider"></div>
+
+      <section class="section">
+        <div class="section-head">
+          <h2 class="section-title">Current Highlights</h2>
+          <p class="section-desc">
+            A focused snapshot of my latest published work and current cybersecurity direction.
+            New writeups will be added here after they are completed and polished.
+          </p>
+        </div>
+
+        <div class="grid">
+          <a class="card" href="/writeups/soc/web-investigation/">
+            <div class="card-top">
+              <span class="badge">Latest</span>
+              <span class="badge secondary">CyberDefenders</span>
+            </div>
+
+            <h3>Web Investigation Lab</h3>
+
+            <p>
+              Network forensics investigation of sqlmap SQL Injection,
+              database disclosure, admin credential compromise and malicious PHP upload.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Wireshark</span>
+              <span class="tag">SQLi</span>
+              <span class="tag">Web Shell</span>
+            </div>
+          </a>
+
+          <a class="card" href="/writeups/soc/compromised-wordpress-log-analysis/">
+            <div class="card-top">
+              <span class="badge">Latest</span>
+              <span class="badge secondary">SOC</span>
+            </div>
+
+            <h3>BTLO: Compromised WordPress</h3>
+
+            <p>
+              Apache access log investigation covering WordPress compromise,
+              vulnerable plugins, web shell activity and attacker timeline.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Log Analysis</span>
+              <span class="tag">WordPress</span>
+              <span class="tag">Web Shell</span>
+            </div>
+          </a>
+
+          <a class="card" href="/writeups/soc/network-analysis/">
+            <div class="card-top">
+              <span class="badge">Latest</span>
+              <span class="badge secondary">BTLO</span>
+            </div>
+
+            <h3>Network Analysis – Malware Compromise</h3>
+
+            <p>
+              PCAP investigation of a macro-based compromise, Ursnif follow-up malware,
+              Dridex C2 traffic, malicious HTTP downloads and IOC correlation.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Wireshark</span>
+              <span class="tag">Dridex</span>
+              <span class="tag">PCAP</span>
+            </div>
+          </a>
+
+          <a class="card" href="/writeups/soc/hawkeye/">
+            <div class="card-top">
+              <span class="badge">Latest</span>
+              <span class="badge secondary">CyberDefenders</span>
+            </div>
+
+            <h3>HawkEye Keylogger Exfiltration</h3>
+
+            <p>
+              Network forensics writeup reconstructing an invoice-themed HawkEye infection,
+              malicious EXE delivery, Base64-decoded SMTP logs and credential exfiltration.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Wireshark</span>
+              <span class="tag">HawkEye</span>
+              <span class="tag">SMTP</span>
+            </div>
+          </a>
+
+          <a class="card" href="/contact/">
+            <div class="card-top">
+              <span class="badge">Contact</span>
+              <span class="badge secondary">Open</span>
+            </div>
+
+            <h3>Let’s Connect</h3>
+
+            <p>
+              Open to learning opportunities, SOC discussions
+              and cybersecurity portfolio feedback.
+            </p>
+
+            <div class="tags">
+              <span class="tag">Email</span>
+              <span class="tag">LinkedIn</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="section grid two">
+        <a class="card" href="/writeups/">
+          <div class="card-top">
+            <span class="badge">Explore</span>
+            <span class="badge secondary">Writeups</span>
+          </div>
+
+          <h3>Browse my cybersecurity writeups</h3>
+
+          <p>
+            View the full writeup library with SOC labs,
+            reverse engineering notes, malware analysis practice and investigation reports.
+          </p>
+
+          <div class="tags">
+            <span class="tag">SOC</span>
+            <span class="tag">Reverse</span>
+            <span class="tag">DFIR</span>
+          </div>
+        </a>
+
+        <a class="card" href="/achievements/">
+          <div class="card-top">
+            <span class="badge">Progress</span>
+            <span class="badge secondary">Achievements</span>
+          </div>
+
+          <h3>Certificates and learning milestones</h3>
+
+          <p>
+            Track my learning progress, certificates,
+            rankings and cybersecurity milestones.
+          </p>
+
+          <div class="tags">
+            <span class="tag">Certificates</span>
+            <span class="tag">SOC</span>
+            <span class="tag">Learning</span>
+          </div>
+        </a>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer reveal-item">
+    <div class="wrap">
+      <p>© Nguyen Thai Ngoc · Security Portfolio</p>
+      <div class="footer-links">
+        <a href="https://github.com/tngoc1810" target="_blank">GitHub</a>
+        <a href="/contact/">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/premium.js"></script>
+</body>
+</html>

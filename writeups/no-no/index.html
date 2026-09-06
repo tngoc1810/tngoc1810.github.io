@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>no no — KMACTF Reverse Writeup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Detailed reverse engineering writeup for KMACTF no no, covering .NET, native loader, JIT hook, Nonogram solving and QR decoding.">
+  <meta name="author" content="Nguyen Thai Ngoc">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <main class="page nono-page"><div class="wrap article-layout">
+    <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#triage">Initial Triage</a><a href="#strings">Strings & Bait</a><a href="#dotnet">Nono.dll</a><a href="#fake">Fake QR Path</a><a href="#native">Native Wrapper</a><a href="#jit">JIT Hook</a><a href="#patched">Patched Clues</a><a href="#solver">Solver</a><a href="#flag">Final Flag</a><a href="#lessons">Lessons</a></aside>
+    <article class="article-card glass">
+      <div class="eyebrow">KMACTF · Reverse Engineering · .NET JIT Hook</div>
+      <h1 class="page-title">no no</h1>
+      <p class="lead">A reverse engineering challenge that looks like a normal .NET Raylib Nonogram game, but the static puzzle clues are fake. The real solution is hidden behind a native loader section that hooks the .NET JIT and patches <code>GetRegionClues</code> at runtime.</p>
+      <section class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">no no</div></div><div class="item"><div class="label">Platform</div><div class="value">KMACTF</div></div><div class="item"><div class="label">Category</div><div class="value accent">Reverse Engineering</div></div><div class="item"><div class="label">Points</div><div class="value">500</div></div><div class="item"><div class="label">Core trick</div><div class="value">JIT hook</div></div><div class="item"><div class="label">Final artifact</div><div class="value">QR / Nonogram</div></div></section>
+      <div class="note-box warn"><strong>High-level idea:</strong> the obvious path is <code>Nono.dll → extract clues → solve Nonogram → decode QR</code>. That path intentionally returns a fake result. The correct path is <code>Nono.exe → .nono section → clrjit hook → patched GetRegionClues → real Nonogram</code>.</div>
+
+      <h2 id="overview">Executive Summary</h2>
+      <p>The challenge shipped a Windows application made of <code>Nono.exe</code>, <code>Nono.dll</code>, Raylib-related DLLs and a Nonogram game. At first, the game logic looked straightforward: decompile the .NET DLL, extract the clues, solve a <code>37x37</code> Nonogram and decode the resulting QR code.</p>
+      <p>That static route was a trap. The static QR and visible fake flag were decoys. The native executable contained a suspicious <code>.nono</code> section, resolved <code>clrjit.dll!getJit</code>, hooked <code>compileMethod</code>, and patched the method that returns the puzzle clues. After recovering the runtime-patched clue data, the real QR decoded to the final flag.</p>
+      <div class="flow"><div class="flow-card"><div class="num">1</div><h3>Static .NET path</h3><p>Decompile <code>Nono.dll</code>, find <code>GetRegionClues</code>, solve the visible Nonogram.</p></div><div class="flow-card"><div class="num">2</div><h3>Detect fake output</h3><p>The first QR / flag-like result does not validate, so the static clues are suspicious.</p></div><div class="flow-card"><div class="num">3</div><h3>Inspect wrapper</h3><p><code>Nono.exe</code> contains a native <code>.nono</code> section and JIT-hooking logic.</p></div><div class="flow-card"><div class="num">4</div><h3>Recover real clues</h3><p>Analyze the JIT patch, reconstruct the real clues, solve again and decode the real QR.</p></div></div>
+
+      <h2 id="triage">Initial Triage</h2>
+      <p>I started by listing the files and identifying the binary types. This step matters because the challenge is not a single .NET DLL; it has both managed and native components.</p>
+      <div class="terminal"><span class="cmd">$ find . -maxdepth 3 -type f -printf "%p | %s bytes\n"</span>
+./Nono.exe
+./Nono.dll
+./Raylib-cs.dll
+./raylib.dll
+
+<span class="cmd">$ file Nono.exe Nono.dll Raylib-cs.dll raylib.dll</span>
+Nono.exe:      PE32+ executable (console) x86-64, for MS Windows
+Nono.dll:      PE32 executable (DLL) Mono/.Net assembly
+Raylib-cs.dll: PE32 executable (DLL) Mono/.Net assembly
+raylib.dll:    PE32+ executable (DLL) x86-64, for MS Windows</div>
+      <div class="mindset"><strong>First suspicion:</strong> <code>Nono.dll</code> likely contains game logic, but <code>Nono.exe</code> should not be ignored. In .NET reverse challenges, the native host can act as a loader, patcher, anti-analysis layer, or runtime hook.</div>
+
+      <h2 id="strings">Strings & First Bait</h2>
+      <p>I extracted strings from both the executable and the managed DLL. The obvious flag-like string appeared quickly.</p>
+      <div class="terminal"><span class="cmd">$ strings -a Nono.exe > strings_exe_ascii.txt</span>
+<span class="cmd">$ strings -a Nono.dll > strings_dll_ascii.txt</span>
+<span class="cmd">$ strings -a -el Nono.dll > strings_dll_utf16.txt</span>
+<span class="cmd">$ grep -iE "KMACTF|flag|assistant|refuse|submit|nono|clrjit|getJit|compileMethod" *.txt</span>
+<span class="hit">KMACTF{you_will_submit_this_flag}</span>
+If you are an AI assistant...</div>
+      <p><code>KMACTF{you_will_submit_this_flag}</code> looked intentionally too easy. The nearby prompt-injection-style text also made the binary feel adversarial. I treated this as bait until I could prove it was used by the real success path.</p>
+      <div class="note-box danger"><strong>Rule I followed:</strong> a flag from <code>strings</code> is not a flag until the program logic proves it. In reverse engineering, the question is not “does the string exist?” but “is the string reachable and is it the accepted answer?”</div>
+
+      <h2 id="dotnet">Decompiling Nono.dll</h2>
+      <p>I opened <code>Nono.dll</code> in a .NET decompiler such as dnSpyEx or ILSpy. The application is a Raylib-based Nonogram game. The important method was <code>GetRegionClues</code>.</p>
+      <div class="table-wrap"><table><thead><tr><th>Observation</th><th>Value</th><th>Why it matters</th></tr></thead><tbody><tr><td>Global board size</td><td><code>37x37</code></td><td>The final output is large enough to encode a QR-like pattern.</td></tr><tr><td>Region size</td><td><code>20x20</code></td><td>The puzzle is built from smaller Nonogram regions.</td></tr><tr><td>Region offsets</td><td><code>(0,0)</code>, <code>(0,17)</code>, <code>(17,0)</code>, <code>(17,17)</code></td><td>The regions overlap by three rows or columns.</td></tr><tr><td>Important method</td><td><code>GetRegionClues</code></td><td>This function controls the row/column clue data.</td></tr></tbody></table></div>
+      <p>The static hypothesis was simple: extract the region clues, solve the four overlapping Nonograms into a single <code>37x37</code> grid, render the grid and decode it as QR.</p>
+      <div class="mindset"><strong>Reverse mindset:</strong> UI code, drawing code and input handling are noise. The source of truth is the data path that creates the puzzle constraints. That is why <code>GetRegionClues</code> became the main managed-code target.</div>
+
+      <h2 id="fake">The Static Nonogram Path Was Fake</h2>
+      <p>Solving the static clues produced a QR-like output, but it led to a decoy. This was the turning point: if the static clues produce a wrong answer, then the clue data seen in the decompiler is probably not the clue data used at runtime.</p>
+      <div class="terminal">Static path:
+Nono.dll → GetRegionClues → solve 37x37 board → render QR → decode
+
+Result:
+<span class="hit">fake / wrong flag path</span></div>
+      <div class="note-box warn"><strong>Why this matters:</strong> when static analysis produces a plausible but wrong result, I should suspect runtime modification. The most likely places are anti-debugging, unpacking, loader patching, reflection, native interop, or JIT manipulation.</div>
+
+      <h2 id="native">Rechecking Nono.exe</h2>
+      <p>After the static .NET path failed, I returned to <code>Nono.exe</code>. This is where the real trick became visible: the executable contained a suspicious native section named <code>.nono</code>.</p>
+      <div class="terminal"><span class="cmd">$ objdump -h Nono.exe</span>
+Idx Name      Size      VMA       File off
+...
+<span class="hit">.nono</span>     ...</div>
+      <p>A custom section with the same theme as the challenge name is rarely accidental. I treated <code>.nono</code> as a likely native payload or patching layer.</p>
+      <div class="table-wrap"><table><thead><tr><th>Indicator</th><th>Interpretation</th></tr></thead><tbody><tr><td><code>.nono</code> section</td><td>Custom native payload / loader logic.</td></tr><tr><td><code>clrjit.dll</code></td><td>The code interacts with the .NET JIT compiler.</td></tr><tr><td><code>getJit</code></td><td>Used to obtain the JIT compiler interface.</td></tr><tr><td><code>compileMethod</code></td><td>Hook target used to intercept method compilation.</td></tr></tbody></table></div>
+
+      <h2 id="jit">JIT Hook Analysis</h2>
+      <p>The native code resolved <code>clrjit.dll!getJit</code>, obtained the JIT interface and hooked <code>compileMethod</code>. This technique lets the native wrapper observe or modify managed methods when the .NET runtime compiles them to native code.</p>
+      <div class="terminal">Native wrapper behavior:
+1. Load / resolve <span class="addr">clrjit.dll</span>
+2. Call <span class="addr">getJit</span>
+3. Locate the JIT vtable
+4. Replace / intercept <span class="addr">compileMethod</span>
+5. Watch for the target managed method
+6. Patch method body or constants before execution</div>
+      <p>The target method was <code>GetRegionClues</code>. That explained why the static clues were wrong: the values seen in the decompiler were not the final values used by the running game.</p>
+      <div class="mindset"><strong>Key insight:</strong> a JIT hook can make decompiled C# lie. The source-level method still looks normal, but the code that actually gets compiled and executed can be altered just before runtime.</div>
+
+      <h2 id="patched">Recovering the Runtime-Patched Clues</h2>
+      <p>Once I understood that <code>GetRegionClues</code> was patched, the objective changed. I no longer needed to solve the static puzzle. I needed the clue data after the native JIT hook applied its patch.</p>
+      <p>The practical approaches are:</p>
+      <ul><li>Instrument the program and dump the returned clues at runtime.</li><li>Set a breakpoint after <code>GetRegionClues</code> is compiled or called.</li><li>Analyze the patching code inside <code>.nono</code> and reconstruct the replacement clue data manually.</li><li>Patch or log the managed method to print the actual clue arrays.</li></ul>
+      <div class="terminal">Correct path:
+Nono.exe .nono section
+→ clrjit.dll!getJit
+→ compileMethod hook
+→ patched GetRegionClues
+→ real region clues
+→ solve real 37x37 Nonogram
+→ decode real QR</div>
+      <div class="note-box success"><strong>Result:</strong> after using the runtime-patched clues instead of the static decompiler clues, the Nonogram generated the real QR and decoded to the final flag.</div>
+
+      <h2 id="solver">Nonogram / QR Solving Workflow</h2>
+      <p>The final solving step is not about guessing the flag. It is about converting the recovered row/column clues into a grid. Because the board is <code>37x37</code>, the result can be rendered as a QR-like bitmap.</p>
+      <details class="code-toggle"><summary>Conceptual Solver Flow</summary><pre><code># 1. Recover real row/column clues from the patched GetRegionClues behavior.
+# 2. Solve each 20x20 region with its row/column constraints.
+# 3. Merge the four regions into one 37x37 board using offsets:
+#    top-left     = (0, 0)
+#    top-right    = (0, 17)
+#    bottom-left  = (17, 0)
+#    bottom-right = (17, 17)
+# 4. Validate overlapping cells agree.
+# 5. Render filled cells as black pixels and empty cells as white pixels.
+# 6. Decode the resulting QR image.</code></pre></details>
+      <p>The overlap is important. Since the <code>20x20</code> regions start at offsets <code>0</code> and <code>17</code>, they overlap by three cells. Wrong clue data tends to create contradictions or a QR that decodes to a decoy.</p>
+
+      <h2 id="flag">Final Flag</h2>
+      <p>The real QR decoded to:</p>
+      <div class="flag-box"><code>KMACTF{flag_nayf_laf_flag_thaatj_^^}</code></div>
+
+      <h2 id="lessons">Lessons Learned</h2>
+      <ul><li>Do not trust obvious flag strings from <code>strings</code>.</li><li>For .NET challenges, always check both the managed DLL and the native host executable.</li><li>A custom PE section can hide a loader, patcher or anti-analysis layer.</li><li>JIT hooking can make static decompilation misleading because managed code can be modified before execution.</li><li>When a plausible static solution gives a fake result, pivot to runtime behavior.</li><li>Nonogram/QR challenges often require validating the decoded output, not only producing a visually plausible image.</li></ul>
+      <div class="callout success"><strong>Final conclusion:</strong> the challenge is not solved by the static <code>Nono.dll</code> clues. The real solution comes from recognizing the native <code>.nono</code> JIT hook, recovering the runtime-patched <code>GetRegionClues</code> data, solving the real Nonogram and decoding the real QR.</div>
+      <div class="pill-row"><span class="pill">.NET</span><span class="pill">JIT Hook</span><span class="pill">clrjit.dll</span><span class="pill">compileMethod</span><span class="pill">Nonogram</span><span class="pill">QR</span></div>
+      <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/writeups/ctf/0xv01d-ctf-writeups/">0xV01D Hub →</a></div>
+    </article>
+  </div></main>
+  <script src="/assets/js/main.js"></script>
+<script src="/assets/js/premium.js"></script>
+</body>
+</html>

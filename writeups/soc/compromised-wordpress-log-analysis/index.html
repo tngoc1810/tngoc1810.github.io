@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>BTLO: Compromised WordPress — Nguyen Thai Ngoc</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <main class="page wp-wordpress-page"><div class="wrap article-layout">
+    <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#initial">Initial Log Review</a><a href="#sources">Source IPs</a><a href="#user-agents">User-Agents</a><a href="#post">POST Requests</a><a href="#webshell">Web Shell</a><a href="#plugins">Plugin CVEs</a><a href="#timeline">Timeline</a><a href="#iocs">IOCs</a><a href="#answers">Answers</a><a href="#lessons">Lessons</a></aside>
+    <article class="article-card glass">
+      <div class="eyebrow">BTLO Writeup · SOC / Apache Log Analysis</div>
+      <h1 class="page-title">Compromised WordPress</h1>
+      <p class="lead">A log-based investigation of a compromised WordPress site. I followed the Apache access log from normal traffic to reconnaissance, plugin exploitation, web shell upload and confirmed access to <code>fr34k.php</code>.</p>
+      <div class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">Compromised WordPress</div></div><div class="item"><div class="label">Platform</div><div class="value">Blue Team Labs Online</div></div><div class="item"><div class="label">Category</div><div class="value accent">SOC / Log Analysis</div></div><div class="item"><div class="label">Difficulty</div><div class="value">Medium</div></div><div class="item"><div class="label">Artifact</div><div class="value">Apache access.log</div></div><div class="item"><div class="label">Focus</div><div class="value">WordPress plugin compromise</div></div></div>
+      <div class="callout"><strong>Investigation goal:</strong> reconstruct how the attacker reached the WordPress site, identify attacker tooling, find the vulnerable plugin, locate the uploaded PHP web shell and explain the final attack chain.</div>
+
+      <h2 id="overview">Challenge Overview</h2>
+      <p>The scenario starts with a compromised WordPress site. Since the artifact is an Apache access log, I cannot see process execution or filesystem contents directly. I have to infer the attack path from HTTP methods, status codes, request URIs, source IPs and User-Agent strings.</p>
+      <div class="mindset"><strong>What I thought first:</strong> for web logs, the fastest path is usually not reading every line. I want to answer three questions first: who was noisy, what endpoints were touched, and which requests succeeded with <code>200</code> or another success-like status code.</div>
+
+      <h2 id="initial">Initial Log Review</h2>
+      <p>I started with the beginning and end of the log. The beginning gives a baseline: normal assets, normal browsing and expected WordPress paths. The end often shows late-stage activity or the final successful artifact.</p>
+      <div class="terminal"><span class="cmd">$ head -n 10 access.log</span>
+# First entries show normal WordPress traffic, static resources and the local gateway/proxy address.</div>
+      <div class="note-box"><strong>Early observations</strong><ul><li>Activity starts at <code>12/Jan/2021:15:52:41 +0000</code>.</li><li><code>172.21.0.1</code> appears heavily, likely because of an internal Docker bridge, reverse proxy or lab gateway.</li><li>The early User-Agent looks like Linux Firefox 78.</li><li>Initial requests include normal WordPress CSS, JavaScript and PHP resources.</li></ul></div>
+      <div class="terminal"><span class="cmd">$ tail -n 20 access.log</span>
+# Tail entries show probing of plugin/theme paths and a successful request to /YouShouldSeeThis.txt.</div>
+      <p>The tail showed probing of paths related to <code>contact-form-7</code>, <code>simple-file-list</code> and <code>kadence</code>. I also noticed a successful request to <code>/YouShouldSeeThis.txt</code>. The name looked like a lab marker or post-compromise clue, so I kept it in mind but did not treat it as the initial access vector by itself.</p>
+
+      <h2 id="sources">Source IP Analysis</h2>
+      <p>Next, I counted source IPs. This helps separate normal internal proxy traffic from external scanning and exploitation attempts.</p>
+      <div class="terminal"><span class="cmd">$ awk '{print $1}' access.log | sort | uniq -c | sort -nr</span></div>
+      <p>The external IP <code>119.241.22.121</code> stood out as the most active non-internal source. Later, <code>103.69.55.212</code> became important because it interacted with the web shell.</p>
+      <div class="mindset"><strong>How I treated the IPs:</strong> request volume alone is not proof of compromise. I used volume only as a pivot. The real proof came from successful POST requests, plugin upload paths and shell access.</div>
+
+      <h2 id="user-agents">User-Agent Analysis</h2>
+      <p>User-Agent strings showed a mix of browser spoofing and automated tools. This helped me understand attacker behavior: reconnaissance, scanning and exploitation were likely automated.</p>
+      <div class="terminal"><span class="cmd">$ awk -F'"' '{print $6}' access.log | sort | uniq -c | sort -nr</span>
+<span class="ua">WPScan v3.8.10</span>
+<span class="ua">sqlmap/1.4.11</span>
+<span class="ua">python-requests/2.24.0</span>
+Mozilla/5.0 ... iPhone OS 5_1 ...
+Opera/9.00 (Windows NT 5.1)</div>
+      <div class="note-box"><strong>Why this mattered</strong><ul><li><code>WPScan</code> strongly suggests WordPress vulnerability enumeration.</li><li><code>sqlmap</code> suggests SQL injection testing.</li><li><code>python-requests/2.24.0</code> often appears in custom exploit scripts or proof-of-concept tooling.</li><li>Old browser User-Agents can be spoofed to blend in or test access rules.</li></ul></div>
+
+      <h2 id="post">Successful POST Requests</h2>
+      <p>For web compromise cases, I pay close attention to successful <code>POST</code> requests. GET requests can be scanning or browsing, but POST requests often carry uploads, login attempts or exploit payloads.</p>
+      <div class="terminal"><span class="cmd">$ grep "POST" access.log | grep -v "403"</span>
+POST /wp-admin/update.php?action=upload-plugin HTTP/1.1" <span class="ok">200</span> 6434
+POST /wp-admin/admin-ajax.php HTTP/1.1" <span class="ok">200</span> ...</div>
+      <p>The successful POST to <code>/wp-admin/update.php?action=upload-plugin</code> looked important because WordPress plugin upload can be abused if the attacker has admin access or can bypass upload controls. However, the stronger confirmed web shell path appeared in the Simple File List upload workflow.</p>
+      <div class="mindset"><strong>What I checked here:</strong> I did not want to call every POST malicious. I looked for POST requests with success status codes, unusual upload endpoints and later access to executable PHP files.</div>
+
+      <h2 id="webshell">Web Shell Discovery</h2>
+      <p>I grouped successful POST requests by source IP and target URI. This exposed repeated POST requests to a PHP file inside the WordPress uploads path.</p>
+      <div class="terminal"><span class="cmd">$ grep "POST" access.log | grep -v "403" | awk '{print $1 " " $7}' | cut -d'?' -f1 | sort | uniq -c | sort -nr</span>
+9 <span class="ip">103.69.55.212</span> <span class="hit">/wp-content/uploads/simple-file-list/fr34k.php</span></div>
+      <div class="danger-note note-box"><strong>Confirmed web shell indicator</strong><ul><li>Source IP: <code>103.69.55.212</code></li><li>Web shell path: <code>/wp-content/uploads/simple-file-list/fr34k.php</code></li><li>Observed count: <code>9</code> POST requests</li><li>Successful response: <code>200 OK</code></li></ul></div>
+      <p>The path is highly suspicious. WordPress <code>/uploads/</code> should normally contain media files, not executable PHP. The filename <code>fr34k.php</code> also looks like a manually chosen shell name rather than a normal plugin asset.</p>
+      <div class="terminal"><span class="cmd">$ grep "103.69.55.212" access.log</span>
+# At 06:27:04 UTC, the web shell returned 200 OK with a 1295-byte response.</div>
+      <p>The <code>1295-byte</code> response was useful because it suggested the shell returned content or interface output, not only a blank hit. In log analysis, response size can be a clue when body content is unavailable.</p>
+
+      <h2 id="plugins">Vulnerable Plugin Analysis</h2>
+      <h3>Simple File List — CVE-2020-8380</h3>
+      <p>The confirmed entry path involved Simple File List. The attacker targeted the plugin upload engine and dropped <code>fr34k.php</code> into the uploads directory.</p>
+      <div class="terminal"><span class="cmd">$ grep "simple-file-list" access.log | grep "POST" | grep -v "403"</span>
+POST /wp-content/plugins/simple-file-list/lib/ee-upload-engine.php ... <span class="ok">200</span></div>
+      <ol><li><code>119.241.22.121</code> sent a POST request to the Simple File List upload engine.</li><li>The User-Agent <code>python-requests/2.24.0</code> suggested an automated Python exploit.</li><li>The uploaded PHP file appeared under <code>/wp-content/uploads/simple-file-list/</code>.</li><li><code>103.69.55.212</code> accessed <code>fr34k.php</code> shortly afterward.</li></ol>
+      <div class="mindset"><strong>Why I called this the entry point:</strong> it connects an upload-capable vulnerable plugin, a successful POST, an executable PHP file in uploads and later shell interaction. That chain is stronger than only seeing plugin reconnaissance.</div>
+      <h3>Contact Form 7 — CVE-2020-35489</h3>
+      <p>Contact Form 7 was also targeted through the REST API feedback endpoint:</p>
+      <div class="terminal">POST /wp-json/contact-form-7/v1/contact-forms/7/feedback</div>
+      <p>Several requests returned <code>200 OK</code>, but the logs did not show the same direct shell path as Simple File List. I treated this as a secondary exploitation attempt or alternate path, while Simple File List remained the confirmed successful vector.</p>
+
+      <h2 id="timeline">Attack Timeline</h2>
+      <table class="timeline-table"><thead><tr><th>Time</th><th>Event</th><th>Interpretation</th></tr></thead><tbody><tr><td><code>Jan 12 15:52</code></td><td>Normal WordPress traffic begins.</td><td>Baseline browsing and asset loading.</td></tr><tr><td><code>Jan 12 15:56</code></td><td>Administrator activates <code>simple-file-list</code>.</td><td>Vulnerable plugin becomes available.</td></tr><tr><td><code>Jan 12 15:57</code></td><td>Administrator activates <code>contact-form-7</code>.</td><td>Second vulnerable plugin appears.</td></tr><tr><td><code>Jan 14 05:42</code></td><td><code>119.241.22.121</code> begins suspicious activity.</td><td>Reconnaissance and spoofed User-Agents.</td></tr><tr><td><code>Jan 14 05:54</code></td><td>Requests target <code>/wp-login.php?itsec-hb-token=adminlogin</code>.</td><td>Hidden login panel or protected admin login path identified.</td></tr><tr><td><code>Jan 14 06:01</code></td><td><code>WPScan v3.8.10</code> appears.</td><td>WordPress scanning and plugin enumeration.</td></tr><tr><td><code>Jan 14 06:08</code></td><td><code>103.69.55.212</code> joins the activity.</td><td>Second actor-controlled source or follow-up infrastructure.</td></tr><tr><td><code>Jan 14 06:26</code></td><td>Simple File List upload engine receives successful POST.</td><td>Initial access through vulnerable plugin upload workflow.</td></tr><tr><td><code>Jan 14 06:27</code></td><td><code>fr34k.php</code> returns <code>200 OK</code>.</td><td>Web shell confirmed accessible.</td></tr></tbody></table>
+
+      <h2 id="iocs">Indicators and Useful Pivots</h2>
+      <div class="ioc-grid"><div class="ioc-card"><div class="type">Attacker / scanner IP</div><div class="value">119.241.22.121</div><p>Main external source for reconnaissance and Simple File List exploitation.</p></div><div class="ioc-card"><div class="type">Web shell source IP</div><div class="value">103.69.55.212</div><p>Source that repeatedly accessed the uploaded PHP shell.</p></div><div class="ioc-card"><div class="type">Web shell path</div><div class="value">/wp-content/uploads/simple-file-list/fr34k.php</div><p>Executable PHP under uploads directory.</p></div><div class="ioc-card"><div class="type">Admin login panel</div><div class="value">/wp-login.php?itsec-hb-token=adminlogin</div><p>Protected or hidden login URI observed in the logs.</p></div><div class="ioc-card"><div class="type">Tooling</div><div class="value">WPScan v3.8.10</div><p>WordPress vulnerability scanner.</p></div><div class="ioc-card"><div class="type">Tooling</div><div class="value">sqlmap/1.4.11</div><p>SQL injection automation tool seen in User-Agent analysis.</p></div><div class="ioc-card"><div class="type">Plugin</div><div class="value">Simple File List</div><p>Confirmed exploited plugin path.</p></div><div class="ioc-card"><div class="type">Plugin</div><div class="value">Contact Form 7</div><p>Probed as a secondary vulnerable plugin path.</p></div></div>
+
+      <h2 id="answers">Answers</h2>
+      <div class="answer-grid"><div class="answer-card"><div class="q">1. Admin login panel URI</div><code>/wp-login.php?itsec-hb-token=adminlogin</code></div><div class="answer-card"><div class="q">2. Two tools used by the attacker</div><code>WPScan and sqlmap</code></div><div class="answer-card"><div class="q">3. Contact Form 7 CVE</div><code>CVE-2020-35489</code></div><div class="answer-card"><div class="q">4. Plugin exploited to get access</div><code>Simple File List</code></div><div class="answer-card"><div class="q">5. PHP web shell filename</div><code>fr34k.php</code></div><div class="answer-card"><div class="q">6. Final web shell response code</div><code>200 OK</code></div></div>
+
+      <h2 id="lessons">Lessons Learned</h2>
+      <p>This lab reinforced that Apache access logs can still tell a full compromise story if I follow the right pivots. The important part was not only finding suspicious tools like WPScan or sqlmap, but connecting them to successful POST requests, vulnerable plugin endpoints and the web shell path.</p>
+      <ul><li>Successful POST requests are often the fastest way to isolate exploit or upload activity.</li><li>Clean public reputation does not override local evidence. A source IP can be unlisted publicly and still be malicious in this case.</li><li>PHP files inside WordPress uploads directories are high-confidence web shell indicators.</li><li>Plugin reconnaissance matters, but the confirmed exploit path needs status code and URI correlation.</li><li>Response size can provide useful context when the response body is not available.</li></ul>
+      <div class="callout"><strong>Final conclusion:</strong> the attacker abused the Simple File List plugin upload workflow to place <code>fr34k.php</code> under <code>/wp-content/uploads/simple-file-list/</code>. The shell was then accessed successfully with <code>200 OK</code>, confirming post-exploitation web shell activity.</div>
+      <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Home ↑</a></div>
+    </article>
+  </div></main>
+  <script src="/assets/js/main.js"></script>
+<script src="/assets/js/premium.js"></script>
+</body>
+</html>

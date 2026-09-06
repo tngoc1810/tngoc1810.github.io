@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>SOC342 - SharePoint ToolShell Writeup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/premium.css">
+</head>
+<body>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  
+  <main class="page shadow-page"><div class="wrap article-layout">
+    <aside class="toc">
+      <div class="toc-title">Mục lục</div>
+      <a href="#summary">1. Tóm tắt sự cố</a>
+      <a href="#alert-info">2. Phân tích Cảnh báo</a>
+      <a href="#vulnerability">3. Về CVE-2025-53770</a>
+      <a href="#network-log">4. Phân tích Log Mạng</a>
+      <a href="#edr-analysis">5. Điều tra trên EDR</a>
+      <a href="#mitre">6. Ánh xạ MITRE ATT&CK</a>
+      <a href="#impact">7. Đánh giá Ảnh hưởng</a>
+      <a href="#remediation">8. Kế hoạch Ứng phó</a>
+      <a href="#iocs">9. IOCs & Nhận diện</a>
+    </aside>
+    
+    <article class="article-card glass">
+      <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / SOC / SOC342</div>
+      <div class="eyebrow">SOC Alert Triage · Incident Response</div>
+      <h1 class="page-title">SOC342 – Khai thác CVE-2025-53770 SharePoint ToolShell</h1>
+      <p class="lead">Hành trình điều tra một vụ xâm nhập nghiêm trọng nhắm vào máy chủ SharePoint on-premises thông qua lỗ hổng ToolShell, từ bước bypass xác thực, chiếm quyền RCE đến hành vi cấy Web Shell và đánh cắp MachineKey.</p>
+      
+      <div class="info-card">
+        <div class="item"><div class="label">Mã Cảnh Báo</div><div class="value">SOC342</div></div>
+        <div class="item"><div class="label">Nền tảng</div><div class="value">LetsDefend</div></div>
+        <div class="item"><div class="label">Mục tiêu</div><div class="value">SharePoint01 (172.16.20.17)</div></div>
+        <div class="item"><div class="label">Kỹ thuật</div><div class="value accent">Auth Bypass, RCE, Web Shell</div></div>
+        <div class="item"><div class="label">Điểm nghẽn</div><div class="value">Lỗi Zero-day (CVE-2025-53770)</div></div>
+      </div>
+      
+      <div class="callout">
+        <strong>Kết luận điều tra:</strong> TRUE POSITIVE – Máy chủ đã bị xâm nhập và chiếm quyền hoàn toàn (Mức độ: <strong>CRITICAL</strong>).
+      </div>
+
+      <h2 id="summary">1. Tóm tắt sự cố</h2>
+      <p>Vào trưa ngày 22/07/2025, hệ thống SIEM bất ngờ ghi nhận cảnh báo <strong>SOC342</strong>. Một request POST từ IP public <code>107.191.58.76</code> đã đâm thẳng vào trang cấu hình nhạy cảm <code>/_layouts/15/ToolPane.aspx</code> trên máy chủ SharePoint nội bộ. Điều đáng ngờ nhất là header Referer đã bị làm giả thành <code>/_layouts/SignOut.aspx</code> – một dấu hiệu kinh điển của việc khai thác lỗ hổng <strong>CVE-2025-53770 (ToolShell)</strong> nhằm bypass cơ chế xác thực.</p>
+      <div class="mindset">
+        <strong>Điểm nghẽn chí mạng:</strong> Thiết bị bảo mật vòng ngoài chỉ ở chế độ <em>Monitor</em> (Log-only) với hành động ghi nhận là <code>Allowed</code>. Gói tin độc hại đã lọt qua lớp phòng ngự và chạm tới máy chủ.
+      </div>
+      <p>Khi tôi tiến hành pivot sang hệ thống EDR để kiểm tra, sự thật đã phơi bày: <strong>Exploit đã thành công!</strong> Chỉ trong vòng 23 giây ngắn ngủi, tiến trình IIS worker (<code>w3wp.exe</code>) đã sinh ra một loạt chuỗi hành vi độc hại: chạy PowerShell mã hóa Base64, biên dịch mã độc C# tại chỗ bằng <code>csc.exe</code>, cấy một Web Shell mang tên <code>spinstall0.aspx</code> vào hệ thống, và đỉnh điểm là việc đánh cắp thành công bộ khóa <strong>MachineKey</strong> của ứng dụng ASP.NET.</p>
+
+      <h2 id="alert-info">2. Phân tích Cảnh báo (Alert Information)</h2>
+      <table class="timeline-table">
+        <thead>
+          <tr><th>Trường thông tin</th><th>Giá trị ghi nhận</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Rule</strong></td><td>SOC342 - CVE-2025-53770 SharePoint ToolShell Auth Bypass and RCE</td></tr>
+          <tr><td><strong>Event Time</strong></td><td>Jul 22, 2025, 01:07 PM</td></tr>
+          <tr><td><strong>Source IP</strong></td><td><span class="ioc">107.191.58.76</span> (External)</td></tr>
+          <tr><td><strong>Destination</strong></td><td>172.16.20.17 (SharePoint01)</td></tr>
+          <tr><td><strong>HTTP Request</strong></td><td><code>POST /_layouts/15/ToolPane.aspx?DisplayMode=Edit&a=/ToolPane.aspx</code></td></tr>
+          <tr><td><strong>Referer</strong></td><td><code>/_layouts/SignOut.aspx</code> (Dấu hiệu giả mạo)</td></tr>
+          <tr><td><strong>Device Action</strong></td><td><strong>Allowed</strong> (Cảnh báo: Payload đã lọt vào trong)</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="vulnerability">3. Hiểu về CVE-2025-53770 (ToolShell)</h2>
+      <p>Đây là một lỗ hổng nghiêm trọng cho phép kẻ tấn công thực thi mã từ xa (RCE) trên máy chủ SharePoint on-premises mà không cần bất kỳ thông tin đăng nhập nào. Kịch bản khai thác thường diễn ra qua 3 bước:</p>
+      <ol class="step-list">
+        <li><strong>Bypass Xác Thực:</strong> Attacker truy cập trang cấu hình <code>ToolPane.aspx</code> nhưng làm giả header Referer thành <code>SignOut.aspx</code>. SharePoint bị đánh lừa rằng đây là luồng đăng xuất, từ đó bỏ qua việc kiểm tra quyền truy cập.</li>
+        <li><strong>Bơm Payload:</strong> Ngay sau khi lọt qua cửa, attacker nhồi một khối dữ liệu lớn (đã Serialize) qua phương thức POST.</li>
+        <li><strong>Thực thi RCE:</strong> SharePoint vô tình Deserialize khối dữ liệu này, kích hoạt mã độc chạy thẳng trên tiến trình IIS <code>w3wp.exe</code>, mở đường cho attacker thao túng toàn bộ máy chủ.</li>
+      </ol>
+
+      <h2 id="network-log">4. Phân tích Log Mạng (Network Log)</h2>
+      <p>Kiểm tra raw log mạng, mọi thông số đều khớp hoàn hảo với cảnh báo. Request mang Content-Length lên tới <code>7699 byte</code> – kích thước quá khổ so với một request thông thường tới endpoint này, chứng tỏ nó đang mang vác một payload Deserialize khổng lồ.</p>
+      <figure class="evidence-shot">
+        <figcaption><span>Evidence 01</span><span>Raw Network Log</span></figcaption>
+        <img src="/assets/media/writeups/soc/soc342/image1.png" alt="Raw log request POST">
+      </figure>
+
+      <h2 id="edr-analysis">5. Điều tra trên EDR: Vạch trần Chuỗi Hậu Khai Thác</h2>
+      <p>Với việc gói tin đã lọt vào máy, tôi lập tức rà soát EDR của máy chủ <code>SharePoint01</code>. Một chuỗi hành vi "Sống ký sinh" (Living-off-the-Land) diễn ra với tốc độ chóng mặt.</p>
+      
+      <h3>Bước 1: IIS Worker gọi PowerShell (13:07:11)</h3>
+      <p>Tiến trình <code>w3wp.exe</code> (chạy dưới quyền <code>IIS APPPOOL\SharePoint - 80</code>) đột ngột gọi ra <code>powershell.exe</code> với tham số <code>-EncodedCommand</code>. Việc một web server tự dưng gọi shell mã hóa là cờ đỏ chói lọi nhất chứng minh RCE đã thành công.</p>
+      <figure class="evidence-shot">
+        <figcaption><span>Evidence 02</span><span>EDR - w3wp.exe spawns PowerShell</span></figcaption>
+        <img src="/assets/media/writeups/soc/soc342/image2.png" alt="IIS Worker spawns PowerShell">
+      </figure>
+
+      <h3>Bước 2: Giải mã Payload độc hại</h3>
+      <p>Sử dụng <strong>CyberChef</strong>, tôi dễ dàng bóc lớp vỏ Base64. Đoạn mã lộ diện không phải một script bình thường, mà là mã nguồn C# của một Web Shell ASP.NET được thiết kế tinh vi nhằm load thư viện <code>System.Web.Configuration</code> và in ra toàn bộ <strong>ValidationKey</strong> cùng <strong>DecryptionKey</strong> của máy chủ.</p>
+      <figure class="evidence-shot">
+        <figcaption><span>Evidence 03</span><span>CyberChef Base64 Decode</span></figcaption>
+        <img src="/assets/media/writeups/soc/soc342/image3.png" alt="CyberChef Decoding">
+      </figure>
+
+      <h3>Bước 3: Biên dịch tại chỗ (13:07:27)</h3>
+      <p>Thay vì tải file .exe từ bên ngoài (dễ bị Anti-Virus tóm), attacker đã dùng thủ thuật vô cùng khéo léo: Dùng chính trình biên dịch C# có sẵn của Windows (<code>csc.exe</code>) để build file thực thi từ mã nguồn vừa ném vào thư mục Temp. Kỹ thuật này giúp chúng lẩn trốn sự phát hiện dựa trên Signature.</p>
+      <figure class="evidence-shot">
+        <figcaption><span>Evidence 04</span><span>EDR - csc.exe compiling payload</span></figcaption>
+        <img src="/assets/media/writeups/soc/soc342/image4.png" alt="csc.exe compiles payload">
+      </figure>
+
+      <h3>Bước 4: Cấy Web Shell (13:07:29)</h3>
+      <p>Ngay sau đó, tiến trình <code>cmd.exe</code> đã lẳng lặng ghi đè một file mang tên <code>spinstall0.aspx</code> vào thư mục <code>LAYOUTS</code> của SharePoint. Đây chính là chiếc Backdoor kiên cố, cho phép attacker ra vào hệ thống mà không cần đăng nhập.</p>
+      <figure class="evidence-shot">
+        <figcaption><span>Evidence 05</span><span>EDR - Web shell dropped</span></figcaption>
+        <img src="/assets/media/writeups/soc/soc342/image5.png" alt="Web shell dropped">
+      </figure>
+
+      <h3>Bước 5: Trộm MachineKey (13:07:34)</h3>
+      <p>Cuối cùng, PowerShell thực thi lệnh đọc trực tiếp cấu hình MachineKey. Khi có được bộ khóa này, attacker có thể tự tạo các chuỗi xác thực hợp lệ để tiếp tục duy trì quyền kiểm soát, ngay cả khi quản trị viên đã vá lỗ hổng.</p>
+      <figure class="evidence-shot">
+        <figcaption><span>Evidence 06</span><span>EDR - Stealing MachineKey</span></figcaption>
+        <img src="/assets/media/writeups/soc/soc342/image6.png" alt="Stealing MachineKey">
+      </figure>
+
+      <h2 id="mitre">6. Ánh xạ MITRE ATT&CK</h2>
+      <table class="timeline-table">
+        <thead>
+          <tr><th>Tactic</th><th>Technique</th><th>Dấu hiệu cụ thể</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Initial Access</strong></td><td>T1190 – Exploit Public-Facing Application</td><td>Khai thác CVE-2025-53770 qua <code>ToolPane.aspx</code></td></tr>
+          <tr><td><strong>Defense Evasion</strong></td><td>T1211 – Bypass Xác thực</td><td>Giả mạo Referer: <code>/_layouts/SignOut.aspx</code></td></tr>
+          <tr><td><strong>Execution</strong></td><td>T1059.001 – PowerShell</td><td><code>powershell.exe -EncodedCommand</code></td></tr>
+          <tr><td><strong>Defense Evasion</strong></td><td>T1027 – Obfuscated Files</td><td>Mã hóa payload bằng Base64</td></tr>
+          <tr><td><strong>Defense Evasion</strong></td><td>T1127 – Trusted Developer Utilities</td><td>Sử dụng <code>csc.exe</code> để biên dịch mã độc</td></tr>
+          <tr><td><strong>Persistence</strong></td><td>T1505.003 – Server Web Shell</td><td>Cấy <code>spinstall0.aspx</code> vào thư mục <code>LAYOUTS</code></td></tr>
+          <tr><td><strong>Credential Access</strong></td><td>T1552.001 – Credentials in Files</td><td>Đánh cắp ValidationKey và DecryptionKey</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="impact">7. Đánh giá Ảnh hưởng</h2>
+      <div class="mini-note warning">
+        <strong>CRITICAL:</strong> Máy chủ đã bị thỏa hiệp hoàn toàn. 
+      </div>
+      <p>Kẻ tấn công không chỉ có quyền RCE dưới tài khoản dịch vụ, mà còn cắm sẵn Web Shell và cuỗm mất MachineKey. Toàn bộ dữ liệu tài liệu, site collection và thông tin đăng nhập nội bộ trên farm SharePoint này đều đối diện với rủi ro bị lộ lọt. Việc attacker tận dụng máy chủ này làm bàn đạp (Lateral Movement) tiến sâu hơn vào mạng Domain là điều có thể xảy ra bất cứ lúc nào.</p>
+
+      <h2 id="remediation">8. Kế hoạch Ứng phó (Incident Response)</h2>
+      <ol class="step-list">
+        <li><strong>Ngăn chặn tức thời (Containment):</strong> Cô lập ngay lập tức máy chủ <code>SharePoint01</code> khỏi mạng thông qua EDR (không tắt máy để giữ nguyên hiện trường RAM). Chặn IP <code>107.191.58.76</code> trên Firewall. Đặt WAF rule chặn khẩn cấp các request tới <code>ToolPane.aspx</code> mang Referer giả.</li>
+        <li><strong>Làm sạch (Eradication):</strong> Truy quét và xóa bỏ Web Shell <code>spinstall0.aspx</code> cùng các file rác trong Temp. <strong>QUAN TRỌNG:</strong> Không chỉ cài bản vá CVE-2025-53770, mà <strong>BẮT BUỘC phải tạo mới (Rotate) MachineKey</strong> trên toàn bộ farm, nếu không attacker vẫn có thể quay lại.</li>
+        <li><strong>Phục hồi & Theo dõi (Recovery):</strong> Đổi mật khẩu toàn bộ tài khoản dịch vụ. Bật AMSI cho SharePoint. Triển khai Threat Hunting toàn hệ thống với mẫu tiến trình <code>w3wp.exe -> powershell.exe -> csc.exe</code>.</li>
+      </ol>
+
+      <h2 id="iocs">9. IOCs & Dấu hiệu Nhận diện</h2>
+      <table class="timeline-table">
+        <thead>
+          <tr><th>Loại IOC</th><th>Giá trị / Mẫu hành vi</th><th>Giải thích</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>IPv4</strong></td><td><span class="ioc">107.191.58.76</span></td><td>IP thực hiện tấn công</td></tr>
+          <tr><td><strong>HTTP Header</strong></td><td><code>Referer: /_layouts/SignOut.aspx</code></td><td>Dấu hiệu Bypass xác thực</td></tr>
+          <tr><td><strong>Web Shell</strong></td><td><code>...\TEMPLATE\LAYOUTS\spinstall0.aspx</code></td><td>Tập tin Backdoor</td></tr>
+          <tr><td><strong>Behavior</strong></td><td><code>w3wp.exe</code> sinh ra <code>powershell.exe</code> và <code>csc.exe</code></td><td>Chuỗi hành vi hậu khai thác</td></tr>
+          <tr><td><strong>Command</strong></td><td><code>powershell.exe -EncodedCommand</code></td><td>Thực thi mã ẩn</td></tr>
+        </tbody>
+      </table>
+
+    </article>
+  </div>
+  </main>
+  
+  <footer class="footer"><div class="wrap text-center"><p class="small text-muted">© 2026 Nguyen Thai Ngoc. Built for Security & Forensics Portfolios.</p></div></footer>
+  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/premium.js"></script>
+</body>
+</html>
