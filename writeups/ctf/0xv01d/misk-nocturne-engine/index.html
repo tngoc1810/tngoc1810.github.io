@@ -4,14 +4,16 @@
   <title>Misk Nocturne Engine — Nguyen Thai Ngoc</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cybersecurity investigation and hands-on lab writeup by Nguyen Thai Ngoc.">
+  <link rel="canonical" href="https://tngoc1810.github.io/writeups/ctf/0xv01d/misk-nocturne-engine/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/premium.css">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
 </head>
 <body>
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page nocturne-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#triage">Initial Triage</a><a href="#bait">Fake Flag</a><a href="#data">Target Data</a><a href="#logic">Checker Logic</a><a href="#solver">Solver</a><a href="#flag">Final Flag</a><a href="#lessons">Lessons</a></aside>
     <article class="article-card glass">
@@ -177,10 +179,10 @@ Final candidates:
       <ul><li>Do not trust visible strings immediately in reverse engineering challenges.</li><li>Fake flags must be verified against the actual program logic.</li><li>Challenge hints often describe the algorithm, not just the story.</li><li>When lookup tables are involved, emulation is usually better than manual table analysis.</li><li>Small state spaces make brute forcing practical when the checker can be reproduced accurately.</li></ul>
       <div class="callout success"><strong>Final conclusion:</strong> the checker is an eight-state automaton with a carried memory byte. By extracting the target and transition tables, then emulating the checker, the real flag becomes recoverable.</div>
       <div class="pill-row"><span class="pill">PE64</span><span class="pill">State Machine</span><span class="pill">.rdata</span><span class="pill">Lookup Tables</span><span class="pill">Python Solver</span></div>
-      <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/writeups/ctf/0xv01d-ctf-writeups/">0xV01D Hub →</a></div>
+      <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Home ↑</a></div>
     </article>
   </div></main>
-  <script src="/assets/js/main.js"></script>
-<script src="/assets/js/premium.js"></script>
+  <script src="/assets/js/main.js?v=20260930b"></script>
+<script src="/assets/js/premium.js?v=20260930b"></script>
 </body>
 </html>

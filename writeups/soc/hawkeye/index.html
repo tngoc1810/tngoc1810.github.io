@@ -4,14 +4,16 @@
   <title>HawkEye Keylogger — Network Forensics Writeup</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cybersecurity investigation and hands-on lab writeup by Nguyen Thai Ngoc.">
+  <link rel="canonical" href="https://tngoc1810.github.io/writeups/soc/hawkeye/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/premium.css">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
 </head>
 <body>
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page"><div class="wrap article-layout">
     <aside class="toc glass-card">
       <div class="toc-title">Contents</div>
@@ -91,7 +93,7 @@ SMTP Server Port  : 587</code></pre><div class="callout danger"><strong>Confirme
       <section id="lessons" class="glass-card section-card"><h2>Lessons learned</h2><p>This lab is a good reminder that the largest protocol by bytes is not always the only important one. HTTP showed the malware arriving, but SMTP showed the actual data loss.</p><p>The second lesson is that Base64 is not encryption. In this capture, the username, password, subject and body were easy to decode once I followed the SMTP stream.</p><p>Finally, repeated SMTP sessions mattered more than a single decoded message. They showed behavior: HawkEye was configured to periodically send collected password logs, which is exactly the kind of pattern worth putting into a timeline and detection idea.</p></section>
     </article>
   </main>
-  <script src="/assets/js/main.js"></script>
-<script src="/assets/js/premium.js"></script>
+  <script src="/assets/js/main.js?v=20260930b"></script>
+<script src="/assets/js/premium.js?v=20260930b"></script>
 </body>
 </html>

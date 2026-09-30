@@ -4,16 +4,17 @@
   <title>no no — KMACTF Reverse Writeup</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://tngoc1810.github.io/writeups/no-no/">
   <meta name="description" content="Detailed reverse engineering writeup for KMACTF no no, covering .NET, native loader, JIT hook, Nonogram solving and QR decoding.">
   <meta name="author" content="Nguyen Thai Ngoc">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/premium.css">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
 </head>
 <body>
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page nono-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#triage">Initial Triage</a><a href="#strings">Strings & Bait</a><a href="#dotnet">Nono.dll</a><a href="#fake">Fake QR Path</a><a href="#native">Native Wrapper</a><a href="#jit">JIT Hook</a><a href="#patched">Patched Clues</a><a href="#solver">Solver</a><a href="#flag">Final Flag</a><a href="#lessons">Lessons</a></aside>
     <article class="article-card glass">
@@ -126,10 +127,10 @@ Nono.exe .nono section
       <ul><li>Do not trust obvious flag strings from <code>strings</code>.</li><li>For .NET challenges, always check both the managed DLL and the native host executable.</li><li>A custom PE section can hide a loader, patcher or anti-analysis layer.</li><li>JIT hooking can make static decompilation misleading because managed code can be modified before execution.</li><li>When a plausible static solution gives a fake result, pivot to runtime behavior.</li><li>Nonogram/QR challenges often require validating the decoded output, not only producing a visually plausible image.</li></ul>
       <div class="callout success"><strong>Final conclusion:</strong> the challenge is not solved by the static <code>Nono.dll</code> clues. The real solution comes from recognizing the native <code>.nono</code> JIT hook, recovering the runtime-patched <code>GetRegionClues</code> data, solving the real Nonogram and decoding the real QR.</div>
       <div class="pill-row"><span class="pill">.NET</span><span class="pill">JIT Hook</span><span class="pill">clrjit.dll</span><span class="pill">compileMethod</span><span class="pill">Nonogram</span><span class="pill">QR</span></div>
-      <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/writeups/ctf/0xv01d-ctf-writeups/">0xV01D Hub →</a></div>
+      <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Home ↑</a></div>
     </article>
   </div></main>
-  <script src="/assets/js/main.js"></script>
-<script src="/assets/js/premium.js"></script>
+  <script src="/assets/js/main.js?v=20260930b"></script>
+<script src="/assets/js/premium.js?v=20260930b"></script>
 </body>
 </html>

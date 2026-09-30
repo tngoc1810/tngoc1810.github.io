@@ -4,16 +4,17 @@
   <title>Misk Automaton — 0xV01D CTF Reverse Writeup</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://tngoc1810.github.io/writeups/ctf/0xv01d/misk-automaton/">
   <meta name="description" content="Reverse engineering writeup for Misk Automaton from 0xV01D CTF.">
   <meta name="author" content="Nguyen Thai Ngoc">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/premium.css">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
 </head>
 <body>
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page automaton-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#triage">Initial Triage</a><a href="#strings">Fake Flag</a><a href="#rdata">.rdata Analysis</a><a href="#checker">Checker Function</a><a href="#automaton">Automaton Logic</a><a href="#solver">Solver</a><a href="#flag">Final Flag</a><a href="#lessons">Lessons</a></aside>
     <article class="article-card glass">
@@ -117,10 +118,10 @@ target = <span class="addr">0x140005080</span></div>
       <ul><li>Never trust an obvious flag from <code>strings</code> in a hard reverse challenge.</li><li>Check where suspicious strings are referenced before submitting them.</li><li>PE virtual addresses must be converted to file offsets before extracting binary data in Python.</li><li>Lookup-table checkers can often be solved by modeling the exact state transition.</li><li>A stateful checker can still be solved character-by-character if the state update is deterministic.</li></ul>
       <div class="callout success"><strong>Final conclusion:</strong> the real checker uses two evolving states, eight transition tables, a 42-byte target and five transition rounds per character. Once the transition is modeled accurately, the true flag is recovered.</div>
       <div class="pill-row"><span class="pill">PE64</span><span class="pill">.rdata</span><span class="pill">Automaton</span><span class="pill">Transition Tables</span><span class="pill">DFS Solver</span></div>
-      <div class="footer-nav"><a href="/writeups/ctf/0xv01d-ctf-writeups/">← Back to 0xV01D Writeups</a><a href="/writeups/">All Writeups →</a></div>
+      <div class="footer-nav"><a href="/">← Home</a><a href="/writeups/">All Writeups →</a></div>
     </article>
   </div></main>
-  <script src="/assets/js/main.js"></script>
-<script src="/assets/js/premium.js"></script>
+  <script src="/assets/js/main.js?v=20260930b"></script>
+<script src="/assets/js/premium.js?v=20260930b"></script>
 </body>
 </html>

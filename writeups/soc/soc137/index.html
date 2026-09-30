@@ -4,14 +4,16 @@
   <title>LetsDefend: SOC137 - Malicious File/Script Download Attempt — Nguyen Thai Ngoc</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cybersecurity investigation and hands-on lab writeup by Nguyen Thai Ngoc.">
+  <link rel="canonical" href="https://tngoc1810.github.io/writeups/soc/soc137/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-<link rel="stylesheet" href="/assets/css/premium.css">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
+<link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
 </head>
 <body>
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page">
     <div class="wrap article-layout">
       <aside class="toc">
@@ -69,24 +71,24 @@
         <h2 id="analysis">Threat Intelligence & Malware Analysis</h2>
         <p>To verify the malicious nature of the payload, the file and its associated hash were analyzed using OSINT platforms (VirusTotal and Joe Sandbox).</p>
         <p><strong>VirusTotal Analysis:</strong> The file hash was flagged as malicious by 40 out of 64 security vendors. The behavioral tags revealed that the document contains malicious macros, attempts to execute PowerShell, and employs evasion techniques.</p>
-        <img src="/assets/media/writeups/soc/soc137/image1.png" alt="VirusTotal Analysis" />
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc137/image1.png" alt="VirusTotal Analysis" />
 
         <p><strong>Joe Sandbox Detonation:</strong> Sandbox analysis confirmed the file as MALICIOUS with high confidence. The behavioral signatures indicate that upon opening the document and enabling content, the embedded VBA macro executes obfuscated command lines and spawns suspicious child processes (PowerShell). This is a classic behavior of a dropper attempting to establish a connection and download secondary payloads.</p>
-        <img src="/assets/media/writeups/soc/soc137/image2.png" alt="Joe Sandbox Analysis" />
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc137/image2.png" alt="Joe Sandbox Analysis" />
         
         <p><strong>Partial Conclusion:</strong> The payload is confirmed to be highly malicious (True Positive at the file level).</p>
 
         <h2 id="log">Log Management Analysis</h2>
         <p>We have proven that the weapon is real and highly dangerous. Now, the critical question remains: Did the host NicolasPRD successfully download and execute this malicious file?</p>
-        <p>A comprehensive search in the Log Management system was conducted using the Source IP (<code>172.16.17.37</code>), Hostname, and the specific timeframe. The search yielded no results regarding successful connections or file transfers.</p>
+        <p>I searched Log Management by source IP (<code>172.16.17.37</code>), hostname and the alert window. I found no successful connection or file-transfer event.</p>
         <p>The absence of network traffic logs (such as HTTP 200 OK) strongly corroborates the SIEM's "Blocked" action, proving the connection was terminated at the network perimeter before any data could be downloaded.</p>
-        <img src="/assets/media/writeups/soc/soc137/image3.jpeg" alt="Log Management Analysis" />
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc137/image3.jpeg" alt="Log Management Analysis" />
 
         <h2 id="endpoint">Endpoint Analysis & C2 Check</h2>
         <p>Further investigation on the Endpoint Detection and Response (EDR) platform for the host NicolasPRD revealed no traces of the malicious <code>.docm</code> file. There are no indicators of file creation, execution, or anomalous child processes. The endpoint remains clean and uncompromised.</p>
         
         <p><strong>C2 Communication Check:</strong> Even though the download was blocked and the EDR showed no signs of execution, I proactively searched the network logs for any suspicious outbound connections or beaconing activity from NicolasPRD to known Command and Control (C2) servers. The result was negative. The absence of any C2 traffic is the final proof that the endpoint is completely clean.</p>
-        <img src="/assets/media/writeups/soc/soc137/image4.png" alt="Endpoint Analysis" />
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc137/image4.png" alt="Endpoint Analysis" />
 
         <h2 id="verdict">Analyst Note & Verdict</h2>
         <p>Analyzed alert SOC137 (EventID: 76) regarding a malicious <code>.docm</code> download attempt by host NicolasPRD. OSINT analysis confirmed the file is a malicious macro-enabled dropper. However, log management and EDR analysis verified that the download was successfully Blocked at the network perimeter. No malicious files were downloaded, and no C2 connections were established. The endpoint remains uncompromised.</p>
@@ -98,7 +100,7 @@
 
         <h3>Lessons Learned & Takeaways</h3>
         <ul>
-          <li>This investigation reinforced the core SOC mindset. Although the SIEM device action reported the download as blocked, an analyst must never assume the system is perfectly safe. Verifying network logs and EDR telemetry is mandatory to confirm the actual impact.</li>
+          <li>The SIEM action was <code>blocked</code>, but I still checked network and EDR telemetry before closing the alert. In this case, neither source showed successful delivery or execution.</li>
           <li>The most critical step is determining whether the payload reached the endpoint and executed. In this case, proving the absence of network traffic and C2 communication was just as important as proving the file was malicious.</li>
         </ul>
 
@@ -109,7 +111,7 @@
       </article>
     </div>
   </main>
-  <script src="/assets/js/main.js"></script>
-<script src="/assets/js/premium.js"></script>
+  <script src="/assets/js/main.js?v=20260930b"></script>
+<script src="/assets/js/premium.js?v=20260930b"></script>
 </body>
 </html>

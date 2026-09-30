@@ -58,22 +58,38 @@ function initImageLightbox() {
 
   const lightbox = document.createElement("div");
   lightbox.id = "img-lightbox";
+  lightbox.setAttribute("role", "dialog");
+  lightbox.setAttribute("aria-modal", "true");
+  lightbox.setAttribute("aria-label", "Evidence image preview");
+  lightbox.tabIndex = -1;
   const lightboxImg = document.createElement("img");
   lightbox.appendChild(lightboxImg);
   document.body.appendChild(lightbox);
 
   const images = document.querySelectorAll(".article-card img, article img, .evidence img");
   
+  let lastFocusedImage = null;
   images.forEach(img => {
     img.style.cursor = "zoom-in";
+    img.tabIndex = 0;
+    img.setAttribute("role", "button");
     img.addEventListener("click", () => {
+      lastFocusedImage = img;
       lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt || "Evidence image";
       lightbox.classList.add("open");
       document.body.style.overflow = "hidden"; // Prevent scrolling
+      lightbox.focus();
+    });
+    img.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        img.click();
+      }
     });
   });
 
-  lightbox.addEventListener("click", () => {
+  function closeLightbox() {
     lightbox.classList.remove("open");
     document.body.style.overflow = "";
     
@@ -83,14 +99,22 @@ function initImageLightbox() {
         lightboxImg.src = "";
       }
     }, 300);
+    if (lastFocusedImage) lastFocusedImage.focus();
+  }
+
+  lightbox.addEventListener("click", closeLightbox);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && lightbox.classList.contains("open")) closeLightbox();
   });
 }
 
 function initScrollTopBtn() {
-  const btn = document.createElement("div");
+  const btn = document.createElement("button");
+  btn.type = "button";
   btn.id = "scroll-top-btn";
   btn.innerHTML = "↑";
   btn.title = "Back to top";
+  btn.setAttribute("aria-label", "Back to top");
   document.body.appendChild(btn);
 
   btn.addEventListener("click", () => {

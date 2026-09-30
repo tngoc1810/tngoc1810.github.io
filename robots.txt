@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tngoc1810.github.io/sitemap.xml

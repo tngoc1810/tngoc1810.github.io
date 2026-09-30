@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initCyberBackground();
   setupFilters();
   initTocActiveHighlight();
+  initMobileToc();
   initScrollReveal();
   initCardTilt();
   initSocStatusBar();
@@ -559,6 +560,17 @@ function setupFilters() {
   const emptyState = document.querySelector("[data-empty]");
   if (!chips.length || !cards.length) return;
 
+  for (const chip of chips) {
+    const filter = String(chip.dataset.filter || "all").trim().toLowerCase();
+    const count = cards.filter((card) => {
+      if (filter === "all") return true;
+      const categories = String(card.dataset.category || "").toLowerCase().split(/\s+/).filter(Boolean);
+      return categories.includes(filter);
+    }).length;
+    const countNode = chip.querySelector(".count");
+    if (countNode) countNode.textContent = String(count);
+  }
+
   function getActiveFilter() {
     const activeChip = document.querySelector("[data-filter].active");
     return activeChip ? activeChip.dataset.filter : "all";
@@ -571,9 +583,9 @@ function setupFilters() {
     const keyword = normalize(searchInput ? searchInput.value : "");
     let visibleCount = 0;
     for (const card of cards) {
-      const category = normalize(card.dataset.category);
+      const categories = normalize(card.dataset.category).split(/\s+/).filter(Boolean);
       const text = normalize(card.dataset.text || card.textContent);
-      const categoryMatch = activeFilter === "all" || category.includes(activeFilter);
+      const categoryMatch = activeFilter === "all" || categories.includes(activeFilter);
       const textMatch = !keyword || text.includes(keyword);
       if (categoryMatch && textMatch) {
         card.classList.remove("hidden");
@@ -594,6 +606,32 @@ function setupFilters() {
 
   if (searchInput) searchInput.addEventListener("input", debounce(applyFilter, 80));
   applyFilter();
+}
+
+function initMobileToc() {
+  const toc = document.querySelector(".toc");
+  if (!toc || toc.querySelector(".toc-toggle")) return;
+
+  const title = toc.querySelector(".toc-title");
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "toc-toggle";
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.innerHTML = '<span>On this page</span><span aria-hidden="true">⌄</span>';
+  if (title) title.insertAdjacentElement("afterend", toggle);
+  else toc.prepend(toggle);
+
+  toggle.addEventListener("click", () => {
+    const open = toc.classList.toggle("toc-open");
+    toggle.setAttribute("aria-expanded", String(open));
+  });
+
+  toc.addEventListener("click", (event) => {
+    if (event.target.closest("a") && window.innerWidth <= 1100) {
+      toc.classList.remove("toc-open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
 }
 
 function initTocActiveHighlight() {

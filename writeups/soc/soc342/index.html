@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <title>SOC342 - SharePoint ToolShell Writeup</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Phân tích cảnh báo SOC342 về khai thác SharePoint ToolShell, tương quan log mạng với EDR, web shell và hành vi đánh cắp MachineKey.">
+  <link rel="canonical" href="https://tngoc1810.github.io/writeups/soc/soc342/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/premium.css">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
 </head>
 <body>
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   
   <main class="page shadow-page"><div class="wrap article-layout">
     <aside class="toc">
@@ -31,14 +33,14 @@
       <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / SOC / SOC342</div>
       <div class="eyebrow">SOC Alert Triage · Incident Response</div>
       <h1 class="page-title">SOC342 – Khai thác CVE-2025-53770 SharePoint ToolShell</h1>
-      <p class="lead">Hành trình điều tra một vụ xâm nhập nghiêm trọng nhắm vào máy chủ SharePoint on-premises thông qua lỗ hổng ToolShell, từ bước bypass xác thực, chiếm quyền RCE đến hành vi cấy Web Shell và đánh cắp MachineKey.</p>
+      <p class="lead">Tôi phân tích cảnh báo ToolShell trên SharePoint bằng cách đối chiếu request khai thác với cây tiến trình EDR. Chuỗi sự kiện cho thấy mã đã được thực thi, web shell được ghi xuống đĩa và MachineKey bị đọc khỏi cấu hình ứng dụng.</p>
       
       <div class="info-card">
         <div class="item"><div class="label">Mã Cảnh Báo</div><div class="value">SOC342</div></div>
         <div class="item"><div class="label">Nền tảng</div><div class="value">LetsDefend</div></div>
         <div class="item"><div class="label">Mục tiêu</div><div class="value">SharePoint01 (172.16.20.17)</div></div>
         <div class="item"><div class="label">Kỹ thuật</div><div class="value accent">Auth Bypass, RCE, Web Shell</div></div>
-        <div class="item"><div class="label">Điểm nghẽn</div><div class="value">Lỗi Zero-day (CVE-2025-53770)</div></div>
+        <div class="item"><div class="label">Lỗ hổng</div><div class="value">CVE-2025-53770</div></div>
       </div>
       
       <div class="callout">
@@ -46,11 +48,11 @@
       </div>
 
       <h2 id="summary">1. Tóm tắt sự cố</h2>
-      <p>Vào trưa ngày 22/07/2025, hệ thống SIEM bất ngờ ghi nhận cảnh báo <strong>SOC342</strong>. Một request POST từ IP public <code>107.191.58.76</code> đã đâm thẳng vào trang cấu hình nhạy cảm <code>/_layouts/15/ToolPane.aspx</code> trên máy chủ SharePoint nội bộ. Điều đáng ngờ nhất là header Referer đã bị làm giả thành <code>/_layouts/SignOut.aspx</code> – một dấu hiệu kinh điển của việc khai thác lỗ hổng <strong>CVE-2025-53770 (ToolShell)</strong> nhằm bypass cơ chế xác thực.</p>
+      <p>Ngày 22/07/2025, SIEM ghi nhận request POST từ <code>107.191.58.76</code> tới <code>/_layouts/15/ToolPane.aspx</code> trên máy chủ SharePoint nội bộ. Request sử dụng Referer <code>/_layouts/SignOut.aspx</code>, trùng với mẫu khai thác ToolShell được cảnh báo trong tình huống lab.</p>
       <div class="mindset">
-        <strong>Điểm nghẽn chí mạng:</strong> Thiết bị bảo mật vòng ngoài chỉ ở chế độ <em>Monitor</em> (Log-only) với hành động ghi nhận là <code>Allowed</code>. Gói tin độc hại đã lọt qua lớp phòng ngự và chạm tới máy chủ.
+        <strong>Điểm cần kiểm tra tiếp:</strong> Thiết bị biên ghi nhận hành động <code>Allowed</code>, vì vậy cảnh báo mạng chưa đủ để kết luận. Tôi chuyển sang EDR để xác định request có dẫn đến thực thi mã hay không.
       </div>
-      <p>Khi tôi tiến hành pivot sang hệ thống EDR để kiểm tra, sự thật đã phơi bày: <strong>Exploit đã thành công!</strong> Chỉ trong vòng 23 giây ngắn ngủi, tiến trình IIS worker (<code>w3wp.exe</code>) đã sinh ra một loạt chuỗi hành vi độc hại: chạy PowerShell mã hóa Base64, biên dịch mã độc C# tại chỗ bằng <code>csc.exe</code>, cấy một Web Shell mang tên <code>spinstall0.aspx</code> vào hệ thống, và đỉnh điểm là việc đánh cắp thành công bộ khóa <strong>MachineKey</strong> của ứng dụng ASP.NET.</p>
+      <p>EDR xác nhận khai thác đã thành công. Trong khoảng 23 giây, IIS worker <code>w3wp.exe</code> tạo PowerShell với tham số mã hóa, gọi <code>csc.exe</code>, ghi <code>spinstall0.aspx</code> vào thư mục SharePoint và đọc MachineKey của ứng dụng ASP.NET.</p>
 
       <h2 id="alert-info">2. Phân tích Cảnh báo (Alert Information)</h2>
       <table class="timeline-table">
@@ -77,48 +79,48 @@
       </ol>
 
       <h2 id="network-log">4. Phân tích Log Mạng (Network Log)</h2>
-      <p>Kiểm tra raw log mạng, mọi thông số đều khớp hoàn hảo với cảnh báo. Request mang Content-Length lên tới <code>7699 byte</code> – kích thước quá khổ so với một request thông thường tới endpoint này, chứng tỏ nó đang mang vác một payload Deserialize khổng lồ.</p>
+      <p>Raw log khớp với thông tin cảnh báo. Request có <code>Content-Length: 7699</code>, lớn bất thường đối với endpoint này và phù hợp với giả thuyết request mang dữ liệu khai thác. Kích thước request là dấu hiệu hỗ trợ; cây tiến trình EDR mới là bằng chứng xác nhận thực thi mã.</p>
       <figure class="evidence-shot">
         <figcaption><span>Evidence 01</span><span>Raw Network Log</span></figcaption>
-        <img src="/assets/media/writeups/soc/soc342/image1.png" alt="Raw log request POST">
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc342/image1.png" alt="Raw log request POST">
       </figure>
 
       <h2 id="edr-analysis">5. Điều tra trên EDR: Vạch trần Chuỗi Hậu Khai Thác</h2>
-      <p>Với việc gói tin đã lọt vào máy, tôi lập tức rà soát EDR của máy chủ <code>SharePoint01</code>. Một chuỗi hành vi "Sống ký sinh" (Living-off-the-Land) diễn ra với tốc độ chóng mặt.</p>
+      <p>Tôi pivot sang EDR của <code>SharePoint01</code> theo thời gian cảnh báo và tiến trình IIS. Chuỗi tiến trình sau đó cho thấy nhiều công cụ có sẵn của Windows bị lạm dụng.</p>
       
       <h3>Bước 1: IIS Worker gọi PowerShell (13:07:11)</h3>
-      <p>Tiến trình <code>w3wp.exe</code> (chạy dưới quyền <code>IIS APPPOOL\SharePoint - 80</code>) đột ngột gọi ra <code>powershell.exe</code> với tham số <code>-EncodedCommand</code>. Việc một web server tự dưng gọi shell mã hóa là cờ đỏ chói lọi nhất chứng minh RCE đã thành công.</p>
+      <p><code>w3wp.exe</code>, chạy dưới tài khoản <code>IIS APPPOOL\SharePoint - 80</code>, tạo <code>powershell.exe</code> với tham số <code>-EncodedCommand</code>. Với mốc thời gian ngay sau request khai thác, quan hệ cha–con này là bằng chứng mạnh cho RCE.</p>
       <figure class="evidence-shot">
         <figcaption><span>Evidence 02</span><span>EDR - w3wp.exe spawns PowerShell</span></figcaption>
-        <img src="/assets/media/writeups/soc/soc342/image2.png" alt="IIS Worker spawns PowerShell">
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc342/image2.png" alt="IIS Worker spawns PowerShell">
       </figure>
 
       <h3>Bước 2: Giải mã Payload độc hại</h3>
-      <p>Sử dụng <strong>CyberChef</strong>, tôi dễ dàng bóc lớp vỏ Base64. Đoạn mã lộ diện không phải một script bình thường, mà là mã nguồn C# của một Web Shell ASP.NET được thiết kế tinh vi nhằm load thư viện <code>System.Web.Configuration</code> và in ra toàn bộ <strong>ValidationKey</strong> cùng <strong>DecryptionKey</strong> của máy chủ.</p>
+      <p>Sau khi giải mã Base64 trong CyberChef, nội dung cho thấy mã C# sử dụng <code>System.Web.Configuration</code> để đọc <strong>ValidationKey</strong> và <strong>DecryptionKey</strong>. Đây là mục tiêu quan trọng vì các khóa này có thể bị lạm dụng để tạo dữ liệu xác thực hợp lệ cho ứng dụng.</p>
       <figure class="evidence-shot">
         <figcaption><span>Evidence 03</span><span>CyberChef Base64 Decode</span></figcaption>
-        <img src="/assets/media/writeups/soc/soc342/image3.png" alt="CyberChef Decoding">
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc342/image3.png" alt="CyberChef Decoding">
       </figure>
 
       <h3>Bước 3: Biên dịch tại chỗ (13:07:27)</h3>
-      <p>Thay vì tải file .exe từ bên ngoài (dễ bị Anti-Virus tóm), attacker đã dùng thủ thuật vô cùng khéo léo: Dùng chính trình biên dịch C# có sẵn của Windows (<code>csc.exe</code>) để build file thực thi từ mã nguồn vừa ném vào thư mục Temp. Kỹ thuật này giúp chúng lẩn trốn sự phát hiện dựa trên Signature.</p>
+      <p>Tiến trình tiếp theo là <code>csc.exe</code>, trình biên dịch C# có sẵn trên Windows. Dữ liệu EDR cho thấy mã nguồn trong thư mục Temp được biên dịch tại chỗ; điều này giảm nhu cầu tải một binary đã biên dịch sẵn và là hành vi cần được giám sát trên máy chủ web.</p>
       <figure class="evidence-shot">
         <figcaption><span>Evidence 04</span><span>EDR - csc.exe compiling payload</span></figcaption>
-        <img src="/assets/media/writeups/soc/soc342/image4.png" alt="csc.exe compiles payload">
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc342/image4.png" alt="csc.exe compiles payload">
       </figure>
 
       <h3>Bước 4: Cấy Web Shell (13:07:29)</h3>
-      <p>Ngay sau đó, tiến trình <code>cmd.exe</code> đã lẳng lặng ghi đè một file mang tên <code>spinstall0.aspx</code> vào thư mục <code>LAYOUTS</code> của SharePoint. Đây chính là chiếc Backdoor kiên cố, cho phép attacker ra vào hệ thống mà không cần đăng nhập.</p>
+      <p>Sau bước biên dịch, <code>cmd.exe</code> ghi <code>spinstall0.aspx</code> vào thư mục <code>LAYOUTS</code> của SharePoint. Đây là web shell và là cơ chế truy cập duy trì trên máy chủ.</p>
       <figure class="evidence-shot">
         <figcaption><span>Evidence 05</span><span>EDR - Web shell dropped</span></figcaption>
-        <img src="/assets/media/writeups/soc/soc342/image5.png" alt="Web shell dropped">
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc342/image5.png" alt="Web shell dropped">
       </figure>
 
       <h3>Bước 5: Trộm MachineKey (13:07:34)</h3>
-      <p>Cuối cùng, PowerShell thực thi lệnh đọc trực tiếp cấu hình MachineKey. Khi có được bộ khóa này, attacker có thể tự tạo các chuỗi xác thực hợp lệ để tiếp tục duy trì quyền kiểm soát, ngay cả khi quản trị viên đã vá lỗ hổng.</p>
+      <p>PowerShell sau đó đọc cấu hình MachineKey. Vì khóa đã có khả năng bị lộ, chỉ xóa web shell hoặc cài bản vá là chưa đủ; MachineKey cần được xoay vòng trong toàn bộ farm liên quan.</p>
       <figure class="evidence-shot">
         <figcaption><span>Evidence 06</span><span>EDR - Stealing MachineKey</span></figcaption>
-        <img src="/assets/media/writeups/soc/soc342/image6.png" alt="Stealing MachineKey">
+        <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc342/image6.png" alt="Stealing MachineKey">
       </figure>
 
       <h2 id="mitre">6. Ánh xạ MITRE ATT&CK</h2>
@@ -128,7 +130,6 @@
         </thead>
         <tbody>
           <tr><td><strong>Initial Access</strong></td><td>T1190 – Exploit Public-Facing Application</td><td>Khai thác CVE-2025-53770 qua <code>ToolPane.aspx</code></td></tr>
-          <tr><td><strong>Defense Evasion</strong></td><td>T1211 – Bypass Xác thực</td><td>Giả mạo Referer: <code>/_layouts/SignOut.aspx</code></td></tr>
           <tr><td><strong>Execution</strong></td><td>T1059.001 – PowerShell</td><td><code>powershell.exe -EncodedCommand</code></td></tr>
           <tr><td><strong>Defense Evasion</strong></td><td>T1027 – Obfuscated Files</td><td>Mã hóa payload bằng Base64</td></tr>
           <tr><td><strong>Defense Evasion</strong></td><td>T1127 – Trusted Developer Utilities</td><td>Sử dụng <code>csc.exe</code> để biên dịch mã độc</td></tr>
@@ -141,7 +142,7 @@
       <div class="mini-note warning">
         <strong>CRITICAL:</strong> Máy chủ đã bị thỏa hiệp hoàn toàn. 
       </div>
-      <p>Kẻ tấn công không chỉ có quyền RCE dưới tài khoản dịch vụ, mà còn cắm sẵn Web Shell và cuỗm mất MachineKey. Toàn bộ dữ liệu tài liệu, site collection và thông tin đăng nhập nội bộ trên farm SharePoint này đều đối diện với rủi ro bị lộ lọt. Việc attacker tận dụng máy chủ này làm bàn đạp (Lateral Movement) tiến sâu hơn vào mạng Domain là điều có thể xảy ra bất cứ lúc nào.</p>
+      <p>Máy chủ đã bị thực thi mã dưới tài khoản dịch vụ, có web shell và có khả năng lộ MachineKey. Dữ liệu hiện có chưa chứng minh lateral movement hoặc truy cập tài liệu, vì vậy tôi xem đây là phạm vi cần threat hunt tiếp thay vì khẳng định đã xảy ra.</p>
 
       <h2 id="remediation">8. Kế hoạch Ứng phó (Incident Response)</h2>
       <ol class="step-list">
@@ -158,7 +159,7 @@
         <tbody>
           <tr><td><strong>IPv4</strong></td><td><span class="ioc">107.191.58.76</span></td><td>IP thực hiện tấn công</td></tr>
           <tr><td><strong>HTTP Header</strong></td><td><code>Referer: /_layouts/SignOut.aspx</code></td><td>Dấu hiệu Bypass xác thực</td></tr>
-          <tr><td><strong>Web Shell</strong></td><td><code>...\TEMPLATE\LAYOUTS\spinstall0.aspx</code></td><td>Tập tin Backdoor</td></tr>
+          <tr><td><strong>Web Shell</strong></td><td><code>TEMPLATE\LAYOUTS\spinstall0.aspx</code></td><td>Tập tin duy trì truy cập</td></tr>
           <tr><td><strong>Behavior</strong></td><td><code>w3wp.exe</code> sinh ra <code>powershell.exe</code> và <code>csc.exe</code></td><td>Chuỗi hành vi hậu khai thác</td></tr>
           <tr><td><strong>Command</strong></td><td><code>powershell.exe -EncodedCommand</code></td><td>Thực thi mã ẩn</td></tr>
         </tbody>
@@ -169,7 +170,7 @@
   </main>
   
   <footer class="footer"><div class="wrap text-center"><p class="small text-muted">© 2026 Nguyen Thai Ngoc. Built for Security & Forensics Portfolios.</p></div></footer>
-  <script src="/assets/js/main.js"></script>
-  <script src="/assets/js/premium.js"></script>
+  <script src="/assets/js/main.js?v=20260930b"></script>
+  <script src="/assets/js/premium.js?v=20260930b"></script>
 </body>
 </html>

@@ -4,12 +4,18 @@
   <title>Nguyen Thai Ngoc — Security Portfolio</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SOC and threat hunting portfolio of Nguyen Thai Ngoc, featuring incident investigations, network forensics, malware analysis and DFIR writeups.">
+  <link rel="canonical" href="https://tngoc1810.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Nguyen Thai Ngoc — Security Portfolio">
+  <meta property="og:description" content="SOC investigations, threat hunting, network forensics and malware analysis writeups.">
+  <meta property="og:url" content="https://tngoc1810.github.io/">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/premium.css">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
 </head>
 
 <body>
@@ -56,7 +62,7 @@
             <div class="terminal-body" id="terminal-body">
               <div class="term-line"><span class="prompt">guest@thaingoc:~$</span> <span class="typing">./sysinfo.sh</span></div>
               <div class="term-output">Initializing SOC Dashboard...<br>Status: Secure. All systems operational.<br><br><span class="muted">Type <span class="prompt">help</span> to view available commands.</span></div>
-              <div class="term-line"><span class="prompt">guest@thaingoc:~$</span> <input type="text" id="term-input" autocomplete="off" spellcheck="false" autofocus></div>
+              <div class="term-line"><span class="prompt">guest@thaingoc:~$</span> <input type="text" id="term-input" aria-label="Portfolio terminal command" autocomplete="off" spellcheck="false" autofocus></div>
             </div>
           </div>
 
@@ -81,7 +87,7 @@
 
           <div class="profile-links">
             <a class="icon-pill" href="https://cyberdefenders.org/p/tngoc/" target="_blank" rel="noopener noreferrer" aria-label="CyberDefenders profile">CD</a>
-            <a class="icon-pill" href="https://www.linkedin.com/in/ngoc-thai-8343023b4/?skipRedirect=true" target="_blank">in</a>
+            <a class="icon-pill" href="https://www.linkedin.com/in/ngoc-thai-8343023b4/?skipRedirect=true" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">in</a>
           </div>
 
           <p class="small">
@@ -100,10 +106,10 @@
 
       <section class="section">
         <div class="section-head">
-          <h2 class="section-title">Current Highlights</h2>
+          <h2 class="section-title">Featured Investigations</h2>
           <p class="section-desc">
-            A focused snapshot of my latest published work and current cybersecurity direction.
-            New writeups will be added here after they are completed and polished.
+            Four investigations that best represent how I work with alerts, endpoint logs,
+            packet captures and incident timelines.
           </p>
         </div>
 
@@ -112,10 +118,10 @@
           <a class="card" href="/writeups/soc/soc342/">
             <div class="card-top">
               <span class="badge">LetsDefend</span>
-              <span class="badge secondary">New</span>
+              <span class="badge secondary">Featured</span>
             </div>
             <h3>SOC342 &ndash; CVE-2025-53770 SharePoint</h3>
-            <p>Incident Response investigation of a critical Zero-day exploit (ToolShell) on a SharePoint server, covering auth bypass, RCE, and Web Shell persistence.</p>
+            <p>Alert triage and incident response for a SharePoint ToolShell intrusion, correlating the web request with EDR evidence, web-shell deployment and MachineKey theft.</p>
             <div class="tags">
               <span class="tag">Incident Response</span>
               <span class="tag">Web Shell</span>
@@ -126,10 +132,10 @@
           <a class="card" href="/writeups/tryhackme/tempest/">
             <div class="card-top">
               <span class="badge">TryHackMe</span>
-              <span class="badge secondary">New</span>
+              <span class="badge secondary">Featured</span>
             </div>
             <h3>Tempest</h3>
-            <p>End-to-end Threat Hunting and DFIR report. From malicious macro documents to C2 traffic correlation, utilizing Sysmon, Brim, and CyberChef.</p>
+            <p>A Windows compromise reconstructed from Sysmon, Windows Event Logs and PCAP evidence, from document execution to C2, privilege escalation and persistence.</p>
             <div class="tags">
               <span class="tag">DFIR</span>
               <span class="tag">Threat Hunting</span>
@@ -137,31 +143,31 @@
             </div>
           </a>
 
-          <a class="card" href="/writeups/malware/fakegpt/">
+          <a class="card" href="/writeups/tryhackme/boogeyman-3/">
             <div class="card-top">
-              <span class="badge">Malware Analysis</span>
-              <span class="badge secondary">New</span>
+              <span class="badge">TryHackMe</span>
+              <span class="badge secondary">Featured</span>
             </div>
-            <h3>FakeGPT Stealer</h3>
-            <p>Static and dynamic analysis of a FakeGPT info-stealer malware. Extracting C2 addresses, identifying persistence mechanisms, and uncovering data exfiltration flows.</p>
+            <h3>Boogeyman 3</h3>
+            <p>An Elastic/Kibana investigation that follows a phishing intrusion through execution, persistence, credential access, lateral movement and domain-level activity.</p>
             <div class="tags">
-              <span class="tag">Reverse Engineering</span>
-              <span class="tag">Malware</span>
-              <span class="tag">Info-Stealer</span>
+              <span class="tag">Elastic</span>
+              <span class="tag">Sysmon</span>
+              <span class="tag">Incident Response</span>
             </div>
           </a>
 
-          <a class="card" href="/writeups/reverse/orbital-docking/">
+          <a class="card" href="/writeups/tryhackme/masterminds/">
             <div class="card-top">
-              <span class="badge">Reverse Engineering</span>
-              <span class="badge secondary">New</span>
+              <span class="badge">Threat Hunting</span>
+              <span class="badge secondary">Featured</span>
             </div>
-            <h3>Orbital Docking Handshake</h3>
-            <p>Dissecting a custom authentication protocol. Involves reverse engineering a binary, analyzing assembly instructions, and bypassing anti-debugging techniques.</p>
+            <h3>Masterminds</h3>
+            <p>Network threat hunting across three PCAPs, using Brim and Suricata to trace payload delivery, C2 patterns and distinct malware activity.</p>
             <div class="tags">
-              <span class="tag">RE</span>
-              <span class="tag">Assembly</span>
-              <span class="tag">Ghidra</span>
+              <span class="tag">Brim</span>
+              <span class="tag">PCAP</span>
+              <span class="tag">Suricata</span>
             </div>
           </a>
 
@@ -216,13 +222,13 @@
     <div class="wrap">
       <p>© Nguyen Thai Ngoc · Security Portfolio</p>
       <div class="footer-links">
-        <a href="https://github.com/tngoc1810" target="_blank">GitHub</a>
+        <a href="https://github.com/tngoc1810" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="/contact/">Contact</a>
       </div>
     </div>
   </footer>
 
-  <script src="/assets/js/main.js"></script>
-  <script src="/assets/js/premium.js"></script>
+  <script src="/assets/js/main.js?v=20260930b"></script>
+  <script src="/assets/js/premium.js?v=20260930b"></script>
 </body>
 </html>
