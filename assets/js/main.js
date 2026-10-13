@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
   initBootScreen();
-  initCyberBackground();
+  if (document.body.dataset.visualStyle !== "editorial") initCyberBackground();
   setupFilters();
   initTocActiveHighlight();
   initMobileToc();
   initScrollReveal();
-  initCardTilt();
-  initSocStatusBar();
+  if (document.body.dataset.visualStyle !== "editorial") initCardTilt();
+  if (document.body.dataset.visualStyle !== "editorial") initSocStatusBar();
   initTerminal();
 });
 
@@ -62,11 +62,12 @@ function initTerminal() {
   if (!input || !body) return;
 
   const commands = {
-    "help": "Available commands: \n- whoami: About me\n- contact: How to reach me\n- certs: My certifications\n- writeups: View latest writeups\n- sudo: Run command as root\n- clear: Clear terminal",
-    "whoami": "guest@thaingoc\nName: Nguyen Thai Ngoc\nRole: SOC Analyst & Threat Hunter\nLocation: Vietnam\nFocus: Digital Forensics, Incident Response, Malware Analysis, Reverse Engineering",
+    "help": "Available commands: \n- whoami: About me\n- contact: How to reach me\n- certs: My certifications\n- writeups: View latest writeups\n- projects: Explore SOC Investigation & Operations\n- sudo: Run command as root\n- clear: Clear terminal",
+    "whoami": "guest@thaingoc\nName: Nguyen Thai Ngoc\nRole: SOC Analyst intern candidate\nLocation: Vietnam\nFocus: Digital Forensics, Incident Response, Malware Analysis, Reverse Engineering",
     "contact": "Email: nguyenvanan01441@gmail.com\nLinkedIn: linkedin.com/in/ngoc-thai-8343023b4",
     "certs": "- CyberJutsu Blue Team 2026\n- Qualys VMDR\n- Security Blue Team Junior Analyst\n- Splunk Security Operations & Defense Analyst\n- TryHackMe SOC Level 1",
     "writeups": "Recent cases: SOC342, SOC137, Masterminds, Tempest, FakeGPT Malware, Orbital Docking. Check /writeups/ for more.",
+    "projects": "SOC Investigation & Operations v6.1.0\n8 documented cases; 170 regression tests.\nRead /projects/soc-investigation/ or github.com/tngoc1810/soc-investigation-lab",
     "sudo": "guest is not in the sudoers file. This incident will be reported.",
     "ls": "achievements/  assets/  contact/  cv/  projects/  writeups/  index.html",
     "cd": "bash: cd: permission denied",
@@ -82,7 +83,12 @@ function initTerminal() {
 
       const line = document.createElement("div");
       line.className = "term-line";
-      line.innerHTML = `<span class="prompt">guest@thaingoc:~$</span> <span>${val}</span>`;
+      const prompt = document.createElement("span");
+      prompt.className = "prompt";
+      prompt.textContent = "guest@thaingoc:~$";
+      const entered = document.createElement("span");
+      entered.textContent = val;
+      line.append(prompt, document.createTextNode(" "), entered);
       input.parentElement.before(line);
 
       if (val === "clear") {

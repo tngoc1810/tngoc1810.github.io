@@ -43,7 +43,7 @@ This portfolio documents my learning progress, hands-on labs, CTF writeups, cert
 |---|---|
 | Home | Main landing page and featured highlights |
 | Writeups | SOC, CTF, DFIR and Blue Team writeups |
-| Projects | Practical security projects and future project work |
+| Projects | SOC Investigation & Operations: case study, source, release and verification evidence |
 | Achievements | Certificates, CTF milestones and learning progress |
 | Contact | Email and professional links |
 
@@ -74,3 +74,9 @@ I am building this portfolio around practical Blue Team skills:
 <p align="center">
   <sub>Built as a public learning portfolio for SOC, Blue Team, DFIR, and cybersecurity writeups.</sub>
 </p>
+
+## Featured project
+
+[SOC Investigation & Operations](https://tngoc1810.github.io/projects/soc-investigation/) combines Windows evidence, process reconstruction, bounded packet analysis, analyst workflow and verified service handoff. The case study links to the v6.1 source, eight cases and retained validation results, with public, constructed and native proof scopes kept explicit.
+
+The site uses static HTML, shared CSS and progressive JavaScript enhancements. No build step is required. Preview from the repository root with `python -m http.server 8770 --bind 127.0.0.1`.

@@ -37,7 +37,7 @@ function initReadingProgress() {
 }
 
 function initMagneticButtons() {
-  if (window.matchMedia("(hover: none)").matches) return;
+  if (document.body.dataset.visualStyle === "editorial" || window.matchMedia("(hover: none)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   const buttons = document.querySelectorAll(".btn");
   buttons.forEach(btn => {
@@ -54,7 +54,7 @@ function initMagneticButtons() {
 function initImageLightbox() {
   // Only on writeup pages
   const isWriteupsPage = location.pathname.includes("writeups");
-  if (!isWriteupsPage) return;
+  if (!isWriteupsPage && !location.pathname.includes("/projects/soc-investigation/")) return;
 
   const lightbox = document.createElement("div");
   lightbox.id = "img-lightbox";
@@ -66,7 +66,7 @@ function initImageLightbox() {
   lightbox.appendChild(lightboxImg);
   document.body.appendChild(lightbox);
 
-  const images = document.querySelectorAll(".article-card img, article img, .evidence img");
+  const images = document.querySelectorAll(".article-card img, article img, .evidence img, .case-content .project-screen img");
   
   let lastFocusedImage = null;
   images.forEach(img => {

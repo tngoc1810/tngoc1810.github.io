@@ -9,11 +9,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261013">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261013">
 </head>
-<body>
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">ThaiNgoc :~$</a><nav class="nav"><a href="/">Home</a><a href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+<body data-visual-style="editorial">
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page"><div class="wrap article-layout">
     <aside class="toc glass-card"><div class="toc-title">Contents</div><a href="#summary">How I handled it</a><a href="#info">Lab info</a><a href="#triage">PCAP triage</a><a href="#smb">SMB/SSH context</a><a href="#tomcat">Tomcat service</a><a href="#recon">Recon</a><a href="#auth">Manager access</a><a href="#upload">WAR upload</a><a href="#shell">Shell & persistence</a><a href="#enrichment">IP enrichment</a><a href="#timeline">Timeline</a><a href="#ioc">IOCs</a><a href="#answers">Key answers</a></aside>
     <article class="article-card glass">
@@ -45,7 +46,8 @@ crontab -l
       <section id="lessons" class="glass-card section-card"><h2>Lessons learned</h2><p>This lab reinforced a practical network-forensics workflow: start broad, map hosts, identify services, then pivot into protocol-specific evidence. The most useful habit was checking HTTP response codes while decoding Basic Auth. A decoded credential alone is not proof of success; <code>401</code> means failed, while <code>200 OK</code> plus a session cookie proves access.</p><p>The final chain was only clear after connecting several pieces together: scan traffic, Tomcat Manager access, WAR upload, deployed path access, reverse shell commands and cron persistence.</p></section>
     </article>
   </main>
-  <script src="/assets/js/main.js?v=20260930b"></script>
-<script src="/assets/js/premium.js?v=20260930b"></script>
+  <script src="/assets/js/main.js?v=20261013"></script>
+<script src="/assets/js/premium.js?v=20261013"></script>
+<script src="/assets/js/studio.js?v=20261013"></script>
 </body>
 </html>

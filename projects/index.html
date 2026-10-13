@@ -1,75 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Projects — Nguyen Thai Ngoc</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Security portfolio page of Nguyen Thai Ngoc.">
+  <title>Security Projects — Nguyen Thai Ngoc</title>
+  <meta name="description" content="Practical security engineering projects by Nguyen Thai Ngoc. SOC investigation, Windows log detection, packet analysis and verified evidence handoff.">
   <link rel="canonical" href="https://tngoc1810.github.io/projects/">
-
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Security Projects — Nguyen Thai Ngoc">
+  <meta property="og:description" content="Practical security engineering projects by Nguyen Thai Ngoc. SOC investigation, Windows log detection, packet analysis and verified evidence handoff.">
+  <meta property="og:url" content="https://tngoc1810.github.io/projects/">
+  <meta name="theme-color" content="#0b1016">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20260930b">
-<link rel="stylesheet" href="/assets/css/premium.css?v=20260930b">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261013">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013">
+  <link rel="stylesheet" href="/assets/css/studio.css?v=20261013">
 </head>
+<body data-visual-style="editorial">
+  <header class="topbar"><div class="wrap topbar-inner">
+    <a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="/">Home</a><a href="/projects/">Projects</a><a href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a>
+    </nav>
+  </div></header>
 
-<body>
-  <header class="topbar">
-    <div class="wrap topbar-inner">
-      <a class="brand" href="/">ThaiNgoc :~$</a>
+  <main class="page"><div class="wrap">
+    <section class="project-intro"><div class="eyebrow">Projects / Security engineering</div><h1>Building the tools<br>behind the investigation.</h1><p class="lead">My project work connects analysis with implementation: collecting evidence, making detections explainable and keeping decisions reviewable when the system encounters missing data or delivery failures.</p></section>
+    <div class="featured-project">
+  <div class="featured-copy">
+    <div class="project-meta"><span class="badge">Independent project</span><span class="badge secondary">v6.1.0</span></div>
+    <h3>SOC Investigation<br>&amp; Operations</h3>
+    <p>From a Windows event or packet to a decision another analyst can check. A single-workstation system for detection, investigation, telemetry review and evidence handoff.</p>
+    <div class="project-numbers"><div><strong>08</strong><span>documented cases</span></div><div><strong>170</strong><span>v6.1 regression tests</span></div><div><strong>8 GB</strong><span>laptop design target</span></div></div>
+    <div class="tags"><span class="tag">Python</span><span class="tag">SQLite</span><span class="tag">Windows logs</span><span class="tag">PCAP</span></div>
+    <div class="cta-row"><a class="btn primary" href="/projects/soc-investigation/">Explore the project <span aria-hidden="true">↗</span></a><a class="btn" href="https://github.com/tngoc1810/soc-investigation-lab" target="_blank" rel="noopener noreferrer">Source code ↗</a></div>
+  </div>
+  <figure class="project-screen">
+    <div class="screen-chrome"><div class="screen-toolbar" aria-hidden="true"><i></i><i></i><i></i><span>soc-investigation / service-readiness</span></div><img src="/assets/media/projects/soc-readiness.jpg" alt="SOC service-readiness report showing two constructed assets, missing telemetry fields and open alerts" width="1265" height="889" loading="lazy" decoding="async"></div>
+    <figcaption>Actual v6 readiness interface · controlled synthetic data. Snapshot retained in the public project.</figcaption>
+  </figure>
+</div>
+    <section class="section"><div class="section-heading"><div><span class="mono-label">What is documented</span><h2 class="section-title">More than the interface.</h2></div></div><div class="method-grid"><div class="method-step"><span class="mono-label">Design</span><h3>Why the system works this way</h3><p>Source boundaries, data identity, analyst revisions and operational tradeoffs are recorded alongside the implementation.</p></div><div class="method-step"><span class="mono-label">Evidence</span><h3>What was actually checked</h3><p>Public and constructed sources are labeled separately. Tests, CI results and retained screenshots show the scope of each verification.</p></div><div class="method-step"><span class="mono-label">Limits</span><h3>Where the conclusions stop</h3><p>A single-workstation lab has different guarantees from a production SOC. The case study makes those boundaries explicit.</p></div></div></section>
+    <div class="section contact-band"><div><h2>Prefer to start with an investigation?</h2><p>The writeup library covers SOC labs, PCAP analysis, malware triage and reverse engineering.</p></div><a class="btn" href="/writeups/">Read the writeups ↗</a></div>
+  </div></main>
 
-      <nav class="nav">
-        <a href="/">Home</a>
-        <a href="/writeups/">Writeups</a>
-        <a href="/achievements/">Achievements</a>
-        <a href="/contact/">Contact</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="page">
-    <div class="wrap">
-      <section class="hero">
-        <div class="hero-copy glass">
-          <div class="eyebrow">Projects</div>
-
-          <h1>Projects<br>Not Published Yet</h1>
-
-          <p class="lead">
-            I have not published standalone security projects yet. For now, my public work is focused on writeups, lab notes, certificates and cybersecurity learning progress.
-          </p>
-
-          <div class="cta-row">
-            <a class="btn primary" href="/writeups/">View Writeups</a>
-            <a class="btn" href="/achievements/">Achievements</a>
-            <a class="btn" href="/contact/">Contact</a>
-          </div>
-        </div>
-
-        <aside class="profile-card glass">
-          <div class="profile-mini">
-            <img class="avatar" src="/assets/media/avatar.png" alt="avatar">
-
-            <div>
-              <h2>No Public Projects Yet</h2>
-              <p>Learning • Labs • Writeups</p>
-            </div>
-          </div>
-
-          <p class="small">
-            This section is intentionally kept simple to avoid giving the wrong impression. Real projects will be added only after they are completed, documented and useful.
-          </p>
-
-          <div class="quote">
-            “Build honestly. Publish when ready.”
-          </div>
-        </aside>
-      </section>
-    </div>
-  </main>
-
-  <script src="/assets/js/main.js?v=20260930b"></script>
-<script src="/assets/js/premium.js?v=20260930b"></script>
+  <footer class="site-footer"><div class="wrap">
+    <p>© Nguyen Thai Ngoc · Learning through investigation.</p>
+    <div class="footer-links"><a href="https://github.com/tngoc1810" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://www.linkedin.com/in/ngoc-thai-8343023b4/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="/contact/">Contact</a></div>
+  </div></footer>
+  <script src="/assets/js/main.js?v=20261013"></script>
+  <script src="/assets/js/premium.js?v=20261013"></script>
+  <script src="/assets/js/studio.js?v=20261013"></script>
 </body>
 </html>
