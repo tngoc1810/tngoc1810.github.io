@@ -602,6 +602,7 @@ function setupFilters() {
       }
     }
     if (emptyState) emptyState.style.display = visibleCount === 0 ? "block" : "none";
+    document.dispatchEvent(new CustomEvent("portfolio:filter-change", { detail: { visible: visibleCount, total: cards.length } }));
   }
 
   for (const chip of chips) chip.addEventListener("click", () => {

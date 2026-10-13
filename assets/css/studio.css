@@ -275,3 +275,34 @@ body.is-scrolling { pointer-events: auto; }
   .reveal-item { opacity: 1; transform: none; filter: none; }
   .card:hover, .btn:hover { transform: none; }
 }
+
+/* Clearer entry points for recruiters and easier library navigation. */
+.landing-hero .identity-title { font-size: clamp(42px,4.5vw,64px); line-height: 1.15; letter-spacing: -.05em; }
+.identity-title > span { display: block; margin-top: 12px; font-size: clamp(24px,2.5vw,36px); font-weight: 400; color: var(--green); letter-spacing: -.03em; }
+.start-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin-top: 25px; font-size: 11px; }
+.start-links > span { color: var(--subtle); }
+.start-links a { color: var(--green); text-decoration: underline; text-underline-offset: 5px; }
+.library-summary { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin: -10px 0 22px; min-height: 32px; }
+.library-summary p { color: var(--subtle); font-size: 12px; }
+.reset-filters { border: 1px solid var(--border); background: var(--surface); border-radius: 6px; color: var(--green); padding: 7px 11px; font: 500 11px Inter,sans-serif; cursor: pointer; }
+.reset-filters[hidden] { display: none; }
+.reset-filters:hover { border-color: var(--border-strong); }
+.contact-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; margin-top: 12px; }
+.contact-panel { padding: 32px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); min-width: 0; }
+.contact-panel h2 { font: 500 24px 'Space Grotesk',sans-serif; letter-spacing: -.03em; margin: 12px 0 16px; }
+.contact-panel p { color: var(--muted); font-size: 14px; line-height: 1.85; }
+.contact-email { display: inline-block; color: var(--green); font: 400 clamp(15px,1.7vw,22px) 'JetBrains Mono',monospace; overflow-wrap: anywhere; margin: 12px 0 2px; }
+.contact-status { min-height: 25px; margin-top: 14px; font-size: 12px !important; }
+.contact-channel { display: block; padding: 16px 0; border-top: 1px solid var(--border); }
+.contact-channel strong { display: flex; justify-content: space-between; font-weight: 500; font-size: 14px; color: var(--text); }
+.contact-channel small { display: block; margin-top: 4px; color: var(--subtle); font-size: 12px; }
+.contact-channel:hover strong { color: var(--green); }
+.contact-context { margin-top: 28px; }
+@media (max-width: 760px) {
+  .landing-hero .identity-title { font-size: clamp(36px,8.5vw,52px); }
+  .identity-title > span { font-size: clamp(23px,5.5vw,30px); line-height: 1.35; }
+  .contact-layout { grid-template-columns: 1fr; }
+  .contact-panel { padding: 24px; }
+  .contact-email { font-size: 14px; }
+  .library-summary { gap: 12px; }
+}
