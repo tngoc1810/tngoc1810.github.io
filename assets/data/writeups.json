@@ -1,0 +1,391 @@
+[
+  {
+    "url": "/writeups/soc/soc342/",
+    "title": "SOC342 – CVE-2025-53770",
+    "description": "SharePoint ToolShell Auth Bypass and RCE analysis. True positive investigation resulting in web shell discovery.",
+    "platform": "LetsDefend",
+    "categories": [
+      "letsdefend",
+      "soc",
+      "triage",
+      "incident-response",
+      "sharepoint",
+      "cve-2025-53770"
+    ],
+    "image": "/assets/media/writeups/soc/soc342/image1.png",
+    "figures": 6,
+    "minutes": 6,
+    "number": "01"
+  },
+  {
+    "url": "/writeups/ctf/whois/",
+    "title": "WHO IS WHOIS",
+    "description": "Exploiting an SSRF vulnerability to smuggle an SSTI payload into a backend Redis instance via BITOP XOR, ultimately achieving RCE.",
+    "platform": "CTF",
+    "categories": [
+      "ctf",
+      "web-exploitation",
+      "ssrf",
+      "ssti",
+      "redis"
+    ],
+    "image": "/assets/media/writeups/ctf/whois/image1.png",
+    "figures": 11,
+    "minutes": 4,
+    "number": "02"
+  },
+  {
+    "url": "/writeups/tryhackme/masterminds/",
+    "title": "Masterminds",
+    "description": "Threat Hunting and Network Traffic Analysis investigation using Brim to identify a phishing compromise and track C2 activity.",
+    "platform": "TryHackMe",
+    "categories": [
+      "tryhackme",
+      "soc",
+      "blue-team",
+      "threat-hunting",
+      "network-traffic-analysis",
+      "pcap",
+      "brim"
+    ],
+    "image": "/assets/media/writeups/tryhackme/masterminds/image1.png",
+    "figures": 14,
+    "minutes": 6,
+    "number": "03"
+  },
+  {
+    "url": "/writeups/reverse/orbital-docking/",
+    "title": "Orbital Docking Handshake",
+    "description": "A reverse engineering challenge analyzing an ARM 64-bit executable to recover a docking phrase and compute an alignment window using Python scripts.",
+    "platform": "CTF",
+    "categories": [
+      "ctf",
+      "reverse-engineering",
+      "ghidra",
+      "python"
+    ],
+    "image": "/assets/media/writeups/reverse/orbital-docking/image1.png",
+    "figures": 13,
+    "minutes": 4,
+    "number": "04"
+  },
+  {
+    "url": "/writeups/pwn/barbieland/",
+    "title": "Barbieland Buffer Blowout",
+    "description": "Binary exploitation challenge covering reverse engineering, token bypass, and a Ret2Win buffer overflow utilizing ROP gadgets to correct stack alignment.",
+    "platform": "CTF",
+    "categories": [
+      "ctf",
+      "pwn",
+      "binary-exploitation",
+      "buffer-overflow",
+      "ret2win",
+      "rop"
+    ],
+    "image": "/assets/media/writeups/pwn/barbieland/image1.png",
+    "figures": 13,
+    "minutes": 5,
+    "number": "05"
+  },
+  {
+    "url": "/writeups/soc/soc137/",
+    "title": "SOC137 - Malicious File Download Attempt",
+    "description": "Checking a blocked document download against sandbox, network and endpoint evidence before closing the alert.",
+    "platform": "LetsDefend",
+    "categories": [
+      "letsdefend",
+      "soc",
+      "blue-team",
+      "malware-analysis"
+    ],
+    "image": "/assets/media/writeups/soc/soc137/image1.png",
+    "figures": 4,
+    "minutes": 4,
+    "number": "06"
+  },
+  {
+    "url": "/writeups/tryhackme/boogeyman-3/",
+    "title": "Boogeyman 3",
+    "description": "Elastic/Kibana investigation following a phishing intrusion from disguised attachment execution to persistence, lateral movement, domain controller activity and impact staging.",
+    "platform": "TryHackMe",
+    "categories": [
+      "tryhackme",
+      "soc",
+      "blue-team",
+      "dfir",
+      "incident-response",
+      "elastic",
+      "kibana",
+      "sysmon",
+      "powershell",
+      "winrm",
+      "dcsync",
+      "ransomware"
+    ],
+    "image": "/assets/media/writeups/tryhackme/boogeyman-3/01-phishing-email-overview.png",
+    "figures": 27,
+    "minutes": 6,
+    "number": "07"
+  },
+  {
+    "url": "/writeups/tryhackme/tempest/",
+    "title": "Tempest",
+    "description": "Full Windows incident reconstruction using Sysmon, Windows Event Logs and packet capture evidence, following the case from document execution to elevated access and persistence.",
+    "platform": "TryHackMe",
+    "categories": [
+      "tryhackme",
+      "soc",
+      "blue-team",
+      "dfir",
+      "incident-response",
+      "sysmon",
+      "windows-evtx",
+      "pcap",
+      "brim",
+      "wireshark",
+      "cve",
+      "chisel",
+      "printspoofer",
+      "winrm",
+      "persistence"
+    ],
+    "image": "/assets/media/writeups/tryhackme/tempest/01-artifact-sha256-verification.png",
+    "figures": 36,
+    "minutes": 16,
+    "number": "08"
+  },
+  {
+    "url": "/writeups/tryhackme/shadow-trace/",
+    "title": "Shadow Trace",
+    "description": "Static triage of a suspicious Windows updater, covering metadata, imports, strings, capabilities and IOC correlation.",
+    "platform": "TryHackMe",
+    "categories": [
+      "tryhackme",
+      "soc",
+      "blue-team",
+      "malware-analysis",
+      "dfir"
+    ],
+    "image": "/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-01-detect-it-easy-overview.png",
+    "figures": 20,
+    "minutes": 8,
+    "number": "09"
+  },
+  {
+    "url": "/writeups/tryhackme/boogeyman-2/",
+    "title": "Boogeyman 2",
+    "description": "SOC investigation of HR document activity, memory forensics, process validation and persistence evidence.",
+    "platform": "TryHackMe",
+    "categories": [
+      "tryhackme",
+      "soc",
+      "blue-team",
+      "dfir",
+      "memory-forensics"
+    ],
+    "image": "/assets/media/writeups/tryhackme/boogeyman-2/boogeyman2-01-email-preview.png",
+    "figures": 20,
+    "minutes": 7,
+    "number": "10"
+  },
+  {
+    "url": "/writeups/tryhackme/boogeyman-1/",
+    "title": "Boogeyman 1",
+    "description": "End-to-end SOC investigation covering endpoint and network evidence, credential discovery and exfiltration analysis.",
+    "platform": "TryHackMe",
+    "categories": [
+      "tryhackme",
+      "soc",
+      "blue-team",
+      "dfir",
+      "pcap"
+    ],
+    "image": "/assets/media/writeups/tryhackme/boogeyman-1/boogeyman1-01-email-thunderbird.png",
+    "figures": 20,
+    "minutes": 7,
+    "number": "11"
+  },
+  {
+    "url": "/writeups/htb/reaper/",
+    "title": "HTB Sherlock: Reaper",
+    "description": "Windows authentication investigation correlating Security.evtx and PCAP evidence.",
+    "platform": "HackTheBox",
+    "categories": [
+      "hackthebox",
+      "htb",
+      "sherlock",
+      "soc",
+      "blue-team",
+      "windows",
+      "evtx",
+      "pcap"
+    ],
+    "image": "/assets/media/writeups/htb-reaper/01-pcap-forela-wkstn001-nbns-mapping.png",
+    "figures": 7,
+    "minutes": 6,
+    "number": "12"
+  },
+  {
+    "url": "/writeups/soc/phishstrike/",
+    "title": "PhishStrike Lab",
+    "description": "Email header and threat-intelligence investigation of an invoice-themed case.",
+    "platform": "CyberDefenders",
+    "categories": [
+      "cyberdefenders",
+      "threat-intel",
+      "soc",
+      "phishing",
+      "malware-analysis"
+    ],
+    "image": "/assets/media/writeups/soc/phishstrike/phishstrike-01-email-header-from-messageid-subject.png",
+    "figures": 23,
+    "minutes": 8,
+    "number": "13"
+  },
+  {
+    "url": "/writeups/soc/tomcat-takeover/",
+    "title": "Tomcat Takeover Lab",
+    "description": "PCAP investigation of Apache Tomcat activity, manager access and persistence evidence.",
+    "platform": "CyberDefenders",
+    "categories": [
+      "cyberdefenders",
+      "network-forensics",
+      "soc",
+      "investigation"
+    ],
+    "image": "/assets/media/writeups/soc/tomcat-takeover/tomcat-takeover-01-capture-properties.png",
+    "figures": 27,
+    "minutes": 10,
+    "number": "14"
+  },
+  {
+    "url": "/writeups/htb/bft/",
+    "title": "HTB Sherlock: BFT",
+    "description": "Windows NTFS forensics investigation using MFTECmd, Timeline Explorer and HxD.",
+    "platform": "HackTheBox",
+    "categories": [
+      "hackthebox",
+      "htb",
+      "sherlock",
+      "soc",
+      "blue-team",
+      "windows",
+      "forensics",
+      "dfir",
+      "ntfs"
+    ],
+    "image": "/assets/media/writeups/htb-bft/01-mftecmd-parse-output.png",
+    "figures": 13,
+    "minutes": 11,
+    "number": "15"
+  },
+  {
+    "url": "/writeups/htb/unit42/",
+    "title": "HTB Sherlock: Unit42",
+    "description": "Windows Sysmon investigation covering process creation, file activity, DNS queries and network connections.",
+    "platform": "HackTheBox",
+    "categories": [
+      "hackthebox",
+      "htb",
+      "sherlock",
+      "soc",
+      "blue-team",
+      "windows",
+      "sysmon",
+      "malware"
+    ],
+    "image": "/assets/media/writeups/htb-unit42/filter_eventid11.png",
+    "figures": 12,
+    "minutes": 5,
+    "number": "16"
+  },
+  {
+    "url": "/writeups/htb/brutus/",
+    "title": "HTB Sherlock: Brutus",
+    "description": "Linux authentication investigation using auth.log and wtmp to reconstruct account activity.",
+    "platform": "HackTheBox",
+    "categories": [
+      "hackthebox",
+      "htb",
+      "sherlock",
+      "soc",
+      "blue-team",
+      "linux",
+      "log-analysis",
+      "ssh"
+    ],
+    "image": "/assets/media/writeups/htb-brutus/01-initial-authlog-inspection.png",
+    "figures": 9,
+    "minutes": 7,
+    "number": "17"
+  },
+  {
+    "url": "/writeups/soc/network-analysis/",
+    "title": "Network Analysis – Malware Compromise",
+    "description": "PCAP investigation of a document-based compromise, follow-up binary activity and C2 traffic correlation.",
+    "platform": "BTLO",
+    "categories": [
+      "btlo",
+      "soc",
+      "blue-team",
+      "network-analysis",
+      "network-forensics",
+      "malware",
+      "pcap"
+    ],
+    "image": "/assets/media/writeups/soc/network-analysis/01-pcap-properties.png",
+    "figures": 15,
+    "minutes": 8,
+    "number": "18"
+  },
+  {
+    "url": "/writeups/soc/hawkeye/",
+    "title": "HawkEye Keylogger Exfiltration",
+    "description": "PCAP investigation reconstructing delivery, SMTP logs and credential exfiltration evidence.",
+    "platform": "CyberDefenders",
+    "categories": [
+      "cyberdefenders",
+      "network-forensics",
+      "soc",
+      "investigation"
+    ],
+    "image": null,
+    "figures": 0,
+    "minutes": 9,
+    "number": "19"
+  },
+  {
+    "url": "/writeups/soc/web-investigation/",
+    "title": "Web Investigation Lab",
+    "description": "PCAP investigation of web application attack activity, credential compromise and upload evidence.",
+    "platform": "CyberDefenders",
+    "categories": [
+      "cyberdefenders",
+      "network-forensics",
+      "soc",
+      "investigation",
+      "web"
+    ],
+    "image": "/assets/media/writeups/soc/web-investigation/web-investigation-02-capture-file-properties.png",
+    "figures": 10,
+    "minutes": 10,
+    "number": "20"
+  },
+  {
+    "url": "/writeups/soc/compromised-wordpress-log-analysis/",
+    "title": "Compromised WordPress",
+    "description": "Apache access log investigation of a compromised WordPress site and attacker timeline.",
+    "platform": "BTLO",
+    "categories": [
+      "btlo",
+      "soc",
+      "blue-team",
+      "log-analysis",
+      "wordpress"
+    ],
+    "image": null,
+    "figures": 0,
+    "minutes": 7,
+    "number": "21"
+  }
+]

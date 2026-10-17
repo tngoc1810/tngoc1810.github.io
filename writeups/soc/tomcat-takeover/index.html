@@ -9,12 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261017blue">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017blue">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261017blue">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017atlas">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017atlas">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017atlas">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#080f1f">
-  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017blue">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017atlas">
+  <link rel="stylesheet" href="/assets/css/atlas.css?v=20261017atlas">
 </head>
 <body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">TN</span>Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
@@ -48,10 +49,12 @@ crontab -l
       <section id="answers" class="glass-card section-card"><h2>Key findings / lab answers</h2><div class="answer-card"><strong>Attacker IP:</strong> <code>14.0.0.120</code><span class="why">This IP performed the scan, enumeration, Manager login, WAR upload and received the reverse shell callback.</span></div><div class="answer-card"><strong>Victim Tomcat server:</strong> <code>10.0.0.112</code><span class="why">This host served Tomcat on port <code>8080</code> and later connected back to the attacker.</span></div><div class="answer-card"><strong>Tomcat version:</strong> <code>Apache Tomcat/7.0.88</code><span class="why">The Tomcat landing page and HTTP stream exposed the version.</span></div><div class="answer-card"><strong>Open ports found during scan:</strong> <code>22</code>, <code>8080</code>, <code>8009</code><span class="why">SYN/ACK responses from the victim confirmed these ports were open.</span></div><div class="answer-card"><strong>Enumeration tool:</strong> <code>gobuster/3.6</code><span class="why">The User-Agent appeared during requests to Tomcat management paths.</span></div><div class="answer-card"><strong>Failed credential example:</strong> <code>tomcat:s3cr3t</code><span class="why">The Basic Auth value decoded to this credential but still returned <code>401</code>.</span></div><div class="answer-card"><strong>Valid credential:</strong> <code>admin:tomcat</code><span class="why">The decoded Basic Auth value returned <code>200 OK</code> and a manager session cookie.</span></div><div class="answer-card"><strong>Uploaded WAR file:</strong> <code>JXQOZY.war</code><span class="why">The multipart POST to <code>/manager/html/upload</code> contained this filename.</span></div><div class="answer-card"><strong>Deployed path:</strong> <code>/JXQOZY/</code><span class="why">The server returned <code>200 OK</code> after the attacker accessed the deployed path.</span></div><div class="answer-card"><strong>Execution context:</strong> <code>root</code><span class="why"><code>whoami</code> in the shell stream returned <code>root</code>.</span></div><div class="answer-card"><strong>Persistence method:</strong> <code>cron reverse shell</code><span class="why">The attacker installed a crontab entry that ran a bash reverse shell every minute.</span></div><div class="answer-card"><strong>Persistence callback:</strong> <code>14.0.0.120:443</code><span class="why">The cron command pointed the reverse shell back to this IP and port.</span></div></section>
       <section id="lessons" class="glass-card section-card"><h2>Lessons learned</h2><p>The Basic Auth values needed to be read alongside the server responses. The failed attempt returned <code>401</code>; the successful sequence included <code>200 OK</code> and a manager session cookie.</p><p>The capture links scanning, Manager access, WAR upload, deployed-path access and later shell commands. The persistence command is retained with that sequence.</p></section>
     </article>
-  </main>
-  <script src="/assets/js/main.js?v=20261017blue"></script>
-<script src="/assets/js/premium.js?v=20261017blue"></script>
-<script src="/assets/js/studio.js?v=20261017blue"></script>
-  <script src="/assets/js/journal.js?v=20261017blue"></script>
+  <section class="wrap related-cases" aria-labelledby="related-writeups"><div class="section-heading"><div><span class="mono-label">Continue investigating</span><h2 id="related-writeups">Related case files</h2></div><a class="text-link" href="/writeups/">All writeups ↗</a></div><div class="related-grid"><a class="related-case" href="/writeups/soc/hawkeye/"><div class="case-cover" aria-hidden="true"><div class="cover-pattern"></div><div class="cover-grid"></div><span class="cover-index">CASE / 19</span><span class="cover-platform">CyberDefenders</span><svg class="cover-mark" width="58" height="58" viewBox="0 0 64 64" fill="none"><path d="M32 6 53 15v15c0 14-11 23-21 28C22 53 11 44 11 30V15L32 6Z" stroke="currentColor" stroke-width="1.5"/><path d="m22 32 7 7 14-16" stroke="currentColor" stroke-width="2"/></svg></div><div><span class="mono-label">CyberDefenders</span><h3>HawkEye Keylogger Exfiltration</h3><p>PCAP investigation reconstructing delivery, SMTP logs and credential exfiltration evidence.</p></div></a><a class="related-case" href="/writeups/soc/web-investigation/"><div class="case-cover" aria-hidden="true"><img src="/assets/media/writeups/soc/web-investigation/web-investigation-02-capture-file-properties.png" alt="" width="640" height="360" loading="lazy" decoding="async"><div class="cover-grid"></div><span class="cover-index">CASE / 20</span><span class="cover-platform">CyberDefenders</span><svg class="cover-mark" width="58" height="58" viewBox="0 0 64 64" fill="none"><path d="M32 6 53 15v15c0 14-11 23-21 28C22 53 11 44 11 30V15L32 6Z" stroke="currentColor" stroke-width="1.5"/><path d="m22 32 7 7 14-16" stroke="currentColor" stroke-width="2"/></svg></div><div><span class="mono-label">CyberDefenders</span><h3>Web Investigation Lab</h3><p>PCAP investigation of web application attack activity, credential compromise and upload evidence.</p></div></a></div></section>
+</main>
+  <script src="/assets/js/main.js?v=20261017atlas"></script>
+<script src="/assets/js/premium.js?v=20261017atlas"></script>
+<script src="/assets/js/studio.js?v=20261017atlas"></script>
+  <script src="/assets/js/journal.js?v=20261017atlas"></script>
+  <script src="/assets/js/atlas.js?v=20261017atlas"></script>
 </body>
 </html>

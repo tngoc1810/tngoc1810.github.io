@@ -9,12 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261017blue">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017blue">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261017blue">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017atlas">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017atlas">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017atlas">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#080f1f">
-  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017blue">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017atlas">
+  <link rel="stylesheet" href="/assets/css/atlas.css?v=20261017atlas">
 </head>
 <body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">TN</span>Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
@@ -133,10 +134,12 @@ HostUrl=https://example.com/file.zip</code></pre>
       <h2 id="lessons">Lessons Learned</h2><p>The MFT retained the ZIP name, extraction path, batch-file metadata and resident script content. Those records were enough to recover the C2 address, while execution and network activity remained outside the artifact's scope.</p><div class="pill-row"><span class="pill">NTFS Forensics</span><span class="pill">Timeline Creation</span><span class="pill">File Recovery</span><span class="pill">Disk Forensics</span><span class="pill">Contextual Analysis</span></div><ul><li><strong>NTFS Forensics:</strong> I learned how MFT records preserve file metadata and sometimes small file content.</li><li><strong>Timeline Creation:</strong> I practiced filtering by extension, parent path, timestamp and ADS to reconstruct activity.</li><li><strong>File Recovery:</strong> I recovered resident content directly from the MFT without executing the file.</li><li><strong>Disk Forensics:</strong> I calculated a raw MFT record offset using <code>Entry Number × 1024</code>.</li><li><strong>Contextual Analysis:</strong> I did not call <code>invoice.bat</code> malicious only because it was a <code>.bat</code>. I combined its location, name, origin, timestamp and recovered content to justify the conclusion.</li></ul>
       <div class="callout"><strong>Final conclusion:</strong> Simon Stark downloaded <code>Stage-20240213T093324-001.zip</code> from a Google Cloud Storage URL. The extracted archive contained <code>invoice.bat</code>, a small resident batch stager. By calculating its MFT record offset and inspecting the raw record in HxD, I recovered the embedded C2 IOC: <span class="ioc">43.204.110.203:6666</span>.</div>
     </article>
-  </div></main>
-  <script src="/assets/js/main.js?v=20261017blue"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("home-bg-mode");document.body.classList.add("writeups-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initWriteupBackground(false);}</script>
-<script src="/assets/js/premium.js?v=20261017blue"></script>
-<script src="/assets/js/studio.js?v=20261017blue"></script>
-  <script src="/assets/js/journal.js?v=20261017blue"></script>
+  </div><section class="wrap related-cases" aria-labelledby="related-writeups"><div class="section-heading"><div><span class="mono-label">Continue investigating</span><h2 id="related-writeups">Related case files</h2></div><a class="text-link" href="/writeups/">All writeups ↗</a></div><div class="related-grid"><a class="related-case" href="/writeups/htb/reaper/"><div class="case-cover" aria-hidden="true"><img src="/assets/media/writeups/htb-reaper/01-pcap-forela-wkstn001-nbns-mapping.png" alt="" width="640" height="360" loading="lazy" decoding="async"><div class="cover-grid"></div><span class="cover-index">CASE / 12</span><span class="cover-platform">HackTheBox</span><svg class="cover-mark" width="58" height="58" viewBox="0 0 64 64" fill="none"><path d="M32 6 53 15v15c0 14-11 23-21 28C22 53 11 44 11 30V15L32 6Z" stroke="currentColor" stroke-width="1.5"/><path d="m22 32 7 7 14-16" stroke="currentColor" stroke-width="2"/></svg></div><div><span class="mono-label">HackTheBox</span><h3>HTB Sherlock: Reaper</h3><p>Windows authentication investigation correlating Security.evtx and PCAP evidence.</p></div></a><a class="related-case" href="/writeups/htb/unit42/"><div class="case-cover" aria-hidden="true"><img src="/assets/media/writeups/htb-unit42/filter_eventid11.png" alt="" width="640" height="360" loading="lazy" decoding="async"><div class="cover-grid"></div><span class="cover-index">CASE / 16</span><span class="cover-platform">HackTheBox</span><svg class="cover-mark" width="58" height="58" viewBox="0 0 64 64" fill="none"><path d="M32 6 53 15v15c0 14-11 23-21 28C22 53 11 44 11 30V15L32 6Z" stroke="currentColor" stroke-width="1.5"/><path d="m22 32 7 7 14-16" stroke="currentColor" stroke-width="2"/></svg></div><div><span class="mono-label">HackTheBox</span><h3>HTB Sherlock: Unit42</h3><p>Windows Sysmon investigation covering process creation, file activity, DNS queries and network connections.</p></div></a></div></section>
+</main>
+  <script src="/assets/js/main.js?v=20261017atlas"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("home-bg-mode");document.body.classList.add("writeups-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initWriteupBackground(false);}</script>
+<script src="/assets/js/premium.js?v=20261017atlas"></script>
+<script src="/assets/js/studio.js?v=20261017atlas"></script>
+  <script src="/assets/js/journal.js?v=20261017atlas"></script>
+  <script src="/assets/js/atlas.js?v=20261017atlas"></script>
 </body>
 </html>

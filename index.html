@@ -14,11 +14,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261017blue">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017blue">
-  <link rel="stylesheet" href="/assets/css/studio.css?v=20261017blue">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017atlas">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017atlas">
+  <link rel="stylesheet" href="/assets/css/studio.css?v=20261017atlas">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017blue">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017atlas">
+  <link rel="stylesheet" href="/assets/css/atlas.css?v=20261017atlas">
 </head>
 <body data-visual-style="editorial" data-page-kind="portfolio">
   <header class="topbar"><div class="wrap topbar-inner">
@@ -30,7 +31,7 @@
 
   <main class="page landing"><div class="wrap">
     <section class="landing-hero" aria-labelledby="intro-title">
-      <div class="hero-ambience" aria-hidden="true"><div class="ambient-orb orb-one"></div><div class="ambient-orb orb-two"></div><div class="ambient-grid"></div><canvas id="signal-field"></canvas></div>
+      <div class="hero-ambience" aria-hidden="true"><div class="ambient-orb orb-one"></div><div class="ambient-orb orb-two"></div><div class="ambient-grid"></div><div class="ambient-beam beam-one atlas-animated"></div><div class="ambient-beam beam-two atlas-animated"></div></div>
       <div>
         <div class="eyebrow">SOC Analyst intern candidate</div>
         <h1 id="intro-title" class="identity-title">Nguyen <span class="name-highlight">Thai Ngoc.</span><span class="identity-role">Security Operations Portfolio</span></h1>
@@ -39,13 +40,13 @@
         <p class="hero-identity">Information Security · KMA · Vietnam</p>
         <nav class="start-links" aria-label="Portfolio shortcuts"><span>Start here</span><a href="#project-title">SOC project</a><a href="#investigations-title">Investigations</a><a href="/achievements/">Certificates</a></nav>
       </div>
-      <aside class="analyst-card" aria-label="About Nguyen Thai Ngoc">
-        <span class="mono-label">At a glance</span>
-        <div class="profile-mini"><img class="avatar" src="/assets/media/avatar.png" alt="Thai Ngoc's portfolio avatar" width="64" height="64"><div><h2>Thai Ngoc</h2><p>Information Security · KMA</p></div></div>
-        <p class="profile-note">I'm building my skills through lab investigations and a SOC project. I keep the queries, evidence and limitations alongside each report.</p>
-        <dl class="profile-facts"><div><dt>Focus</dt><dd>SOC &amp; digital forensics</dd></div><div><dt>Working with</dt><dd>Endpoint logs &amp; packets</dd></div><div><dt>Currently seeking</dt><dd>Internship opportunities</dd></div></dl>
-        <div class="profile-footer"><span class="status-label">Seeking a SOC internship</span><a class="text-link" href="https://github.com/tngoc1810" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></div>
-      </aside>
+      <aside class="hero-visual" aria-label="Decorative network globe and areas of practice">
+ <div class="globe-stage" data-renderer="canvas"><div class="globe-halo"></div><canvas id="globe-fallback" aria-hidden="true"></canvas><canvas id="globe-canvas" aria-hidden="true"></canvas><div class="globe-orbit orbit-a atlas-animated" aria-hidden="true"></div><div class="globe-orbit orbit-b atlas-animated" aria-hidden="true"></div></div>
+ <div class="signal-chip chip-endpoint"><span class="signal-symbol" aria-hidden="true">⌘</span><div><strong>Endpoint</strong><span>Windows event logs</span></div></div>
+ <div class="signal-chip chip-network"><span class="signal-symbol" aria-hidden="true">⌁</span><div><strong>Network</strong><span>Packet captures</span></div></div>
+ <div class="signal-chip chip-evidence"><span class="signal-symbol" aria-hidden="true">↗</span><div><strong>Investigation</strong><span>Findings &amp; evidence</span></div></div>
+ <a class="globe-caption" href="/writeups/"><span>21 documented writeups</span><strong>Explore the case files <span aria-hidden="true">↗</span></strong></a>
+</aside>
     </section>
     <div class="practice-strip" aria-label="Areas of practice"><span class="strip-label">Areas of practice</span><span>Detection &amp; triage</span><span>Windows forensics</span><span>Network analysis</span><span>Incident reporting</span></div>
     <section class="section" aria-labelledby="project-title">
@@ -73,7 +74,14 @@
 <a class="card investigation-card" href="/writeups/tryhackme/masterminds/"><span class="case-number">04</span><div><div class="card-top"><span class="badge">TryHackMe</span><span class="badge secondary">Network forensics</span></div><h3>Masterminds</h3><p>Using Brim and Suricata across three packet captures to trace payload delivery, C2 patterns and malware activity.</p><div class="card-bottom"><div class="tags"><span class="tag">Brim</span><span class="tag">Suricata</span><span class="tag">PCAP</span></div><span aria-hidden="true">↗</span></div></div></a>
 </div>
     </section>
-    <section class="section" aria-labelledby="method-title">
+    <section class="section about-section" aria-labelledby="about-title"><div class="about-copy"><span class="mono-label">The person behind the notes</span><h2 id="about-title">Learning by working<br>through the evidence.</h2><p>I’m an Information Security student at KMA, looking for a SOC internship. This portfolio brings together the investigations I’ve written and the SOC system I’m building.</p><div class="about-links"><a class="text-link" href="/achievements/">Certificates &amp; training ↗</a><a class="text-link" href="/contact/">Get in touch ↗</a></div></div><aside class="analyst-card" aria-label="About Nguyen Thai Ngoc">
+        <span class="mono-label">At a glance</span>
+        <div class="profile-mini"><img class="avatar" src="/assets/media/avatar.png" alt="Thai Ngoc's portfolio avatar" width="64" height="64"><div><h2>Thai Ngoc</h2><p>Information Security · KMA</p></div></div>
+        <p class="profile-note">I'm building my skills through lab investigations and a SOC project. I keep the queries, evidence and limitations alongside each report.</p>
+        <dl class="profile-facts"><div><dt>Focus</dt><dd>SOC &amp; digital forensics</dd></div><div><dt>Working with</dt><dd>Endpoint logs &amp; packets</dd></div><div><dt>Currently seeking</dt><dd>Internship opportunities</dd></div></dl>
+        <div class="profile-footer"><span class="status-label">Seeking a SOC internship</span><a class="text-link" href="https://github.com/tngoc1810" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></div>
+      </aside></section>
+<section class="section" aria-labelledby="method-title">
       <div class="section-heading"><div><span class="mono-label">03 / How I approach a case</span><h2 class="section-title" id="method-title">Evidence before conclusions.</h2></div></div>
       <div class="method-grid"><div class="method-step"><span class="mono-label">01 · Establish the source</span><h3>Start with what is recorded.</h3><p>Identify the host, provider, time window and original artifact. Keep enough context to return to the same record.</p></div><div class="method-step"><span class="mono-label">02 · Connect the activity</span><h3>Follow the next useful pivot.</h3><p>Correlate processes, identities and traffic. Separate an observed relationship from one that is only plausible.</p></div><div class="method-step"><span class="mono-label">03 · Make it reviewable</span><h3>Explain what remains unknown.</h3><p>Write the reasoning, alternative explanations and next checks. A useful handoff should survive another analyst's review.</p></div></div>
     </section>
@@ -85,10 +93,11 @@
     <p>© Nguyen Thai Ngoc · Learning through investigation.</p>
     <div class="footer-links"><a href="https://github.com/tngoc1810" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://www.linkedin.com/in/ngoc-thai-8343023b4/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="/contact/">Contact</a></div>
   </div></footer>
-  <script src="/assets/js/main.js?v=20261017blue"></script>
-  <script src="/assets/js/premium.js?v=20261017blue"></script>
-  <script src="/assets/js/studio.js?v=20261017blue"></script>
-  <script src="/assets/js/journal.js?v=20261017blue"></script>
-  <script src="/assets/js/ambient.js?v=20261017blue"></script>
+  <script src="/assets/js/main.js?v=20261017atlas"></script>
+  <script src="/assets/js/premium.js?v=20261017atlas"></script>
+  <script src="/assets/js/studio.js?v=20261017atlas"></script>
+  <script src="/assets/js/journal.js?v=20261017atlas"></script>
+  <script src="/assets/js/ambient.js?v=20261017atlas"></script>
+  <script src="/assets/js/atlas.js?v=20261017atlas"></script>
 </body>
 </html>

@@ -51,7 +51,7 @@ function initMagneticButtons() {
 }
 
 function initImageLightbox() {
-  const images = document.querySelectorAll('body[data-page-kind="article"] main img, .case-content .project-screen img');
+  const images = document.querySelectorAll('body[data-page-kind="article"] .article-card img, body[data-page-kind="article"] .lab-content img, .case-content .project-screen img');
   if (!images.length) return;
   const lightbox = document.createElement('dialog');
   lightbox.id = 'img-lightbox';
