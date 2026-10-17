@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <title>Orbital Docking Handshake - Writeup — Nguyen Thai Ngoc</title>
   <meta charset="UTF-8">
@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page">
     <div class="wrap article-layout">
@@ -30,7 +31,7 @@
       <article class="article-card glass">
         <div class="eyebrow">CTF Writeup · Reverse Engineering</div>
         <h1 class="page-title">Orbital Docking Handshake</h1>
-        <p class="lead">The docking console hides its handshake phrase in a runtime-built buffer behind one more computed alignment value. Use the lightest reversing path and recover both values.</p>
+        <p class="lead">Phân tích một binary ARM64 để khôi phục docking phrase, tính alignment window và giải mã flag từ các mảng byte trong chương trình.</p>
         
         <div class="info-card">
           <div class="item"><div class="label">Category</div><div class="value accent">Reverse Engineering</div></div>
@@ -39,11 +40,11 @@
         </div>
 
         <h2 id="overview">Overview</h2>
-        <p>Đây là định dạng executable của macOS/iOS kiến trúc ARM 64-bit, có cơ chế bảo vệ PIE nhưng không ảnh hưởng đến static analysis.</p>
+        <p>File là executable Mach-O cho kiến trúc ARM64. PIE được bật, nhưng vẫn có thể đọc logic và dữ liệu bằng static analysis.</p>
         <img loading="lazy" decoding="async" src="/assets/media/writeups/reverse/orbital-docking/image1.png" alt="File details" />
 
         <h2 id="analysis">Static Analysis</h2>
-        <p>Tiến hành decompile file bằng Ghidra, ta thấy chương trình đã gán <code>__stack_chk_guard</code>. Điều này tái khẳng định việc dùng phương pháp Buffer Overflow để đè biến là không khả thi.</p>
+        <p>Ghidra cho thấy tham chiếu tới <code>__stack_chk_guard</code>. Tôi tiếp tục theo hướng khôi phục giá trị chương trình mong đợi; riêng dấu hiệu stack guard chưa đủ để kết luận mọi đường buffer overflow đều bất khả thi.</p>
         <img loading="lazy" decoding="async" src="/assets/media/writeups/reverse/orbital-docking/image2.png" alt="Ghidra decompile" />
 
         <p>Chương trình in ra dòng: <em>"Hint for analysts: the shortest path is still the cleanest one."</em></p>
@@ -52,8 +53,8 @@
         <img loading="lazy" decoding="async" src="/assets/media/writeups/reverse/orbital-docking/image3.png" alt="User inputs" />
 
         <h2 id="phrase">Phân tích Docking Phrase</h2>
-        <p>Tiếp theo tôi chú ý đến hàm <code>_build_expected_phrase()</code>. Ghidra không show tham số ở entry nhưng hàm thật sự nhận <code>param_1</code>. Khả năng <code>param_1</code> trỏ đến <code>auStack_65</code>, tức là buffer để hàm ghi kết quả vào.</p>
-        <p>Vòng lặp 12 lần, mỗi lần tăng 1, khả năng phrase dài 12 kí tự.</p>
+        <p>Tôi xem hàm <code>_build_expected_phrase()</code>. Dù Ghidra không hiển thị tham số ở entry, phần thân vẫn dùng <code>param_1</code>. Cách ghi qua <code>param_1</code> gợi ý tham số này trỏ tới <code>auStack_65</code>, buffer nhận phrase được dựng.</p>
+        <p>Vòng lặp xử lý 12 vị trí và kết thúc bằng byte null, gợi ý phrase dài 12 ký tự.</p>
         <p>Đọc byte thứ i từ <code>obfuscated_phrase</code>, lưu vào <code>bVar1</code>. Sau đó gọi hàm <code>mask_for</code> truyền <code>local_20</code> vào lưu vào <code>bVar2</code>. Tiếp theo thấy XOR 2 byte lại và lưu vào buffer:</p>
         <pre><code class="language-c">buffer[i] = obfuscated_phrase[i] ^ mask_for(i)</code></pre>
         <p>Cuối cùng gán phần tử thứ 12 là 0 để kết thúc chuỗi.</p>
@@ -129,7 +130,7 @@ for i in range(len(encoded_flag)):
 
 print(flag)</code></pre>
 
-        <p>Chạy script trên ta sẽ nhận được flag hợp lệ.</p>
+        <p>Script giải mã trả về flag của bài.</p>
         <img loading="lazy" decoding="async" src="/assets/media/writeups/reverse/orbital-docking/image13.png" alt="Flag output" />
         <div class="note-box">
             <strong>Flag:</strong> <code>bitctf{{0rb1t4l_d0ck1ng_r0ut1n3}}</code>
@@ -142,8 +143,9 @@ print(flag)</code></pre>
       </article>
     </div>
   </main>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

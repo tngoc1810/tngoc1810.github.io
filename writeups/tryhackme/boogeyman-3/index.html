@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page"><div class="wrap article-layout">
     <aside class="toc">
@@ -37,7 +38,7 @@
       <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / TryHackMe / Boogeyman 3</div>
       <div class="eyebrow">TryHackMe · Elastic/Kibana · Incident Investigation</div>
       <h1 class="page-title">Boogeyman 3: Reconstructing an Intrusion in Elastic</h1>
-      <p class="lead">I used Elastic and Sysmon telemetry to follow one phishing attachment across two workstations and a domain controller. The useful part of the room was not finding isolated answers; it was proving how each event led to the next stage of the intrusion.</p>
+      <p class="lead">Following a phishing attachment across two workstations and a domain controller in Elastic, using Sysmon relationships and authentication activity to reconstruct the sequence.</p>
 
       <div class="info-card">
         <div class="item"><div class="label">Data source</div><div class="value">Elastic / Sysmon</div></div>
@@ -88,7 +89,7 @@ destination.ip / destination.port</code></pre>
       <figure class="evidence-shot"><figcaption><span>Evidence 16</span><span>Encoded second-stage PowerShell</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/boogeyman-3/16-encoded-powershell-stage2-command.png" alt="Encoded second-stage PowerShell command in Elastic"></figure>
 
       <h2 id="credentials">Credential access</h2>
-      <p>PowerShell downloaded Mimikatz, after which the logs showed credential reuse consistent with pass-the-hash activity. The important distinction was that a download alone only proved tool transfer; the later authentication and remote-execution events showed that credentials were actually used.</p>
+      <p>PowerShell downloaded Mimikatz. The later authentication and remote-execution events support credential reuse consistent with pass-the-hash activity; the download by itself would establish only tool transfer.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 17</span><span>PowerShell begins downloading credential tooling</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/boogeyman-3/17-powershell-downloads-mimikatz.png" alt="PowerShell telemetry showing the credential-tool download"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 18</span><span>Mimikatz download command</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/boogeyman-3/18-mimikatz-download-commandline.png" alt="PowerShell command line used to download Mimikatz"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 19</span><span>Pass-the-hash event</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/boogeyman-3/19-mimikatz-pass-the-hash-event.png" alt="Elastic event associated with pass-the-hash activity"></figure>
@@ -154,8 +155,9 @@ process.command_line: "*ransomboogey.exe*"</code></pre>
       <p>The strongest evidence came from correlation: a document-looking attachment, HTA execution, Rundll32 staging, scheduled-task persistence, outbound traffic, credential reuse and remoting telemetry on the destination host. Keeping “observed” separate from “likely” also mattered; the logs showed a ransomware download, but not the encryption event itself.</p>
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-  <script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+  <script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

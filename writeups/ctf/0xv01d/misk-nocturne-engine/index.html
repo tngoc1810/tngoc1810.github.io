@@ -9,20 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page nocturne-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#triage">Initial Triage</a><a href="#bait">Fake Flag</a><a href="#data">Target Data</a><a href="#logic">Checker Logic</a><a href="#solver">Solver</a><a href="#flag">Final Flag</a><a href="#lessons">Lessons</a></aside>
     <article class="article-card glass">
       <div class="eyebrow">0xV01D CTF · Reverse Engineering</div>
       <h1 class="page-title">Misk Nocturne Engine</h1>
-      <p class="lead">Reverse engineering a Windows PE64 checker where the visible flag is bait and the real validation is hidden behind eight state tables, a memory byte and a 42-byte target array.</p>
+      <p class="lead">Tracing a Windows PE64 checker from its decoy string to the real 42-byte input, using eight state tables and a memory byte carried between characters.</p>
       <div class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">Misk Nocturne Engine</div></div><div class="item"><div class="label">Platform</div><div class="value">0xV01D CTF</div></div><div class="item"><div class="label">Category</div><div class="value accent">Reverse Engineering</div></div><div class="item"><div class="label">Points</div><div class="value">500</div></div><div class="item"><div class="label">Binary</div><div class="value">misk_automaton.exe</div></div><div class="item"><div class="label">Technique</div><div class="value">State-machine emulation</div></div></div>
       <div class="note-box warn"><strong>Challenge hint:</strong> “The machine has only eight states, but it remembers every wrong transition.” I treated this as a direct hint that the checker would combine a small state value with another memory variable.</div>
 
@@ -37,7 +38,7 @@ misk_automaton.exe
 
 <span class="cmd">$ file misk_automaton.exe</span>
 misk_automaton.exe: PE32+ executable for MS Windows 5.02 (console), x86-64</div>
-      <p>The file is a 64-bit Windows PE executable. That matters because the disassembly should be read with the Windows x64 calling convention in mind. More importantly, it means target arrays and table pointers must be extracted by converting virtual addresses to file offsets.</p>
+      <p>This is a 64-bit Windows PE executable. I used the Windows x64 calling convention to read the function arguments, then converted virtual addresses to file offsets to extract the target array and table pointers.</p>
       <div class="mindset"><strong>Reverse mindset:</strong> the challenge name and hint both point to state-machine logic. So I focused less on UI/output strings and more on tables, target bytes and state updates.</div>
 
       <h2 id="bait">Fake Flag and Bait Strings</h2>
@@ -48,7 +49,7 @@ stalled
 awake
 operator note: the visible state names are bait
 <span class="hit">0xV01D{eight_states_are_not_enough}</span></div>
-      <p>The visible flag looks tempting, but the nearby operator note explicitly warns that visible state names are bait. That does not automatically prove the flag is fake, but it is enough reason to verify references in the disassembly.</p>
+      <p>The nearby operator note warns that the visible state names are bait. I checked references to the flag-looking string in the disassembly before deciding whether it belonged to the success path.</p>
       <div class="note-box danger"><strong>Why I did not submit it:</strong> a hard reverse challenge often includes fake flags for string scanners. A flag-like string is only trustworthy if it is reachable through the normal success path or participates in the real check.</div>
 
       <h2 id="data">Target Data in .rdata</h2>
@@ -185,8 +186,9 @@ Final candidates:
       <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Home ↑</a></div>
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

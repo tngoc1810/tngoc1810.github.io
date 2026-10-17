@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page shadow-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#approach">Analyst approach</a><a href="#triage">Initial triage</a><a href="#vt">Threat intel</a><a href="#pebear">PE structure</a><a href="#imports">Import analysis</a><a href="#floss">FLOSS strings</a><a href="#capa">capa capabilities</a><a href="#alerts">Alert correlation</a><a href="#timeline">Timeline</a><a href="#iocs">IOCs</a><a href="#response">Response</a><a href="#answers">Final answers</a></aside>
@@ -23,19 +24,19 @@
       <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / TryHackMe / Shadow Trace</div>
       <div class="eyebrow">TryHackMe · Malware Analysis / SOC Triage</div>
       <h1 class="page-title">Shadow Trace: Static Malware Triage and Alert Correlation</h1>
-      <p class="lead">A practical malware-analysis style walkthrough of a suspicious Windows updater. I used static triage, PE metadata, imports, FLOSS, capa, VirusTotal and alert decoding to identify IOCs and explain the behavior in plain English.</p>
+      <p class="lead">Static triage of a suspicious Windows updater using PE metadata, imports, FLOSS, capa and reputation lookups, followed by a review of the supplied alert commands.</p>
       <div class="info-card"><div class="item"><div class="label">Room</div><div class="value">Shadow Trace</div></div><div class="item"><div class="label">Platform</div><div class="value">TryHackMe</div></div><div class="item"><div class="label">Focus</div><div class="value accent">Malware Triage / SOC</div></div><div class="item"><div class="label">Sample</div><div class="value">windows-update.exe</div></div><div class="item"><div class="label">Tools</div><div class="value">DIE, PE-bear, FLOSS, capa, CyberChef, VirusTotal</div></div><div class="item"><div class="label">Evidence images</div><div class="value">20 screenshots</div></div></div>
       <div class="callout"><strong>Goal:</strong> identify the suspicious binary, extract useful IOCs, understand its likely capabilities, and correlate the static findings with alert data.</div>
 
       <h2 id="overview">Scenario Overview</h2>
-      <p>The case begins with a file named <code>windows-update.exe</code> found on a user machine. At first glance, the name tries to look like a legitimate updater. My job was to avoid jumping to conclusions and instead build confidence from evidence: file metadata, hashes, PE structure, imported APIs, extracted strings, malware capabilities and EDR-style alerts.</p>
+      <p>The sample is named <code>windows-update.exe</code>. I checked its metadata, PE structure, imports and strings, then compared capa findings with the supplied alerts.</p>
       <div class="flow"><pre><code>Suspicious file → PE triage → Hashing → VirusTotal enrichment → Imports → FLOSS strings → capa capability mapping → Alert decoding → IOC list → Response actions</code></pre></div>
 
       <h2 id="approach">How I Approached the Case</h2>
       <ol class="step-list"><li><strong>Identify the sample first.</strong> I collected file type, architecture, hashes and size before thinking about behavior.</li><li><strong>Do static analysis before execution.</strong> I inspected PE metadata, imports and strings without running the binary.</li><li><strong>Separate evidence from assumptions.</strong> A suspicious import is only a clue. It becomes stronger when it matches strings, capa output or alerts.</li><li><strong>Use tools for different questions.</strong> Detect It Easy and PE-bear explain the PE file. FLOSS reveals strings. capa summarizes capabilities. CyberChef decodes hidden values.</li><li><strong>Correlate alerts back to the malware evidence.</strong> Alert URLs and download behavior should be compared with the IOCs found during file analysis.</li></ol>
 
       <h2 id="triage">1. Initial File Triage</h2>
-      <p>I started with Detect It Easy. My first question was simple: what kind of file is this? The tool identified the sample as a 64-bit Windows PE console executable compiled with Microsoft Visual C/C++.</p>
+      <p>Detect It Easy identified a 64-bit Windows PE console executable compiled with Microsoft Visual C/C++.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 01</span><span>Detect It Easy overview</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-01-detect-it-easy-overview.png" alt="Detect It Easy overview showing PE64 AMD64"></figure>
       <p>The filename is also important. <code>windows-update.exe</code> sounds trustworthy, but the path was the user Desktop, not a normal Windows system directory. I treated that as masquerading: a legitimate-looking name used in an unusual location.</p>
       <div class="note"><strong>Analyst thought:</strong> architecture and compiler do not prove malware, but they tell me which analysis path to use. Here, PE64 / AMD64 means this is a 64-bit Windows executable.</div>
@@ -48,7 +49,7 @@ MD5: be951d941adab3865c3ed425ef26c9</code></pre>
       <h2 id="vt">2. VirusTotal Enrichment</h2>
       <p>After collecting the SHA-256 locally, I checked the hash on VirusTotal. I made sure the hash on VirusTotal matched my local sample before trusting the report.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 03</span><span>VirusTotal detection ratio</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-03-virustotal-detection-ratio.png" alt="VirusTotal detection ratio"></figure>
-      <p>The detection ratio was high: many vendors flagged the file as malicious. This is not a replacement for analysis, but it increases confidence that the sample deserves deeper review.</p>
+      <p>Many vendors flagged the hash as malicious. I kept the ratio as supporting reputation data and continued with the file analysis.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 04</span><span>Community YARA match</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-04-virustotal-community-yara.png" alt="VirusTotal community YARA match"></figure>
       <p>The community section showed a THOR / VALHALLA YARA match for suspicious command-line hacktool strings. I treated that as a generic warning, not a family name. It told me to pay attention to strings and command-like behavior.</p>
 
@@ -61,7 +62,7 @@ MD5: be951d941adab3865c3ed425ef26c9</code></pre>
       <div class="note"><strong>Analyst thought:</strong> normal-looking sections do not mean the file is safe. It only means the sample is probably not heavily packed, so imports and strings may be readable.</div>
 
       <h2 id="imports">4. Import Analysis: What Can the Binary Do?</h2>
-      <p>Import analysis is where the file started to look more like malware. I grouped APIs by capability instead of reading every function as an isolated item.</p>
+      <p>I grouped the imports by capability: process inspection, process control, shell execution and networking.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 08</span><span>KERNEL32 process-related APIs</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-08-kernel32-process-apis.png" alt="KERNEL32 process APIs"></figure>
       <p>The KERNEL32 imports included process discovery and control functions such as <code>CreateToolhelp32Snapshot</code>, <code>Process32First</code>, <code>Process32Next</code>, <code>OpenProcess</code> and <code>TerminateProcess</code>. This suggests the program can inspect running processes and possibly terminate selected ones. I also noticed <code>IsDebuggerPresent</code>, which is a basic anti-debugging clue.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 09</span><span>SHELL32 imports</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-09-shell32-imports.png" alt="SHELL32 imports"></figure>
@@ -90,14 +91,14 @@ MD5: be951d941adab3865c3ed425ef26c9</code></pre>
 → THM{you_g0t_some_IOCs_friend}</code></pre>
 
       <h2 id="capa">6. capa Capability Analysis</h2>
-      <p>I then used capa to validate the behavior at a higher level. capa does not replace manual analysis, but it is excellent for summarizing what a binary is capable of doing.</p>
+      <p>I used capa to compare its capability findings with the imports and strings already identified.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 16</span><span>capa ATT&amp;CK and MBC mapping</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-16-capa-attck-mbc.png" alt="capa ATT&CK and MBC mapping"></figure>
       <figure class="evidence-shot"><figcaption><span>Evidence 17</span><span>capa capability list</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-17-capa-capabilities.png" alt="capa capability list"></figure>
       <p>capa identified communication and command-and-control style behaviors, including sending and receiving data, DNS resolution, HTTP request creation, URL download and socket communication. It also identified process enumeration, process termination, file reading, writing and deletion, hostname collection and runtime API linking.</p>
       <div class="pivot"><strong>Correlation:</strong> capa said the binary can download URLs; FLOSS showed <code>security-update.exe</code>; imports showed WININET; alerts later showed suspicious downloads. These independent clues all support the same behavior.</div>
 
       <h2 id="alerts">7. Alert Correlation</h2>
-      <p>After file analysis, I moved to the alert table. I read alerts by process, rule, command and encoded data. The goal was not only to answer the task questions, but also to understand what the alert was really showing.</p>
+      <p>I reviewed the supplied alerts by process, rule, command and encoded content, then decoded the relevant values.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 18</span><span>Alert table</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-18-alert-table.png" alt="EDR alert table"></figure>
       <p>The first alert was triggered by <code>powershell.exe</code>. The command used <code>System.Net.WebClient.DownloadString()</code> and then piped the result into <code>IEX</code>. This is a classic PowerShell download cradle: download code from a remote URL and execute it directly in memory.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 19</span><span>Decoded PowerShell URL</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/shadow-trace/shadow-trace-19-powershell-url-decoded.png" alt="CyberChef decode of PowerShell Base64 URL"></figure>
@@ -121,11 +122,12 @@ Saved file: test.txt</code></pre>
       <div class="answer-list"><div class="answer-item"><div class="q">Architecture of windows-update.exe</div><div class="a">64-bit</div></div><div class="answer-item"><div class="q">SHA-256 hash</div><div class="a">b2a88de3e3bcfae4a4b38fa36e884c586b5cb2c2c283e71fba59efdb9ea64bfc</div></div><div class="answer-item"><div class="q">URL inside the file</div><div class="a">http://tryhatme.com/update/security-update.exe</div></div><div class="answer-item"><div class="q">Domain IOC</div><div class="a">responses.tryhatme.com</div></div><div class="answer-item"><div class="q">Decoded flag</div><div class="a">THM{you_g0t_some_IOCs_friend}</div></div><div class="answer-item"><div class="q">Socket communication library</div><div class="a">WS2_32.dll</div></div><div class="answer-item"><div class="q">PowerShell alert URL</div><div class="a">https://tryhatme.com/dev/main.exe</div></div><div class="answer-item"><div class="q">Chrome alert URL</div><div class="a">https://reallysecureupdate.tryhatme.com/update.exe</div></div><div class="answer-item"><div class="q">File saved by chrome.exe alert</div><div class="a">test.txt</div></div></div>
 
       <h2>Conclusion</h2>
-      <p>This sample is best described as a suspicious downloader/backdoor-style Windows PE. The strongest evidence is the correlation between imports, extracted strings, capa findings and alerts. The binary imports HTTP and socket libraries, contains downloader and C2-like strings, references process termination targets, exposes network IOCs and matches critical alert behavior. The investigation shows why malware analysis should not rely on one tool: confidence comes from multiple evidence sources telling the same story.</p>
+      <p>The imports, strings and capa findings support a downloader/backdoor assessment and identify behaviors worth checking in runtime telemetry. The supplied alerts add command-level context. Static capabilities do not establish that every listed behavior executed on the affected host.</p>
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar">
     <div class="wrap topbar-inner">
       <a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a>
@@ -35,9 +36,7 @@
         <div class="hero-copy glass">
           <div class="eyebrow">CTF Writeup • Pwn / Crypto Fault</div>
           <h1>Paper Lantern — CRT-RSA Fault Attack</h1>
-          <p class="lead">
-            A beginner-friendly technical thought journal for a pwn challenge where the exploit path is not classic ROP, but protocol analysis, comment parser state corruption, CRT-RSA faulting, RSA private key recovery, and signature forgery.
-          </p>
+          <p class="lead">A CTF challenge combining a comment-parser overflow with CRT-RSA faulting. The writeup follows the request protocol, recovers the signing key and uses it to authorize the flag capsule.</p>
           <div class="meta-row">
             <span class="pill">Category: Pwn / Crypto</span>
             <span class="pill">Bug: Comment braid overflow</span>
@@ -50,32 +49,28 @@
 
       <section class="card glass toc">
         <h2>Table of Contents</h2>
-        <a href="#story">1. Story and Mental Model</a>
+        <a href="#story">1. Service and Trust Boundary</a>
         <a href="#recon">2. Recon: Looking at the Files</a>
         <a href="#protocol">3. Learning the Capsule Protocol</a>
         <a href="#safe-test">4. First Manual Test: Safe Capsule</a>
         <a href="#unsafe-test">5. Testing the Unsafe Opcode</a>
-        <a href="#crypto-shift">6. The Key Mental Shift: From Pwn to Signature Forgery</a>
+        <a href="#crypto-shift">6. From Parser Bug to Signature Forgery</a>
         <a href="#comment">7. Finding the Comment Braid Bug</a>
         <a href="#fault">8. Producing a Faulty CRT-RSA Signature</a>
         <a href="#factor">9. Factoring n with gcd</a>
         <a href="#forge">10. Forging the Flag Capsule Signature</a>
         <a href="#final-run">11. Final Run and Flag</a>
-        <a href="#deep-dive">12. Deep Dive for Beginners</a>
-        <a href="#mindset">13. Hacker's Mindset</a>
+        <a href="#deep-dive">12. Why the Fault Reveals a Factor</a>
+        <a href="#mindset">13. Investigation Notes</a>
         <a href="#timeline">14. Full Timeline</a>
       </section>
 
       <section id="story" class="card glass">
-        <h2>1. Story and Mental Model</h2>
-        <p>
-          When I first saw this challenge, I expected a normal pwn task: maybe a stack overflow, a format string, a ROP chain, or a heap bug. But the challenge files immediately changed the direction of my thinking. There was a binary named <code>paper_lantern</code>, a Python helper named <code>capsule.py</code>, and a JSON file named <code>public_params.json</code>.
-        </p>
-        <p>
-          That combination was suspicious. A normal pwn challenge rarely gives public RSA parameters. The presence of <code>SIGN</code>, <code>RUN</code>, and <code>crt-rsa-fdh</code> suggested that the binary was not just executing my input. It was enforcing an authorization rule: a capsule must be signed before it can run.
-        </p>
+        <h2>1. Service and Trust Boundary</h2>
+        <p>The supplied files were <code>paper_lantern</code>, <code>capsule.py</code> and <code>public_params.json</code>. Together they describe a service that signs and runs serialized capsules, so I began by tracing the request format and signing checks.</p>
+        <p>The <code>SIGN</code> and <code>RUN</code> operations, together with <code>crt-rsa-fdh</code>, identify the trust boundary: a capsule needs a valid signature before the service will execute it.</p>
         <div class="note">
-          <strong>Beginner mental model:</strong> the server is like a guard. A capsule is like a package. The guard only opens packages that have a valid stamp. The unsafe package contains the flag opcode, but the guard refuses to stamp it. So the exploit goal becomes: make a valid stamp ourselves.
+          <strong>Trust boundary:</strong> the service refuses to sign a capsule containing the flag opcode. The attack therefore needs a signature accepted by the verifier, without relying on the normal signing policy.
         </div>
         <pre><code>Safe capsule      → server signs it → server runs it
 Unsafe capsule    → server refuses to sign it
@@ -85,7 +80,7 @@ Exploit strategy  → recover signing key → forge signature → run unsafe cap
       <section id="recon" class="card glass phase">
         <h2>2. Recon: Looking at the Files</h2>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I started from the zip file and did not know whether this was a normal binary exploit or a custom protocol challenge.</td>
@@ -118,11 +113,9 @@ public_params.json</code></pre><p>The Python helper means I should not talk to t
 
       <section id="protocol" class="card glass phase">
         <h2>3. Learning the Capsule Protocol</h2>
-        <p>
-          I then opened <code>capsule.py</code>. For a newbie, this file looks noisy because it defines many constants and helper functions. The correct approach is to identify the lifecycle of one request.
-        </p>
+        <p>In <code>capsule.py</code>, I followed how a request is serialized, sent and parsed. This narrowed the helper code down to the functions needed for a single capsule.</p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I saw many frame constants. I needed to translate them into human language.</td>
@@ -154,7 +147,7 @@ HELLO → NEWCAP → APPEND records → SIGN → RUN(signature)</code></pre>
           Before exploiting anything, I needed to prove that I understood the normal flow. The safest capsule is a harmless one: store a short text or simply halt.
         </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I wrote a tiny test to ask the server to sign a safe capsule.</td>
@@ -181,7 +174,7 @@ c.send(FT_SIGN)</code></pre></td>
           The exploit target is opcode <code>0x7f</code>. This is the dangerous record that eventually prints the flag. The server, however, refuses to sign it.
         </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I tried to build the suspicious capsule manually.</td>
@@ -205,10 +198,8 @@ c.send(FT_SIGN)</code></pre></td>
       </section>
 
       <section id="crypto-shift" class="card glass phase">
-        <h2>6. The Key Mental Shift: From Pwn to Signature Forgery</h2>
-        <p>
-          At this point, my thinking changed. The direct route was blocked: I could not make the server sign opcode <code>0x7f</code>. But if I could recover the RSA private key, I would not need the server to sign it.
-        </p>
+        <h2>6. From Parser Bug to Signature Forgery</h2>
+        <p>The service refused to sign opcode <code>0x7f</code>. Recovering the RSA private key would allow that capsule to be signed locally, so I turned to the signing implementation.</p>
         <pre><code>Problem:
   unsafe capsule needs valid signature
   server refuses to sign unsafe capsule
@@ -228,7 +219,7 @@ New goal:
           Since the main capsule records were filtered, I looked at the secondary input surface: <code>FT_COMMENT</code>. Comments often look harmless, but here they have their own mini-language: literal writes, xor operations, and braid fills.
         </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I noticed the exact value <code>replay_buf = 72</code>. Exact buffer sizes in CTFs are often hints.</td>
@@ -258,18 +249,14 @@ overflow = 6 bytes</code></pre><p>This is the logic bug: a braid fill can contin
 write 60 bytes:       [0 ... 59]
 braid 18 bytes:       [60 ... 77]
 overflow bytes:       [72 ... 77]</code></pre>
-        <p>
-          This is not a classic overflow to overwrite a return address. Instead, it is a state corruption bug. The overwritten bytes influence how CRT-RSA signing behaves.
-        </p>
+        <p>The overflow changes signing state near the replay buffer. Those bytes affect the CRT-RSA calculation rather than a saved return address.</p>
       </section>
 
       <section id="fault" class="card glass phase">
         <h2>8. Producing a Faulty CRT-RSA Signature</h2>
-        <p>
-          CRT-RSA signs a message by computing two smaller signatures modulo <code>p</code> and modulo <code>q</code>, then recombining them. If one branch is corrupted, the final signature is wrong in a very useful way.
-        </p>
+        <p>CRT-RSA calculates signatures modulo <code>p</code> and modulo <code>q</code> before recombining them. Corrupting one branch can leave a faulty result from which a factor of the modulus can be recovered.</p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I already had a normal signature for a safe capsule. Now I needed a faulty signature for the same kind of safe capsule.</td>
@@ -302,7 +289,7 @@ fault_sig = get_safe_signature(comment)</code></pre></td>
           Once I had a correct signature and a faulty signature for the same message family, the RSA modulus could be factored with a greatest common divisor calculation.
         </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I converted both signatures from bytes to integers.</td>
@@ -344,7 +331,7 @@ So:
           After factoring <code>n</code>, I computed the private exponent <code>d</code>. This gave me the ability to sign the unsafe capsule locally.
         </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I had <code>p</code> and <code>q</code>, but needed the actual RSA signing exponent.</td>
@@ -373,7 +360,7 @@ forged_sig = forged_int.to_bytes(64, "big")</code></pre></td>
           The final step was to create a new capsule containing the unsafe opcode and run it with the forged signature.
         </p>
         <table class="journal-table">
-          <thead><tr><th>Newbie State</th><th>Command / Input</th><th>Output / Expert Analysis</th></tr></thead>
+          <thead><tr><th>Observation</th><th>Command / Input</th><th>Output / Interpretation</th></tr></thead>
           <tbody>
             <tr>
               <td>I prepared the actual flag capsule.</td>
@@ -401,7 +388,7 @@ slopped{faulted_crt_seams_burn_open}</code></pre><p>The flag text itself confirm
       </section>
 
       <section id="deep-dive" class="card glass phase">
-        <h2>12. Deep Dive for Beginners</h2>
+        <h2>12. Why the Fault Reveals a Factor</h2>
         <h3>What is CRT-RSA?</h3>
         <p>
           Normal RSA signing computes <code>m^d mod n</code>. CRT-RSA speeds this up by computing the signature separately modulo <code>p</code> and modulo <code>q</code>, then combining the results. This is faster, but it introduces a dangerous failure mode: if one branch is faulted, the faulty signature can reveal a factor of <code>n</code>.
@@ -420,16 +407,14 @@ CRT idea:
         </p>
 
         <h3>What is state corruption?</h3>
-        <p>
-          In classic pwn, an overflow often aims to control the instruction pointer. In this challenge, the overflow is more subtle. The comment braid overflow changes hidden state near the replay buffer. That hidden state affects CRT-RSA signing, which is enough to break the authentication model.
-        </p>
+        <p>Here, the comment braid overflow changes state near the replay buffer. The resulting CRT-RSA fault exposes a factor of the modulus and breaks the capsule-signing check.</p>
         <div class="note success">
           <strong>Key lesson:</strong> pwn is not always about getting a shell. Sometimes the best exploit is to corrupt one security-critical variable and let the program's own crypto leak the key.
         </div>
       </section>
 
       <section id="mindset" class="card glass phase">
-        <h2>13. Hacker's Mindset</h2>
+        <h2>13. Investigation Notes</h2>
         <h3>Why did I focus on <code>FT_COMMENT</code>?</h3>
         <p>
           The main record path was protected by an unsafe opcode check. When the obvious path is blocked, I look for secondary inputs: comments, metadata, replay buffers, debug fields, compression, or parsers. These are often less protected but still influence internal state.
@@ -478,8 +463,9 @@ CRT idea:
     </div>
   </main>
 
-  <script src="/assets/js/main.js?v=20261013b"></script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

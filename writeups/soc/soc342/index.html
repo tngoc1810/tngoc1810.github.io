@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   
   <main class="page shadow-page"><div class="wrap article-layout">
@@ -36,7 +37,7 @@
       <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / SOC / SOC342</div>
       <div class="eyebrow">SOC Alert Triage · Incident Response</div>
       <h1 class="page-title">SOC342 – Khai thác CVE-2025-53770 SharePoint ToolShell</h1>
-      <p class="lead">Tôi phân tích cảnh báo ToolShell trên SharePoint bằng cách đối chiếu request khai thác với cây tiến trình EDR. Chuỗi sự kiện cho thấy mã đã được thực thi, web shell được ghi xuống đĩa và MachineKey bị đọc khỏi cấu hình ứng dụng.</p>
+      <p class="lead">Tôi đối chiếu request ToolShell trên SharePoint với cây tiến trình EDR để xác định chuỗi thực thi mã, web shell và hoạt động đọc MachineKey.</p>
       
       <div class="info-card">
         <div class="item"><div class="label">Mã Cảnh Báo</div><div class="value">SOC342</div></div>
@@ -89,7 +90,7 @@
       </figure>
 
       <h2 id="edr-analysis">5. Điều tra trên EDR: Vạch trần Chuỗi Hậu Khai Thác</h2>
-      <p>Tôi pivot sang EDR của <code>SharePoint01</code> theo thời gian cảnh báo và tiến trình IIS. Chuỗi tiến trình sau đó cho thấy nhiều công cụ có sẵn của Windows bị lạm dụng.</p>
+      <p>Tôi tìm trong EDR của <code>SharePoint01</code> theo thời gian cảnh báo và tiến trình IIS, rồi lần theo các process con.</p>
       
       <h3>Bước 1: IIS Worker gọi PowerShell (13:07:11)</h3>
       <p><code>w3wp.exe</code>, chạy dưới tài khoản <code>IIS APPPOOL\SharePoint - 80</code>, tạo <code>powershell.exe</code> với tham số <code>-EncodedCommand</code>. Với mốc thời gian ngay sau request khai thác, quan hệ cha–con này là bằng chứng mạnh cho RCE.</p>
@@ -106,7 +107,7 @@
       </figure>
 
       <h3>Bước 3: Biên dịch tại chỗ (13:07:27)</h3>
-      <p>Tiến trình tiếp theo là <code>csc.exe</code>, trình biên dịch C# có sẵn trên Windows. Dữ liệu EDR cho thấy mã nguồn trong thư mục Temp được biên dịch tại chỗ; điều này giảm nhu cầu tải một binary đã biên dịch sẵn và là hành vi cần được giám sát trên máy chủ web.</p>
+      <p>Tiếp theo là <code>csc.exe</code>, trình biên dịch C# của Windows. EDR ghi nhận mã nguồn trong thư mục Temp được biên dịch tại chỗ. Tôi giữ bước này trong timeline để nối command trước đó với file được tạo sau đó.</p>
       <figure class="evidence-shot">
         <figcaption><span>Evidence 04</span><span>EDR - csc.exe compiling payload</span></figcaption>
         <img loading="lazy" decoding="async" src="/assets/media/writeups/soc/soc342/image4.png" alt="csc.exe compiles payload">
@@ -173,8 +174,9 @@
   </main>
   
   <footer class="footer"><div class="wrap text-center"><p class="small text-muted">© 2026 Nguyen Thai Ngoc. Built for Security & Forensics Portfolios.</p></div></footer>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-  <script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+  <script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

@@ -10,20 +10,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page nono-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#triage">Initial Triage</a><a href="#strings">Strings & Bait</a><a href="#dotnet">Nono.dll</a><a href="#fake">Fake QR Path</a><a href="#native">Native Wrapper</a><a href="#jit">JIT Hook</a><a href="#patched">Patched Clues</a><a href="#solver">Solver</a><a href="#flag">Final Flag</a><a href="#lessons">Lessons</a></aside>
     <article class="article-card glass">
       <div class="eyebrow">KMACTF · Reverse Engineering · .NET JIT Hook</div>
       <h1 class="page-title">no no</h1>
-      <p class="lead">A reverse engineering challenge that looks like a normal .NET Raylib Nonogram game, but the static puzzle clues are fake. The real solution is hidden behind a native loader section that hooks the .NET JIT and patches <code>GetRegionClues</code> at runtime.</p>
+      <p class="lead">A .NET Nonogram challenge with a native JIT-hooking layer. The static clues lead to a decoy; recovering the runtime replacement for <code>GetRegionClues</code> reveals the grid used for the final QR.</p>
       <section class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">no no</div></div><div class="item"><div class="label">Platform</div><div class="value">KMACTF</div></div><div class="item"><div class="label">Category</div><div class="value accent">Reverse Engineering</div></div><div class="item"><div class="label">Points</div><div class="value">500</div></div><div class="item"><div class="label">Core trick</div><div class="value">JIT hook</div></div><div class="item"><div class="label">Final artifact</div><div class="value">QR / Nonogram</div></div></section>
       <div class="note-box warn"><strong>High-level idea:</strong> the obvious path is <code>Nono.dll → extract clues → solve Nonogram → decode QR</code>. That path intentionally returns a fake result. The correct path is <code>Nono.exe → .nono section → clrjit hook → patched GetRegionClues → real Nonogram</code>.</div>
 
@@ -33,7 +34,7 @@
       <div class="flow"><div class="flow-card"><div class="num">1</div><h3>Static .NET path</h3><p>Decompile <code>Nono.dll</code>, find <code>GetRegionClues</code>, solve the visible Nonogram.</p></div><div class="flow-card"><div class="num">2</div><h3>Detect fake output</h3><p>The first QR / flag-like result does not validate, so the static clues are suspicious.</p></div><div class="flow-card"><div class="num">3</div><h3>Inspect wrapper</h3><p><code>Nono.exe</code> contains a native <code>.nono</code> section and JIT-hooking logic.</p></div><div class="flow-card"><div class="num">4</div><h3>Recover real clues</h3><p>Analyze the JIT patch, reconstruct the real clues, solve again and decode the real QR.</p></div></div>
 
       <h2 id="triage">Initial Triage</h2>
-      <p>I started by listing the files and identifying the binary types. This step matters because the challenge is not a single .NET DLL; it has both managed and native components.</p>
+      <p>I checked file types first because the package combines managed .NET code with a native executable. Both components need to be accounted for.</p>
       <div class="terminal"><span class="cmd">$ find . -maxdepth 3 -type f -printf "%p | %s bytes\n"</span>
 ./Nono.exe
 ./Nono.dll
@@ -79,7 +80,7 @@ Result:
 Idx Name      Size      VMA       File off
 ...
 <span class="hit">.nono</span>     ...</div>
-      <p>A custom section with the same theme as the challenge name is rarely accidental. I treated <code>.nono</code> as a likely native payload or patching layer.</p>
+      <p>The <code>.nono</code> section warranted inspection as a possible patching layer. Its name alone did not establish what the code did.</p>
       <div class="table-wrap"><table><thead><tr><th>Indicator</th><th>Interpretation</th></tr></thead><tbody><tr><td><code>.nono</code> section</td><td>Custom native payload / loader logic.</td></tr><tr><td><code>clrjit.dll</code></td><td>The code interacts with the .NET JIT compiler.</td></tr><tr><td><code>getJit</code></td><td>Used to obtain the JIT compiler interface.</td></tr><tr><td><code>compileMethod</code></td><td>Hook target used to intercept method compilation.</td></tr></tbody></table></div>
 
       <h2 id="jit">JIT Hook Analysis</h2>
@@ -95,7 +96,7 @@ Idx Name      Size      VMA       File off
       <div class="mindset"><strong>Key insight:</strong> a JIT hook can make decompiled C# lie. The source-level method still looks normal, but the code that actually gets compiled and executed can be altered just before runtime.</div>
 
       <h2 id="patched">Recovering the Runtime-Patched Clues</h2>
-      <p>Once I understood that <code>GetRegionClues</code> was patched, the objective changed. I no longer needed to solve the static puzzle. I needed the clue data after the native JIT hook applied its patch.</p>
+      <p>Once the patch to <code>GetRegionClues</code> was identified, I needed the values used after that patch, rather than another solution to the static clue set.</p>
       <p>The practical approaches are:</p>
       <ul><li>Instrument the program and dump the returned clues at runtime.</li><li>Set a breakpoint after <code>GetRegionClues</code> is compiled or called.</li><li>Analyze the patching code inside <code>.nono</code> and reconstruct the replacement clue data manually.</li><li>Patch or log the managed method to print the actual clue arrays.</li></ul>
       <div class="terminal">Correct path:
@@ -109,7 +110,7 @@ Nono.exe .nono section
       <div class="note-box success"><strong>Result:</strong> after using the runtime-patched clues instead of the static decompiler clues, the Nonogram generated the real QR and decoded to the final flag.</div>
 
       <h2 id="solver">Nonogram / QR Solving Workflow</h2>
-      <p>The final solving step is not about guessing the flag. It is about converting the recovered row/column clues into a grid. Because the board is <code>37x37</code>, the result can be rendered as a QR-like bitmap.</p>
+      <p>I converted the recovered row and column clues into a <code>37x37</code> grid, then rendered it for QR decoding.</p>
       <details class="code-toggle"><summary>Conceptual Solver Flow</summary><pre><code># 1. Recover real row/column clues from the patched GetRegionClues behavior.
 # 2. Solve each 20x20 region with its row/column constraints.
 # 3. Merge the four regions into one 37x37 board using offsets:
@@ -133,8 +134,9 @@ Nono.exe .nono section
       <div class="footer-nav"><a href="/writeups/">← Back to Writeups</a><a href="/">Home ↑</a></div>
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

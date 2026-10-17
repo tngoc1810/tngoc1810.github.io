@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page masterminds-page"><div class="wrap article-layout">
     <aside class="toc">
@@ -61,7 +62,7 @@
       </figure>
 
       <h3>DNS Traffic Analysis</h3>
-      <p>After identifying the initial payload delivery, the investigation shifted to DNS traffic analysis to map out the broader Command and Control (C2) infrastructure.</p>
+      <p>I then checked DNS activity from the same endpoint for domains contacted around the download.</p>
       
       <figure class="evidence-shot">
         <img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/masterminds/image3.png" alt="DNS Resolution Logs">
@@ -119,7 +120,7 @@
         <img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/masterminds/image8.png" alt="Direct IP HTTP POST">
       </figure>
 
-      <p>To validate the anomalous HTTP traffic and identify the specific malware strain or delivery mechanism, I pivoted to analyzing the Suricata Intrusion Detection System (IDS).</p>
+      <p>I compared the HTTP sequence with Suricata alerts to check the malware and delivery hypotheses.</p>
       <p>The IDS alerts occurred at the same time as the download from <code>45.95.203.28</code>, adding another data source to the HTTP evidence. The useful signatures were:</p>
       <ul>
         <li><strong>Suspicious Firesale gTLD EXE DL with no Referer:</strong> This confirms the automated, script-driven nature of the <code>apines.exe</code> download.</li>
@@ -159,7 +160,7 @@
         <li><strong>Sequential Payload Retrieval:</strong> The host systematically issued HTTP GET requests to download sequentially named executables (<code>/s/1.exe</code> through <code>/s/5.exe</code>).</li>
         <li><strong>Fallback Infrastructure:</strong> To ensure successful delivery, the malware cycled through multiple suspicious Russian TLDs acting as mirror servers: <code>xfhoahegue.ru</code>, <code>afhoahegue.ru</code>, and <code>efhoahegue.ru</code>.</li>
       </ul>
-      <p>The endpoint repeatedly requested the URI <code>/s/VNEW=1</code> across these domains. This is highly indicative of a bot check-in mechanism communicating with the Command & Control server.</p>
+      <p>The repeated <code>/s/VNEW=1</code> requests across these domains are consistent with automated check-ins. I retained the pattern as a C2 lead alongside the download and reputation evidence.</p>
 
       <figure class="evidence-shot">
         <img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/masterminds/image12.png" alt="C2 bot check-in">
@@ -168,7 +169,7 @@
       <p>DNS also contained expected Windows noise such as <code>wpad.local</code> and <code>isatap.local</code>, but the host queried many pseudo-random <code>.local</code> names, including <code>hxbhaelzrcmf.local</code>, <code>vrahsvtwl.local</code> and <code>xcpthyukbep.local</code>. I marked this as anomalous internal discovery activity, not confirmed lateral movement.</p>
       <p>All automated GET requests to the malicious .ru domains utilized the exact same, hardcoded User-Agent string:</p>
       <pre><code>Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:25.0) Gecko/20100101 Firefox/25.0</code></pre>
-      <p>The User-Agent explicitly claims the client is running macOS. However, the requested payloads are Windows executables (.exe), a behavior inconsistent with legitimate macOS user activity.</p>
+      <p>The User-Agent claims macOS while the requests retrieve Windows executables. I treated that inconsistency as supporting context, rather than evidence of the endpoint operating system by itself.</p>
 
       <figure class="evidence-shot">
         <img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/masterminds/image13.png" alt="User-Agent spoofing">
@@ -191,7 +192,7 @@
       </div>
 
       <h2 id="takeaways">5. What changed my assessment</h2>
-      <p>No single indicator was enough. Confidence came from combining download sequence, response size, DNS frequency, IDS alerts, destination choice and User-Agent mismatch.</p>
+      <p>The assessments combine the download sequence, response characteristics, DNS, IDS alerts and reputation lookups. The unusual error responses and User-Agent remain supporting observations.</p>
       <ul>
         <li><strong>Behavioral anomalies:</strong>
           <ul>
@@ -205,8 +206,9 @@
       
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-  <script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+  <script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

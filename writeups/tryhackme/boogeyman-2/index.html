@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page boogeyman-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#approach">Approach</a><a href="#email">Email triage</a><a href="#attachment">Attachment</a><a href="#macro">Macro</a><a href="#memory">Memory</a><a href="#stage2">Stage 2</a><a href="#c2">C2</a><a href="#persistence">Persistence</a><a href="#timeline">Timeline</a><a href="#iocs">IOCs</a><a href="#answer-logic">Answer logic</a><a href="#answers">Final answers</a></aside>
@@ -23,12 +24,12 @@
       <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / TryHackMe / Boogeyman 2</div>
       <div class="eyebrow">TryHackMe · SOC Level 1 / Memory Forensics</div>
       <h1 class="page-title">Boogeyman 2: Following the Evidence from Phishing Email to Persistence</h1>
-      <p class="lead">I used the email and document to establish the suspected chain, then relied on the memory image to prove execution, identify the C2 process and recover the persistence command.</p>
+      <p class="lead">Checking a phishing document against a memory image to establish the process chain, identify the network connection and recover a scheduled-task command.</p>
       <div class="info-card"><div class="item"><div class="label">Room</div><div class="value">Boogeyman 2</div></div><div class="item"><div class="label">Platform</div><div class="value">TryHackMe</div></div><div class="item"><div class="label">Focus</div><div class="value accent">SOC / DFIR</div></div><div class="item"><div class="label">Artifacts</div><div class="value">EML, DOC, Memory Dump</div></div><div class="item"><div class="label">Tools</div><div class="value">olevba, Volatility, strings</div></div><div class="item"><div class="label">Evidence model</div><div class="value">File → Process → Network</div></div></div>
       <div class="callout"><strong>Investigation goal:</strong> prove how the HR workstation was compromised, identify what the Word document executed, confirm it in memory, find the binary and C2 connection, then recover how the attacker maintained access.</div>
 
       <h2 id="overview">Scenario Overview</h2>
-      <p>Maxine Beck, an HR employee at Quick Logistics LLC, received a resume application email. A resume sent to HR is believable, so I treated the attachment carefully instead of assuming it was obviously malicious from the beginning.</p>
+      <p>The email to Maxine Beck at Quick Logistics LLC used a resume application as its pretext. I examined the attachment, then checked its behavior against the memory artifact.</p>
       <div class="flow"><pre><code>Email → Word attachment → Macro → JavaScript stage → EXE payload → C2 callback → Scheduled task persistence</code></pre></div>
 
       <h2 id="approach">How I Approached the Case</h2>
@@ -40,7 +41,7 @@
 To: maxine.beck@quicklogisticsorg.onmicrosoft.com
 Subject: Resume - Application for Junior IT Analyst Role
 Attachment: resume_WesleyTaylor.doc</code></pre>
-      <p>I took the sender and victim directly from the email. The attachment was the obvious next artifact because it was the object the victim would open.</p>
+      <p>The email supplies the sender, recipient and attachment name. I used the attachment as the next artifact to examine.</p>
 
       <h2 id="attachment">2. Attachment Triage</h2>
       <pre><code>file Resume_WesleyTaylor.doc
@@ -164,10 +165,11 @@ grep -ni "schtasks" unicode_strings.txt</code></pre></div>
         <div class="answer-item"><div class="q">Full path of malicious email attachment</div><div class="a">C:\Users\maxine.beck\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\WQHGCZFT\Resume_WesleyTaylor (002).doc</div></div>
         <div class="answer-item"><div class="q">Persistence command</div><div class="a">schtasks /Create /F /SC DAILY /ST 09:00 /TN Updater /TR "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonI -W hidden -c \"IEX ([Text.Encoding]::UNICODE.GetString([Convert]::FromBase64String((gp HKCU:\Software\Microsoft\Windows\CurrentVersion debug).debug)))\""</div></div>
       </div>
-      <h2>Closing note</h2><p>The document explained what the attacker intended to run; the memory image showed what actually ran. The parent-child chain, PID-bound network connection and recovered scheduled-task command together made the case stronger than any single sandbox or reputation result.</p>
+      <h2>Closing note</h2><p>The document describes the intended macro actions. The memory image adds the process tree, command lines and PID-bound network evidence. The recovered task command supplies a persistence lead, with the limits of string-based recovery retained.</p>
     </article>
-  </div></main><script src="/assets/js/main.js?v=20261013b"></script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  </div></main><script src="/assets/js/main.js?v=20261017"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

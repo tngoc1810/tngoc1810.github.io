@@ -18,8 +18,7 @@ function initPremiumFeatures() {
 
 function initReadingProgress() {
   // Only add reading progress on writeup pages (or pages with an article)
-  const article = document.querySelector("article");
-  if (!article && !location.pathname.includes("/writeups/")) return;
+  if (document.body.dataset.pageKind !== "article") return;
 
   const progressBar = document.createElement("div");
   progressBar.id = "reading-progress";
@@ -52,59 +51,55 @@ function initMagneticButtons() {
 }
 
 function initImageLightbox() {
-  // Only on writeup pages
-  const isWriteupsPage = location.pathname.includes("writeups");
-  if (!isWriteupsPage && !location.pathname.includes("/projects/soc-investigation/")) return;
-
-  const lightbox = document.createElement("div");
-  lightbox.id = "img-lightbox";
-  lightbox.setAttribute("role", "dialog");
-  lightbox.setAttribute("aria-modal", "true");
-  lightbox.setAttribute("aria-label", "Evidence image preview");
-  lightbox.tabIndex = -1;
-  const lightboxImg = document.createElement("img");
-  lightbox.appendChild(lightboxImg);
-  document.body.appendChild(lightbox);
-
-  const images = document.querySelectorAll(".article-card img, article img, .evidence img, .case-content .project-screen img");
-  
-  let lastFocusedImage = null;
+  const images = document.querySelectorAll('body[data-page-kind="article"] main img, .case-content .project-screen img');
+  if (!images.length) return;
+  const lightbox = document.createElement('dialog');
+  lightbox.id = 'img-lightbox';
+  lightbox.setAttribute('aria-label', 'Evidence image preview');
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'lightbox-close';
+  close.textContent = 'Close preview ×';
+  const image = document.createElement('img');
+  const caption = document.createElement('p');
+  caption.className = 'lightbox-caption';
+  lightbox.append(close, image, caption);
+  document.body.append(lightbox);
+  let previousOverflow = '';
+  let sourceImage = null;
   images.forEach(img => {
-    img.style.cursor = "zoom-in";
+    img.style.cursor = 'zoom-in';
     img.tabIndex = 0;
-    img.setAttribute("role", "button");
-    img.addEventListener("click", () => {
-      lastFocusedImage = img;
-      lightboxImg.src = img.src;
-      lightboxImg.alt = img.alt || "Evidence image";
-      lightbox.classList.add("open");
-      document.body.style.overflow = "hidden"; // Prevent scrolling
-      lightbox.focus();
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-haspopup', 'dialog');
+    img.addEventListener('click', () => {
+      sourceImage = img;
+      image.src = img.currentSrc || img.src;
+      image.alt = img.alt || 'Evidence image';
+      caption.textContent = img.closest('figure')?.querySelector('figcaption')?.textContent || image.alt;
+      previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      lightbox.showModal();
+      close.focus();
     });
-    img.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
+    img.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         img.click();
       }
     });
   });
-
-  function closeLightbox() {
-    lightbox.classList.remove("open");
-    document.body.style.overflow = "";
-    
-    // Clear src after animation to avoid flicker next time
-    setTimeout(() => {
-      if(!lightbox.classList.contains("open")) {
-        lightboxImg.src = "";
-      }
-    }, 300);
-    if (lastFocusedImage) lastFocusedImage.focus();
-  }
-
-  lightbox.addEventListener("click", closeLightbox);
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && lightbox.classList.contains("open")) closeLightbox();
+  lightbox.addEventListener('keydown', event => {
+    if (event.key === 'Tab') { event.preventDefault(); close.focus(); }
+  });
+  close.addEventListener('click', () => lightbox.close());
+  lightbox.addEventListener('click', event => {
+    if (event.target === lightbox) lightbox.close();
+  });
+  lightbox.addEventListener('close', () => {
+    document.body.style.overflow = previousOverflow;
+    sourceImage?.focus({preventScroll: true});
+    image.removeAttribute('src');
   });
 }
 

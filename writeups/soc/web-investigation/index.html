@@ -9,13 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/about/">About</a></nav></div></header>
   <main class="page"><div class="wrap article-layout">
     <aside class="toc glass-card">
@@ -32,7 +33,7 @@
 
       <section id="summary" class="glass-card section-card">
         <h2>How I approached it</h2>
-        <p>I did not start by assuming the whole attack chain. The scenario only told me BookWorld had unusual database queries and resource usage. So my first job was to find which conversation was abnormal, then follow that conversation through HTTP requests, SQL Injection payloads, extracted data, admin login and upload activity.</p>
+        <p>The BookWorld scenario reported unusual database queries and resource use. I started with the conversations, then traced the relevant HTTP requests through SQL injection, credential disclosure, admin access and upload activity.</p>
         <p>The main pattern became clear after pivoting on <code>111.224.250.131</code>. The traffic volume was high, the requests were web-focused, the User-Agent exposed <code>sqlmap</code>, and the same source later used dumped credentials to access the admin dashboard.</p>
         <div class="callout danger"><strong>Working conclusion:</strong> <code>111.224.250.131</code> exploited SQL Injection in <code>search.php</code>, dumped database content, recovered <code>admin:admin123!</code>, logged into the admin panel and uploaded <code>NVri2vhp.php</code>, a PHP reverse shell attempt pointing back to the attacker.</div>
         <div class="kill-chain"><div class="kill-step"><span>01</span><strong>Recon / probing</strong><br>High-volume HTTP traffic against BookWorld.</div><div class="kill-step"><span>02</span><strong>SQL Injection</strong><br><code>sqlmap</code> against <code>search.php?search=</code>.</div><div class="kill-step"><span>03</span><strong>Data access</strong><br>Database, admin credentials and customer PII extracted.</div><div class="kill-step"><span>04</span><strong>Admin access</strong><br>Valid credentials used on <code>/admin/login.php</code>.</div><div class="kill-step"><span>05</span><strong>File upload</strong><br>PHP reverse shell uploaded to <code>/admin/uploads/</code>.</div></div>
@@ -60,7 +61,7 @@
 
       <section id="conversations" class="glass-card section-card">
         <h2>3. Conversation analysis</h2>
-        <p>I checked IPv4 Conversations next. The largest conversation was between <code>111.224.250.131</code> and <code>73.124.22.98</code>, with more than 88,000 packets. That was too large to ignore.</p>
+        <p>The conversation between <code>111.224.250.131</code> and <code>73.124.22.98</code> contained more than 88,000 packets. I inspected its requests next to determine what accounted for that volume.</p>
         <figure class="evidence"><img loading="lazy" decoding="async" src="/assets/media/writeups/soc/web-investigation/web-investigation-04-ipv4-conversations.png" alt="IPv4 conversations showing attacker and victim traffic volume"><figcaption>The largest conversation was between <code>111.224.250.131</code> and <code>73.124.22.98</code>.</figcaption></figure>
         <div class="table-wrap"><table><tr><th>Address A</th><th>Address B</th><th>Packets</th><th>Bytes</th><th>How I treated it</th></tr><tr><td><code>111.224.250.131</code></td><td><code>73.124.22.98</code></td><td><code>88,484</code></td><td><code>29 MB</code></td><td>Main suspicious conversation.</td></tr><tr><td><code>170.40.150.126</code></td><td><code>73.124.22.98</code></td><td><code>256</code></td><td><code>39 KB</code></td><td>Lower priority browsing traffic.</td></tr></table></div>
         <div class="thought-card"><b>What I thought here:</b> <code>111.224.250.131</code> was a strong attacker candidate, but I still needed behavior proof. A high packet count alone is not enough. The next step was to inspect its HTTP requests.</div>
@@ -135,7 +136,7 @@ Content-Type: text/html</code></pre>
         <h2>10. Directory enumeration with Gobuster</h2>
         <p>Around packet <code>1681</code>, the attacker began directory enumeration with Gobuster and discovered <code>/admin/</code>. This became important later because the SQLi had already exposed admin credentials.</p>
         <pre><code>/admin/</code></pre>
-        <p>At this stage, the attack path made sense: dump admin credential first, discover admin panel, then attempt login.</p>
+        <p>The sequence now connected database extraction to discovery of the admin panel and subsequent login attempts.</p>
       </section>
 
       <section id="admin" class="glass-card section-card">
@@ -197,13 +198,14 @@ Content-Type: application/x-php</code></pre>
 
       <section id="lessons" class="glass-card section-card">
         <h2>Lessons learned</h2>
-        <p>This lab showed why I should not jump directly to the final exploit. The full story came from a chain: conversation statistics, HTTP methods, sqlmap User-Agent, SQLi payloads, extracted credentials, admin response codes and file upload evidence.</p>
+        <p>The investigation connected the high-volume conversation to SQL injection, disclosed credentials, admin access and a PHP upload. The packet references above show which observation supports each step.</p>
         <p>The most important habit is to match each conclusion with the packet that proves it. For example, <code>admin:admin123!</code> was not just found in a response; the later <code>302</code> and <code>200 OK</code> responses showed it was actually used successfully.</p>
       </section>
     </article>
   </main>
   <footer class="footer"><div class="wrap"><p>© Nguyen Thai Ngoc · Cybersecurity Portfolio</p></div></footer>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

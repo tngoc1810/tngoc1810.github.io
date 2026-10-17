@@ -9,26 +9,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page reaper-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#mindset">Senior SOC Mindset</a><a href="#evidence">Evidence Sources</a><a href="#mapping">Host/IP Mapping</a><a href="#victim">Victim Share Navigation</a><a href="#stolen-hash">Stolen NTLM Authentication</a><a href="#malicious-logon">Malicious Logon</a><a href="#logon-id">Logon ID Correlation</a><a href="#timeline">Timeline</a><a href="#answers">Answers</a><a href="#recommendations">Recommendations</a><a href="#lessons">Lessons Learned</a></aside>
     <article class="article-card glass">
       <div class="eyebrow">Hack The Box Sherlock · SOC / Windows Authentication</div>
       <h1 class="page-title">HTB Sherlock: Reaper</h1>
-      <p class="lead">A senior-style SOC investigation of a suspicious Windows logon alert where the source workstation name did not match the source IP address. I correlated <code>Security.evtx</code> with <code>ntlmrelay.pcapng</code> to prove NTLM relay behavior, identify the victim user, map hosts to IPs and connect Event ID <code>4624</code> with Event ID <code>5140</code> using the malicious Logon ID.</p>
+      <p class="lead">Investigating a Windows logon whose source workstation name did not match its IP address. I compared <code>Security.evtx</code> with <code>ntlmrelay.pcapng</code>, then linked events <code>4624</code> and <code>5140</code> through the session Logon ID.</p>
       <div class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">Reaper</div></div><div class="item"><div class="label">Platform</div><div class="value">Hack The Box</div></div><div class="item"><div class="label">Difficulty</div><div class="value">Very Easy</div></div><div class="item"><div class="label">Type</div><div class="value accent">Sherlock</div></div><div class="item"><div class="label">Skills Learned</div><div class="value">EVTX, PCAP, NTLM Relay</div></div><div class="item"><div class="label">Tags</div><div class="value">SOC, Windows Auth, SMB</div></div></div>
       <div class="callout"><strong>Investigation goal:</strong> Validate a SIEM alert for a suspicious successful logon where the workstation name and source IP address were inconsistent, then report the real source, victim account, file share access and malicious session details.</div>
 
       <h2 id="overview">Scenario Overview</h2>
-      <p>The lab provides two evidence sources: a Windows Security event log and a packet capture from the same incident window. The SIEM alert is not simply “a user logged in.” The important detail is that the <strong>IP address</strong> and <strong>source workstation name</strong> did not match.</p>
-      <p>That mismatch is a strong sign of authentication abuse. In an NTLM relay scenario, the target host may log the workstation name embedded in NTLM authentication metadata, while the actual TCP connection comes from the attacker-controlled relay device.</p>
+      <p>The lab provides a Windows Security log and a packet capture from the same incident window. The alert concerns a mismatch between the source IP and the workstation name recorded for a successful logon.</p>
+      <p>That mismatch needs checking against the network evidence. With NTLM relay, the target can record a workstation name from the authentication message while the TCP connection comes from the relay host.</p>
 
       <h2 id="mindset">Senior SOC Mindset</h2>
       <div class="mindset"><strong>First thought:</strong> Do not trust a single field in Event ID 4624. <code>WorkstationName</code> can describe the claimed workstation in the authentication metadata, while <code>IpAddress</code> shows the host that actually connected to the target. If these do not map to the same system, I need network evidence.</div>
@@ -101,12 +102,13 @@ FORELA-WKSTN001 / 172.17.79.129
       <ul><li>Reset or rotate credentials for <code>FORELA\arthur.kyle</code> and invalidate active sessions where possible.</li><li>Investigate <code>172.17.79.135</code> as the attacker-controlled or unauthorized relay device.</li><li>Hunt for additional Event ID <code>4624</code> Logon Type <code>3</code> events where <code>WorkstationName</code> does not match the legitimate assigned IP address.</li><li>Correlate Event ID <code>4624</code> and <code>5140</code> by Logon ID to identify what resources were accessed after suspicious authentication.</li><li>Enforce SMB signing where practical and reduce NTLM exposure to limit NTLM relay risk.</li><li>Review name resolution paths such as NBNS/LLMNR and consider hardening or disabling legacy name resolution if not required.</li></ul>
 
       <h2 id="lessons">Lessons Learned</h2>
-      <p>The most important lesson from Reaper is that a successful logon is not automatically legitimate. The analyst must validate whether the source workstation identity and the source IP address describe the same system.</p>
-      <p>This lab also reinforces a practical SOC habit: <strong>correlate host logs with network traffic</strong>. Event ID <code>4624</code> gave the suspicious session. The PCAP proved where the traffic came from. Event ID <code>5140</code> showed what share was accessed under the same Logon ID. Together, they formed a complete and defensible incident story.</p>
+      <p>Reaper illustrates why a successful logon still needs source validation. A workstation name in authentication metadata should be checked against the address that actually made the connection.</p>
+      <p>Event <code>4624</code> identified the session, and the PCAP showed its network source. Event <code>5140</code> linked subsequent share access through the Logon ID. Each source answered a different part of the investigation.</p>
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>

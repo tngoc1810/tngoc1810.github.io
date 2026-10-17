@@ -10,25 +10,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261013b">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261013b">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261013b">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b1016">
+<meta name="theme-color" content="#121411">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017">
 </head>
-<body data-visual-style="editorial">
+<body data-visual-style="editorial" data-page-kind="article">
   <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page automaton-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#triage">Initial Triage</a><a href="#strings">Fake Flag</a><a href="#rdata">.rdata Analysis</a><a href="#checker">Checker Function</a><a href="#automaton">Automaton Logic</a><a href="#solver">Solver</a><a href="#flag">Final Flag</a><a href="#lessons">Lessons</a></aside>
     <article class="article-card glass">
       <div class="eyebrow">0xV01D CTF · Reverse Engineering</div>
       <h1 class="page-title">Misk Automaton</h1>
-      <p class="lead">Reverse engineering a Windows PE64 checker that hides the real validation logic behind a fake flag, target bytes, eight transition tables and a small state machine.</p>
+      <p class="lead">A Windows PE64 checker with a decoy flag and a stateful validation loop. This writeup follows the target bytes and eight transition tables into a Python solver.</p>
       <section class="info-card"><div class="item"><div class="label">Challenge</div><div class="value">Misk Automaton</div></div><div class="item"><div class="label">Platform</div><div class="value">0xV01D CTF</div></div><div class="item"><div class="label">Category</div><div class="value accent">Reverse Engineering</div></div><div class="item"><div class="label">Difficulty</div><div class="value">Hard · 500 pts</div></div><div class="item"><div class="label">Binary</div><div class="value">misk_automaton.exe</div></div><div class="item"><div class="label">Core idea</div><div class="value">Stateful automaton checker</div></div></section>
       <div class="note-box warn"><strong>Analyst note</strong>The binary contains a visible flag-like string. I treated it as bait because the nearby string says the visible state names are bait, and the fake flag is only reachable through an impossible argument-count branch.</div>
 
       <h2 id="overview">Overview</h2>
-      <p>The challenge archive contained one main artifact: <code>misk_automaton.exe</code>. The binary looked small, but it had enough structure to hide a stateful checker. The goal was to recover the real input accepted by the validation function, not to trust the first flag-looking string.</p>
+      <p>The archive contains <code>misk_automaton.exe</code>. Its validation function checks a transformed version of the input against a target array. I traced that function before attempting to recover the accepted string.</p>
       <div class="flow"><div class="flow-card"><div class="num">1</div><h3>Triage</h3><p>Identify file type, architecture, sections and obvious strings.</p></div><div class="flow-card"><div class="num">2</div><h3>Reject bait</h3><p>Confirm the visible flag is not part of the real validation path.</p></div><div class="flow-card"><div class="num">3</div><h3>Recover data</h3><p>Extract target bytes and transition table pointers from <code>.rdata</code>.</p></div><div class="flow-card"><div class="num">4</div><h3>Model checker</h3><p>Translate the assembly into a Python solver and recover the flag.</p></div></div>
 
       <h2 id="triage">Initial Triage</h2>
@@ -38,7 +39,7 @@ Archive:  9znj0v.zip
 
 <span class="cmd">$ file misk_automaton.exe</span>
 misk_automaton.exe: PE32+ executable for MS Windows 5.02 (console), x86-64 (stripped to external PDB), 11 sections</div>
-      <p>The file type matters because this is a Windows x64 binary. While reading assembly, I kept the Windows x64 calling convention in mind: <code>rcx</code>, <code>rdx</code>, <code>r8</code> and <code>r9</code> are the first arguments.</p>
+      <p>For the Windows x64 calling convention used here, the first four arguments are passed in <code>rcx</code>, <code>rdx</code>, <code>r8</code> and <code>r9</code>.</p>
       <div class="mindset"><strong>Reverse mindset:</strong> a small checker is often data-driven. Instead of only reading branches, I looked for target arrays, lookup tables and references from the checker into <code>.rdata</code>.</div>
 
       <h2 id="strings">Fake Flag in Strings</h2>
@@ -96,7 +97,7 @@ target = <span class="addr">0x140005080</span></div>
       <div class="mindset"><strong>Key insight:</strong> the checker is stateful, but the state is fully deterministic. If I know <code>i</code>, <code>state1</code> and <code>state2</code>, I can brute force the next character and carry the new state forward.</div>
 
       <h2 id="solver">Solver</h2>
-      <p>The solver extracted the target bytes and eight transition tables from the PE file, then used DFS over a limited flag charset. The important part was converting virtual addresses to file offsets correctly.</p>
+      <p>The solver extracts the target array and eight transition tables from the PE file, then searches a limited flag charset with DFS. Address conversion has to be correct: the table pointers are virtual addresses, while the parser reads file offsets.</p>
       <div class="terminal"><span class="cmd">$ python3 solve.py</span>
 [+] target length: 42
 [+] target: b575c490fc585248c3b2bf9071376aa0ee870aaab00363ced48379cd5fd077a7173e83e0ed2736b21ea7
@@ -124,8 +125,9 @@ target = <span class="addr">0x140005080</span></div>
       <div class="footer-nav"><a href="/">← Home</a><a href="/writeups/">All Writeups →</a></div>
     </article>
   </div></main>
-  <script src="/assets/js/main.js?v=20261013b"></script>
-<script src="/assets/js/premium.js?v=20261013b"></script>
-<script src="/assets/js/studio.js?v=20261013b"></script>
+  <script src="/assets/js/main.js?v=20261017"></script>
+<script src="/assets/js/premium.js?v=20261017"></script>
+<script src="/assets/js/studio.js?v=20261017"></script>
+  <script src="/assets/js/journal.js?v=20261017"></script>
 </body>
 </html>
