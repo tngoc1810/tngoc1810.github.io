@@ -8,4 +8,4 @@
 - The upstream ESM distribution is included unchanged.
 - SHA-256: `b4706c2a8772c5983f0872e02bbb707e551e093b32ad7c01d61dd661765097ee`
 
-COBE renders the decorative globe on the portfolio homepage. The globe is an illustration, not live security telemetry.
+COBE renders the decorative globe behind the portfolio pages. The globe is an illustration, not live security telemetry.

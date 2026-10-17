@@ -1,15 +1,17 @@
-/* Decorative globe: local COBE 2.0.1, with an abstract Canvas 2D fallback. */
+/* Full-page decorative background. Local COBE with a Canvas 2D fallback. */
 document.addEventListener('DOMContentLoaded', async () => {
-  const hero = document.querySelector('.landing-hero'), stage = document.querySelector('.globe-stage');
-  if (!hero || !stage) return;
+  const stage = document.querySelector('.site-ambience .globe-stage');
+  if (!stage) return;
   const canvas = document.getElementById('globe-canvas'), fallback = document.getElementById('globe-fallback');
   const ctx = fallback.getContext('2d'), reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let enabled = !reduced.matches;
   try { if (localStorage.getItem('portfolio-motion') === 'off') enabled = false; } catch { /* Optional. */ }
-  let visible = true, frame = 0, lastDraw = 0, phi = 4.15, size = 0, globe = null, disposed = false;
+  let frame = 0, lastDraw = 0, phi = 4.15, size = 0, globe = null, disposed = false;
   const button = document.createElement('button');
   button.type = 'button'; button.className = 'ambient-toggle'; button.setAttribute('aria-label', 'Background animation');
-  hero.querySelector('.hero-visual')?.append(button);
+  button.setAttribute('aria-controls', 'portfolio-background');
+  stage.parentElement.id = 'portfolio-background';
+  document.body.append(button);
   function project(lat, lon) {
     const x = Math.cos(lat) * Math.sin(lon + phi), y = Math.sin(lat), z = Math.cos(lat) * Math.cos(lon + phi), tilt = -.2;
     return {x:size/2+x*size*.405,y:size/2+(y*Math.cos(tilt)-z*Math.sin(tilt))*size*.405,z:y*Math.sin(tilt)+z*Math.cos(tilt)};
@@ -46,20 +48,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   function render(){if(globe)globe.update({phi});else fallbackDraw();}
   function tick(time){
-    frame=0;if(disposed||!enabled||!visible||document.hidden)return;
-    const interval=innerWidth<600?1000/24:1000/30;
+    frame=0;if(disposed||!enabled||document.hidden)return;
+    const interval=innerWidth<600?1000/20:1000/24;
     if(time-lastDraw>=interval){phi+=Math.min((time-lastDraw)/1000,.1)*.16;lastDraw=time;render();}
     frame=requestAnimationFrame(tick);
   }
   function sync(){
     if(frame)cancelAnimationFrame(frame);frame=0;
-    const running=enabled&&visible&&!document.hidden&&!disposed;
-    button.textContent=enabled?'Motion on · pause':'Motion off · play';button.setAttribute('aria-pressed',String(enabled));
+    const running=enabled&&!document.hidden&&!disposed;
+    button.textContent=enabled?'Pause background':'Play background';button.setAttribute('aria-pressed',String(enabled));
     document.body.dataset.motion=running?'running':'paused';
+    stage.parentElement.dataset.motion=running?'running':'paused';
     if(running){lastDraw=performance.now();frame=requestAnimationFrame(tick);}else if(!disposed)render();
   }
   function resize(){
-    size=Math.max(1,stage.getBoundingClientRect().width);
+    size=Math.max(1,stage.clientWidth);
     const ratio=Math.min(devicePixelRatio||1,innerWidth<600?1:1.25);
     fallback.width=Math.round(size*ratio);fallback.height=Math.round(size*ratio);ctx?.setTransform(ratio,0,0,ratio,0,0);
     if(globe)globe.update({width:size,height:size,devicePixelRatio:ratio});render();
@@ -67,12 +70,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   button.addEventListener('click',()=>{enabled=!enabled;try{localStorage.setItem('portfolio-motion',enabled?'on':'off');}catch{/* Optional. */}sync();});
   reduced.addEventListener('change',event=>{if(event.matches){enabled=false;sync();}});
   document.addEventListener('visibilitychange',sync);
-  const intersection='IntersectionObserver'in window?new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;sync();}):null;
-  intersection?.observe(hero);
   const observer='ResizeObserver'in window?new ResizeObserver(resize):null;
   if(observer)observer.observe(stage);else window.addEventListener('resize',resize,{passive:true});
   canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();globe?.destroy();globe=null;stage.dataset.renderer='canvas';render();});
-  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;if(frame)cancelAnimationFrame(frame);observer?.disconnect();intersection?.disconnect();globe?.destroy();});
+  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;if(frame)cancelAnimationFrame(frame);observer?.disconnect();globe?.destroy();});
   resize();sync();
   try{
     const {default:createGlobe}=await import('/assets/vendor/cobe/cobe-2.0.1.js');if(disposed)return;
@@ -80,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const context={alpha:true,antialias:false,powerPreference:'low-power'};
     const gl=canvas.getContext('webgl2',context)||canvas.getContext('webgl',context);
     if(!gl)throw new Error('WebGL unavailable');
-    globe=createGlobe(canvas,{devicePixelRatio:ratio,width:size,height:size,phi,theta:.18,dark:1,diffuse:1.6,scale:1.03,mapSamples:innerWidth<600?8000:14000,mapBrightness:7,mapBaseBrightness:.03,baseColor:[.26,.48,.95],markerColor:[.45,.75,1],glowColor:[.11,.34,.8],markers:[],arcs:[],context});
+    globe=createGlobe(canvas,{devicePixelRatio:ratio,width:size,height:size,phi,theta:.18,dark:1,diffuse:1.6,scale:1.03,mapSamples:innerWidth<600?6000:10000,mapBrightness:7,mapBaseBrightness:.03,baseColor:[.26,.48,.95],markerColor:[.45,.75,1],glowColor:[.11,.34,.8],markers:[],arcs:[],context});
     // COBE returns a no-op object on context/shader failure instead of throwing.
     if(!gl.getParameter(gl.CURRENT_PROGRAM)){globe.destroy();globe=null;throw new Error('Globe shader unavailable');}
     stage.dataset.renderer='webgl';render();

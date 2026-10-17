@@ -80,3 +80,5 @@ I am building this portfolio around practical Blue Team skills:
 [SOC Investigation & Operations](https://tngoc1810.github.io/projects/soc-investigation/) combines Windows evidence, process reconstruction, bounded packet analysis, analyst workflow and verified service handoff. The case study links to the v6.1 source, eight cases and retained validation results, with public, constructed and native proof scopes kept explicit.
 
 The site uses static HTML, shared CSS and progressive JavaScript enhancements. No build step is required. Preview from the repository root with `python -m http.server 8770 --bind 127.0.0.1`.
+
+The blue background stays behind the page while scrolling. Its globe uses the bundled COBE renderer, with a Canvas fallback. The bottom-right control pauses all background motion and remembers the choice. Motion also pauses in hidden tabs and starts disabled when reduced motion is requested. Article pages use a softer background; Focus view dims it further.
