@@ -8,16 +8,16 @@
   <link rel="canonical" href="https://tngoc1810.github.io/writeups/tryhackme/boogeyman-1/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/style.css?v=20261017">
-  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017">
-<link rel="stylesheet" href="/assets/css/studio.css?v=20261017">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261017blue">
+  <link rel="stylesheet" href="/assets/css/premium.css?v=20261017blue">
+<link rel="stylesheet" href="/assets/css/studio.css?v=20261017blue">
 <link rel="icon" href="/assets/media/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#121411">
-  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017b">
+<meta name="theme-color" content="#080f1f">
+  <link rel="stylesheet" href="/assets/css/journal.css?v=20261017blue">
 </head>
 <body data-visual-style="editorial" data-page-kind="article">
-  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/">Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
+  <header class="topbar"><div class="wrap topbar-inner"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">TN</span>Thai Ngoc<span aria-hidden="true">.</span></a><nav class="nav"><a href="/">Home</a><a href="/projects/">Projects</a><a class="active" href="/writeups/">Writeups</a><a href="/achievements/">Achievements</a><a href="/contact/">Contact</a></nav></div></header>
   <main class="page boogeyman-page"><div class="wrap article-layout">
     <aside class="toc"><div class="toc-title">On this page</div><a href="#overview">Overview</a><a href="#approach">Approach</a><a href="#email">Email</a><a href="#lnk">LNK payload</a><a href="#powershell">PowerShell</a><a href="#enumeration">Enumeration</a><a href="#sticky">Sticky Notes</a><a href="#keepass">KeePass</a><a href="#network">Network</a><a href="#reconstruction">Reconstruction</a><a href="#timeline">Timeline</a><a href="#iocs">IOCs</a><a href="#answers">Final answers</a></aside>
     <article class="article-card glass">
@@ -127,9 +127,9 @@ tcp.stream eq X</code></pre>
       <div class="answer-list"><div class="answer-item"><div class="q">What software was used by the attacker to host the presumed file/payload server?</div><div class="a">python</div></div><div class="answer-item"><div class="q">What HTTP method was used by the C2 for output of commands executed by the attacker?</div><div class="a">POST</div></div><div class="answer-item"><div class="q">What protocol was used during exfiltration?</div><div class="a">dns</div></div><div class="answer-item"><div class="q">What was the password of the exfiltrated file?</div><div class="a">%p9^3!lL^Mz47E2GaT^y</div></div><div class="answer-item"><div class="q">What credit card number was stored inside the exfiltrated file?</div><div class="a">4024 **** **** 9551 (redacted)</div></div></div>
       <h2>Closing note</h2><p>The decisive point was correlation. PowerShell logs showed how the KeePass database was converted and chunked; the PCAP showed those chunks leaving as DNS queries; reconstruction confirmed that the traffic represented a real file rather than random-looking labels.</p>
     </article>
-  </div></main><script src="/assets/js/main.js?v=20261017"></script>
-<script src="/assets/js/premium.js?v=20261017"></script>
-<script src="/assets/js/studio.js?v=20261017"></script>
-  <script src="/assets/js/journal.js?v=20261017"></script>
+  </div></main><script src="/assets/js/main.js?v=20261017blue"></script>
+<script src="/assets/js/premium.js?v=20261017blue"></script>
+<script src="/assets/js/studio.js?v=20261017blue"></script>
+  <script src="/assets/js/journal.js?v=20261017blue"></script>
 </body>
 </html>
