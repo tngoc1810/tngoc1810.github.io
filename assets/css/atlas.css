@@ -155,11 +155,11 @@ body.reading-focus .related-cases { max-width:900px; }
 
 /* The atmosphere lives under the entire document, outside the content grid. */
 .site-ambience { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; contain:strict; background:#070d1a; }
-.background-aurora { position:absolute; width:110%; height:110%; top:-20%; left:-10%; background:radial-gradient(ellipse at 65% 35%,#175deb66,transparent 48%),radial-gradient(ellipse at 28% 70%,#087ba746,transparent 45%); animation:atmosphere-drift 22s ease-in-out infinite alternate; animation-play-state:paused; }
-.aurora-two { top:5%; left:15%; opacity:.65; background:radial-gradient(ellipse at 65% 50%,#365bf04d,transparent 48%); animation-duration:29s; animation-delay:-11s; }
-.background-grid { position:absolute; inset:0; background-image:linear-gradient(#7cb7ff0a 1px,transparent 1px),linear-gradient(90deg,#7cb7ff0a 1px,transparent 1px); background-size:84px 84px; mask-image:radial-gradient(ellipse at 65% 45%,#000,transparent 75%); }
+.background-aurora { position:absolute; width:110%; height:110%; top:-20%; left:-10%; background:radial-gradient(ellipse at 50% 45%,#175deb66,transparent 48%),radial-gradient(ellipse at 28% 70%,#087ba746,transparent 45%); animation:atmosphere-drift 22s ease-in-out infinite alternate; animation-play-state:paused; }
+.aurora-two { top:5%; left:15%; opacity:.65; background:radial-gradient(ellipse at 50% 50%,#365bf04d,transparent 48%); animation-duration:29s; animation-delay:-11s; }
+.background-grid { position:absolute; inset:0; background-image:linear-gradient(#7cb7ff0a 1px,transparent 1px),linear-gradient(90deg,#7cb7ff0a 1px,transparent 1px); background-size:84px 84px; mask-image:radial-gradient(ellipse at 50% 50%,#000,transparent 75%); }
 .siem-canvas { position:absolute; inset:0; width:100%; height:100%; opacity:.92; }
-.background-veil { position:absolute; inset:0; background:linear-gradient(90deg,#070d1aeb 0%,#070d1a94 37%,#070d1a08 72%),linear-gradient(0deg,#070d1a8c,transparent 55%); }
+.background-veil { position:absolute; inset:0; background:radial-gradient(ellipse at center,#070d1a12 20%,#070d1a55 70%,#070d1ab3),linear-gradient(0deg,#070d1a66,transparent 55%); }
 body > .ambient-toggle { position:fixed; z-index:110; right:max(22px,env(safe-area-inset-right)); bottom:max(18px,env(safe-area-inset-bottom)); margin:0; padding:10px 13px; background:#0b1935f5; color:#c8dfff; border-color:#41689b; box-shadow:0 4px 18px #0004; }
 .ambient-toggle:focus-visible { outline:2px solid #9ac9ff; outline-offset:4px; }
 .landing-hero { display:flex; grid-template-columns:none; min-height:calc(100svh - 170px); padding:78px 0 66px; }
@@ -169,13 +169,13 @@ body > .ambient-toggle { position:fixed; z-index:110; right:max(22px,env(safe-ar
 .practice-strip { background:#0b193a70; padding-left:20px; padding-right:20px; border-radius:8px; }
 #scroll-top-btn { bottom:74px; }
 .site-footer { padding-bottom:80px; }
-body[data-page-kind="article"] .site-ambience { opacity:.48; }
+body[data-page-kind="article"] .site-ambience { opacity:.75; }
 body.reading-focus .site-ambience { opacity:.15; }
 @keyframes atmosphere-drift { from { transform:translate3d(-5%,-3%,0) rotate(-6deg) scale(1); } to { transform:translate3d(5%,6%,0) rotate(8deg) scale(1.12); } }
 @media(max-width:820px) {
   .landing-hero { min-height:660px; padding:65px 0 55px; }
   .landing-hero .identity-title { font-size:clamp(64px,10.5vw,92px); }
-  .background-veil { background:linear-gradient(90deg,#070d1ac9,#070d1a40),linear-gradient(0deg,#070d1a80,transparent); }
+  .background-veil { background:radial-gradient(ellipse at center,#070d1a33,#070d1a99); }
 }
 @media(max-width:640px) {
   .landing-hero { min-height:calc(100svh - 155px); padding:50px 0 44px; }
@@ -186,3 +186,19 @@ body.reading-focus .site-ambience { opacity:.15; }
   body > .ambient-toggle { right:12px; bottom:max(12px,env(safe-area-inset-bottom)); font-size:9px; padding:9px 11px; }
 }
 @media(prefers-reduced-motion:reduce) { .background-aurora { animation:none; } }
+
+/* Centered Blue Team atmosphere is shared by the archive and every section. */
+body[data-page-kind="library"] .hero { text-align:center; min-height:420px; display:grid; place-items:center; padding:52px 0 45px; }
+body[data-page-kind="library"] .hero-copy { max-width:800px; width:100%; }
+body[data-page-kind="library"] .hero h1 { margin-left:auto; margin-right:auto; }
+body[data-page-kind="library"] .archive-intro { margin-left:auto; margin-right:auto; }
+body[data-page-kind="library"] .archive-meta { justify-content:center; }
+body[data-page-kind="library"] .hero-copy :is(h1,p) { text-shadow:0 2px 18px #070d1a,0 0 32px #070d1acc; }
+.landing-hero .identity-title { text-shadow:0 2px 30px #070d1a90; }
+@media(max-width:640px) {
+  body[data-page-kind="library"] .hero { min-height:390px; padding:34px 0; }
+  body[data-page-kind="library"] .archive-intro { font-size:14px; }
+}
+
+body[data-page-kind="article"] .article-card { background:linear-gradient(150deg,#10223be8 0,#0d192de6 600px,#0c1729eb 100%); }
+body.reading-focus[data-page-kind="article"] .article-card { background:linear-gradient(150deg,#10223b,#0c1729); }
